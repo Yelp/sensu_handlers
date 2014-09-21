@@ -1,3 +1,5 @@
+![Build status](https://travis-ci.org/Yelp/sensu_handlers.svg)
+
 # Yelp sensu\_handlers
 
 ## Usage
