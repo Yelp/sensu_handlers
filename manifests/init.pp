@@ -156,7 +156,7 @@ class sensu_handlers(
       require => Package['sensu-community-plugins'],
   }
 
-  if hiera(ready_for_new_sensu, false) == true {
+  if hiera('ready_for_new_sensu', false) == true {
     sensu::handler { 'graphite':
       type     => 'transport',
       config => {
@@ -225,3 +225,4 @@ class sensu_handlers(
  }
 
 }
+

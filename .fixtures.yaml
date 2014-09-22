@@ -1,0 +1,8 @@
+---
+fixtures:
+  symlinks:
+    sensu_handlers: "#{source_dir}"
+  repositories:
+    monitoring_check: "https://github.com/Yelp/puppet-monitoring_check"
+    sensu: "https://github.com/sensu/puppet-sensu"
+
