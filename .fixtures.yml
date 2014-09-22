@@ -5,4 +5,5 @@ fixtures:
   repositories:
     monitoring_check: "https://github.com/Yelp/puppet-monitoring_check"
     sensu: "https://github.com/sensu/sensu-puppet"
+    stdlib: "https://github.com/puppetlabs/puppetlabs-stdlib"
 
