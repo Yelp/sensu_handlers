@@ -4,5 +4,5 @@ fixtures:
     sensu_handlers: "#{source_dir}"
   repositories:
     monitoring_check: "https://github.com/Yelp/puppet-monitoring_check"
-    sensu: "https://github.com/sensu/puppet-sensu"
+    sensu: "https://github.com/sensu/sensu-puppet"
 
