@@ -2,6 +2,9 @@
 
 # Yelp sensu\_handlers
 
+Note: These still have a load of Yelp specific code in them at the moment,
+we're working on making these more generic!
+
 ## Usage
 
 ### Teams
