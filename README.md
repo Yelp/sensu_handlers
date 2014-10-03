@@ -1,4 +1,4 @@
-![Build status](https://travis-ci.org/Yelp/sensu_handlers.svg)
+[![Build Status](https://travis-ci.org/Yelp/sensu_handlers.svg?branch=master)](https://travis-ci.org/Yelp/sensu_handlers)
 
 # Yelp sensu\_handlers
 
