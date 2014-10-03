@@ -39,9 +39,9 @@ class Nodebot < BaseHandler
       color = '7'
     end
 
-    # Max irc line length is ~ 419, from:
-    # [sensu]  CRITICAL - relengsrv2-devc.dev.yelpcorp.com : mom_to_iad1 : CheckRabbitFederation CRITICAL: Link not running: {"uri"=>"amqp://mommq1.local-iad1.yelpcorp.com/MOM", "timestamp"=>"2014-08-21 8:29:05", "node"=>"rabbit@sysinfra2-r1-devc", "exchange"=>"amq.direct", "type"=>"exchange", "upstream_exchange"=>"amq.direct", "status"=>"starting", "upstream"=>"mom_to_iad1", "vhost"=>"MOM"}  - Bounce cluster if links di
-
+    # Max irc line length is theoretically 512 from the RFC, but after the
+    # color, line breaks etc it comes out to ~ 419 for us? Just truncate
+    # to 415 to be safe
     pre = "[sensu] #{color} #{status} - "
     "#{pre}#{description(415 - pre.length)}"
   end
