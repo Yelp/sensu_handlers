@@ -28,11 +28,6 @@ notifications.
 Modification of the sensu-community-plugins mailer that responds to the 
 notification_email key provided by the check definition.
 
-### opsgenie (pages)
-
-(No longer in use at Yelp). Uses a global API key and hand handle multiple
-OpsGenie recipients on a per-team basis.
-
 ### pagerduty (pages)
 
 Modification of the sensu-community-plugins handler that determins if an

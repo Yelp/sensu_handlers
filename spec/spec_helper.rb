@@ -38,16 +38,6 @@ module SensuHandlerTestHelper
     subject.settings[settings_key]['teams']['someotherteam'] = {
       'pagerduty_api_key' => 'someotherteam_pagerduty_key'
     }
-    subject.settings[settings_key]['teams']['3rd_test_team'] = {
-      'opsgenie_api_key' =>  '3rd_teams_ops_genie_api_key',
-      'opsgenie_recipients' => '3rd_team_escalation'
-    }
-    subject.settings[settings_key]['teams']['team_without_og_key'] = {
-      'opsgenie_recipients' => 'test_team_escalation'
-    }
-    subject.settings[settings_key]['teams']['team_without_og_recipients'] = {
-      'opsgenie_recipients' => 'test_team_escalation'
-    }
     yield(event) if block_given?
   end
 end
