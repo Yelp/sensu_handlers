@@ -18,30 +18,68 @@ these handlers will do nothing.
 
 ## Available Handlers
 
+### Base
+
+The base handler is the only handler necissary to use. It is the default.
+All other handler behavior is derived from the event data. 
+
+This allows checks to use one handler, and we can add new features or 
+deprecate old ones without changing client-side configuration.
+
+The base handler also handles advanced filtering. It respects the following
+tunables:
+
+* `alert_after` - Seconds to wait before any handler is activated. Defaults to
+0.
+* `realert_every` - Integer which filters out repeat events (uses "mod"). 
+`realert_every => 2` would filter every other event. Defaults to `-1` which is
+treated as a special input and does exponential backoff.
+
+This handler also provides many helping functions to extract team data, etc.
+
+All other handlers inherit the base handler.
+
 ### nodebot (irc)
 
 Uses the [nodebot](https://github.com/thwarted/nodebot) tool to send IRC
-notifications. 
+notifications. Nodebot is helpful here as it retains a persistent connection
+to the IRC server, which can be expensive to setup.
+
+* Sends notification to the `pages_irc_channel` or `${team_name}-pages` if
+the alert has `page => true`
+* Sends notification IRC messages to the array of `irc_channels` specified by the
+check, otherwise sends to the `notifications_irc_channel` specified in the team data.
+* If out of all that there are no channels, then no notifications will be sent.
 
 ### mailer (notification emails)
 
-Modification of the sensu-community-plugins mailer that responds to the 
-notification_email key provided by the check definition.
+Modification of the sensu-community-plugins mailer that can route emails to
+different destinations depending on the circumstance.
+
+* Sends an email to the `notification_email` destination if specified in the 
+check.
+* Otherwise it uses the `notification_email` specified by the team.
+* Will refuse to send any email if `notification_email => false`.
 
 ### pagerduty (pages)
 
-Modification of the sensu-community-plugins handler that determins if an
-alert should page or not based on the `page` boolean key in the event 
-data. 
+Modification of the sensu-community-plugins handler that can open events 
+on different Pagerduty services depending on the inputs.
 
-Additionally it directs the page to a different Pagerduty service depending
-on the `team` variable.
+* Only activates if the `page` boolean key in the event data is set to true
+* Uses the `pagerduty_api_key` config set to the `team` to determine which
+service to open or close an event in.
+* Tries to provide maximum context in the pagerduty event details
+* Automatically closes events that are resolved.
 
 ### jira (tickets)
 
-This handler can make a JIRA ticket for an alert. The alert must have `ticket`
-set to `true`, and a `project` must be set for the team or for the check 
-itself.
+This handler can make a JIRA ticket for an alert. 
+
+* The alert must have `ticket => true`
+* Derives the Project to make the ticket in from the `project` key set in the
+event data
+* Falls back to the default project for the `team` if unset.
 
 ### Other
 
@@ -58,9 +96,20 @@ from Sensu if they do not exist in the API.
 
 Standard handler, sends graphite metrics.
 
-## Usage
+## Puppet Usage
 
-TODO
+If you are using the module itself, it can deploy the handlers and configure them.
+
+```puppet
+class sensu_handlers {
+  # See the teams section
+  $teams => $team_data,
+}
+```
+
+## Puppet Parameters
+
+See the inline docstrings in init.pp for parameter documentation.
 
 ## Teams
 
