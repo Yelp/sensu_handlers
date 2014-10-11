@@ -11,6 +11,7 @@ class sensu_handlers::aws_prune inherits sensu_handlers {
     ensure_packages(['rubygem-fog', 'rubygem-unf'])
     # We currently use $::habitat::datacenter for the AWS region.
     # This may change someday.
+    # TODO: Remove this habitat reference.
     $region = $::habitat::datacenter
     $access_key = hiera('sensu::aws_key')
     $secret_key = hiera('sensu::aws_secret')
