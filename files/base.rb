@@ -163,8 +163,10 @@ BODY
     # Don't bother acting if we haven't hit the 
     # alert_after threshold
     if number_of_failed_attempts < 1
-      bail "Only failing for #{failing_for}, less than #{alert_after}. Not performing any action yet."
-    # If we have an interval, and this is a creation event, that means we are an active check
+      bail "Not failing long enough, only #{number_of_failed_attempts} after " \
+        "#{initial_failing_occurrences} initial failing occurrences"
+    # If we have an interval, and this is a creation event, that means we are
+    # an active check
     # Lets also filter based on the realert_every setting
     elsif interval > 0 and @event['action'] == 'create' 
       # Special case of exponential backoff
@@ -174,11 +176,12 @@ BODY
           # Then This is our MOMENT!
           return nil
         else
-          bail 'not on a power of two: ' + number_of_failed_attempts.to_s
+          bail "not on a power of two: #{number_of_failed_attempts}"
         end
       elsif number_of_failed_attempts % realert_every != 1
         # Now bail if we are not in the realert_every cycle
-        bail 'only handling every ' + realert_every.to_s + ' occurrences, and we are at ' + number_of_failed_attempts.to_s
+        bail "only handling every #{realert_every} occurrences, and we are at" \
+          " #{number_of_failed_attempts}"
       end
     end
   end
