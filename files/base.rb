@@ -152,10 +152,10 @@ BODY
       # http://sensuapp.org/docs/0.12/keepalives
       interval = 20
     else
-      interval      = @event['check']['interval']      || 0
+      interval      = @event['check']['interval'].to_i || 0
     end
-    alert_after   = @event['check']['alert_after']  || 0
-    realert_every = @event['check']['realert_every']   || 1
+    alert_after   = @event['check']['alert_after'].to_i || 0
+    realert_every = @event['check']['realert_every'].to_i || 1
     failing_for   = @event['occurrences'].to_i * @event['check']['interval'].to_i
 
     # Don't bother acting if we haven't hit the 
@@ -168,8 +168,8 @@ BODY
       initial_failing_occurrences = alert_after.fdiv(interval).to_i
       number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
       # Special case of exponential backoff
-      if realert_every.to_i == -1
-        # If our number of failed attempts is an exponent of 2^
+      if realert_every == -1
+        # If our number of failed attempts is an exponent of 2
         if power_of_two?(number_of_failed_attempts)
           # Then This is our MOMENT!
           return nil
@@ -182,7 +182,7 @@ BODY
         return nil
       end
       # Now bail if we are not in the realert_every cycle
-      unless number_of_failed_attempts == 0 || number_of_failed_attempts % realert_every.to_i == 0
+      unless number_of_failed_attempts == 0 || number_of_failed_attempts % realert_every == 0
         bail 'only handling every ' + realert_every.to_s + ' occurrences, and we are at ' + number_of_failed_attempts.to_s
       end
     end
