@@ -170,12 +170,11 @@ BODY
       # Special case of exponential backoff
       if realert_every.to_i == -1
         # If our number of failed attempts is an exponent of 2^
-        if (Math::log(number_of_failed_attempts) / Math::log(2)) % 1 == 0
+        if power_of_two?(number_of_failed_attempts)
           # Then This is our MOMENT!
-          realert_every = number_of_failed_attempts
+          return nil
         else
-          # Fake realert to be higher so we dont alert
-          realert_every = number_of_failed_attempts + 1
+          bail 'not on a power of two: ' + number_of_failed_attempts.to_s
         end
       end
       if number_of_failed_attempts == 1
@@ -183,13 +182,17 @@ BODY
         return nil
       end
       # Now bail if we are not in the realert_every cycle
-      unless number_of_failed_attempts == 0 || number_of_failed_attempts % realert_every == 0
+      unless number_of_failed_attempts == 0 || number_of_failed_attempts % realert_every.to_i == 0
         bail 'only handling every ' + realert_every.to_s + ' occurrences, and we are at ' + number_of_failed_attempts.to_s
-# DEBUG
-#      else
-#        puts 'Continuing because we realert every ' + realert_every.to_s + ' and we are at ' + number_of_failed_attempts.to_s
       end
     end
+  end
+
+  def power_of_two?(x)
+    while ( x % 2) == 0 and x > 1
+      x /= 2
+    end
+    x==1
   end
 
 end

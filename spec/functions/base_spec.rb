@@ -229,6 +229,72 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+    context "When exponential backoff, and alert_after, it should not alert the first time" do
+      it do
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the second time" do
+      it do
+        subject.event['occurrences'] = 2
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the third time" do
+      it do
+        subject.event['occurrences'] = 3
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should alert the forth time" do
+      it do
+        subject.event['occurrences'] = 4
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the fith time" do
+      it do
+        subject.event['occurrences'] = 5
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the sixth time" do
+      it do
+        subject.event['occurrences'] = 6
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
   end #End filter repeated
 
 end # End describe  
