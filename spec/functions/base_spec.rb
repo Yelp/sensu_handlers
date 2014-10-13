@@ -148,9 +148,20 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+    context "It should not fire an alert after one alert_after period, because that would be the same as alert_after = 0" do
+      it do
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 60
+        subject.event['check']['realert_every'] = "100000"
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
     context "It should fire an alert after it first reaches the alert_after, regardless of the realert_every" do
       it do
-        subject.event['occurrences'] = 2
+        subject.event['occurrences'] = 3
         subject.event['check']['interval'] = 60
         subject.event['check']['alert_after'] = 120
         subject.event['check']['realert_every'] = "100000"
