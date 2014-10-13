@@ -9,14 +9,14 @@ gem 'rspec-mocks', '2.14.6'                # MIT
 #gem 'rspec-puppet', '1.0.1'               # MIT
 # Upgrade when 1.0.2 is out
 gem 'rspec-puppet',
-  :git => 'git@github.com:bobtfish/rspec-puppet.git',
+  :git => 'https://github.com/bobtfish/rspec-puppet.git',
   :ref => '06aa6c675baafa538b4d06107fc239cd025159fd'
 
 gem 'puppet', '~> 3.6.2'                     # Apache2
 gem 'facter', '1.7.5'                      # Apache2
 gem 'sensu-plugin'
 gem 'hiera-puppet-helper',
-  :git => 'git@github.com:bobtfish/hiera-puppet-helper.git',
+  :git => 'https://github.com/bobtfish/hiera-puppet-helper.git',
   :ref => '5ed989a130bc62cc6bdb923596586284f0bd73df'
 
 gem 'mail', '~> 2.5.4'
