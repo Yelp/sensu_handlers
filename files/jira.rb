@@ -10,7 +10,7 @@ class Jira < BaseHandler
       client = JIRA::Client.new(get_options)
       # In order to stop duplicates, we query JIRA for any open tickets
       # in the requested project that have the exact same client name and check name
-      query_string = "PROJECT='#{project}' AND labels='SENSU_#{@event['client']['name']}' AND labels='SENSU_#{@event['check']['name']}' AND resolution=Unresolved"
+      query_string = "labels='SENSU_#{@event['client']['name']}' AND labels='SENSU_#{@event['check']['name']}' AND resolution=Unresolved"
       existing_issues = client.Issue.jql(query_string)
       if existing_issues.length > 0
         # If there are tickets that match, we don't make a new one because it is already a known issue
