@@ -100,7 +100,6 @@ Team: #{team_name}
 Host: #{@event['client']['name']}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
-Habitat: #{habitat}
 
 BODY
     body
@@ -118,23 +117,13 @@ BODY
       'Status' => @event['check']['status'],
       'Occurrences' => @event['occurrences'],
       'Team' => team_name,
-      'Habitat' => habitat,
       'Runbook' => runbook,
       'Tip' => tip
     }
   end
 
   def dashboard_link
-    "https://systems-#{habitat}.yelpcorp.com/sensu/"
-  end
-
-  def habitat
-    file_name='/nail/etc/habitat'
-    begin
-      File.read(file_name).strip
-    rescue
-      "UNKNOWN"
-    end
+    settings['base']['dashboard_link'] || 'Unknown dashboard link. Please set for the base handler config'
   end
 
   # == Custom Yelp Filter Logic

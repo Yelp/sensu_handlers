@@ -1,12 +1,12 @@
 GIT
-  remote: git@github.com:bobtfish/hiera-puppet-helper.git
+  remote: https://github.com/bobtfish/hiera-puppet-helper.git
   revision: 5ed989a130bc62cc6bdb923596586284f0bd73df
   ref: 5ed989a130bc62cc6bdb923596586284f0bd73df
   specs:
     hiera-puppet-helper (2.0.1)
 
 GIT
-  remote: git@github.com:bobtfish/rspec-puppet.git
+  remote: https://github.com/bobtfish/rspec-puppet.git
   revision: 06aa6c675baafa538b4d06107fc239cd025159fd
   ref: 06aa6c675baafa538b4d06107fc239cd025159fd
   specs:

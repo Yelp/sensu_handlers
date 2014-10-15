@@ -17,7 +17,7 @@ class sensu_handlers::nodebot inherits sensu_handlers {
     check_every => '10m',
     command  => '/usr/lib/nagios/plugins/check_tcp -H irc.local.yelpcorp.com -p 6697',
     runbook  => 'http://y/rb-irc',
-    tip      => "Is irc.local setup for this habitat? (${::habitat})",
+    tip      => "Is irc.local setup for this datacenter?",
   }
 
 }

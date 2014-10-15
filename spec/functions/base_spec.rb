@@ -115,17 +115,12 @@ describe BaseHandler do
 
   context "full_description" do
     before(:each) do
-      File.should_receive(:read).with("/nail/etc/habitat").and_return("TESTHABITAT")
-      File.should_receive(:read).with("/nail/etc/habitat").and_return("TESTHABITAT")
       setup_event! do |e|
         e['check']['status'] = 2
         e['check']['page'] = true
         e['check']['runbook'] = 'http://some.runbook/'
         e['check']['team'] = 'someotherteam'
       end
-    end
-    it "should properly read /nail/etc/habitat and have it in the output for the admin url" do
-      expect(subject.full_description).to match("https://systems-TESTHABITAT.yelpcorp.com/sensu/")
     end
     it "should have the responsible team name in the description" do
       expect(subject.full_description).to match("Team: someotherteam")

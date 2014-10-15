@@ -44,6 +44,7 @@ class sensu_handlers(
   $jira_site             = "jira.${::domain}",
   $include_graphite      = true,
   $include_aws_prune     = true,
+  $dashboard_link        = "https://sensu.${::domain}",
 ) {
 
   validate_hash($teams)
@@ -61,6 +62,9 @@ class sensu_handlers(
     type      => 'set',
     command   => true,
     handlers  => $default_handler_array,
+    config    => {
+      dashboard_link => $dashboard_link,
+    }
   }
 
   # We compose an array of classes depending on the handlers requested
