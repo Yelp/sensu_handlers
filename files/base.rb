@@ -141,44 +141,45 @@ BODY
       # http://sensuapp.org/docs/0.12/keepalives
       interval = 20
     else
-      interval      = @event['check']['interval']      || 0
+      interval      = @event['check']['interval'].to_i || 0
     end
-    alert_after   = @event['check']['alert_after']  || 0
-    realert_every = @event['check']['realert_every']   || 1
-    failing_for   = @event['occurrences'].to_i * @event['check']['interval'].to_i
+    alert_after   = @event['check']['alert_after'].to_i || 0
+    realert_every = @event['check']['realert_every'].to_i || 1
+
+    initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
+    number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
 
     # Don't bother acting if we haven't hit the 
     # alert_after threshold
-    if failing_for < alert_after
-      bail "Only failing for #{failing_for}, less than #{alert_after}. Not performing any action yet."
-    # If we have an interval, and this is a creation event, that means we are an active check
+    if number_of_failed_attempts < 1
+      bail "Not failing long enough, only #{number_of_failed_attempts} after " \
+        "#{initial_failing_occurrences} initial failing occurrences"
+    # If we have an interval, and this is a creation event, that means we are
+    # an active check
     # Lets also filter based on the realert_every setting
     elsif interval > 0 and @event['action'] == 'create' 
-      initial_failing_occurrences = alert_after.fdiv(interval).to_i
-      number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
       # Special case of exponential backoff
-      if realert_every.to_i == -1
-        # If our number of failed attempts is an exponent of 2^
-        if (Math::log(number_of_failed_attempts) / Math::log(2)) % 1 == 0
+      if realert_every == -1
+        # If our number of failed attempts is an exponent of 2
+        if power_of_two?(number_of_failed_attempts)
           # Then This is our MOMENT!
-          realert_every = number_of_failed_attempts
+          return nil
         else
-          # Fake realert to be higher so we dont alert
-          realert_every = number_of_failed_attempts + 1
+          bail "not on a power of two: #{number_of_failed_attempts}"
         end
-      end
-      if number_of_failed_attempts == 1
-        # Always alert the first time that we pass the alert_after threshold
-        return nil
-      end
-      # Now bail if we are not in the realert_every cycle
-      unless number_of_failed_attempts == 0 || number_of_failed_attempts % realert_every == 0
-        bail 'only handling every ' + realert_every.to_s + ' occurrences, and we are at ' + number_of_failed_attempts.to_s
-# DEBUG
-#      else
-#        puts 'Continuing because we realert every ' + realert_every.to_s + ' and we are at ' + number_of_failed_attempts.to_s
+      elsif number_of_failed_attempts % realert_every != 1
+        # Now bail if we are not in the realert_every cycle
+        bail "only handling every #{realert_every} occurrences, and we are at" \
+          " #{number_of_failed_attempts}"
       end
     end
+  end
+
+  def power_of_two?(x)
+    while ( x % 2) == 0 and x > 1
+      x /= 2
+    end
+    x==1
   end
 
 end

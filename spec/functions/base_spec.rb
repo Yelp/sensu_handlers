@@ -143,9 +143,20 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+    context "It should not fire an alert after one alert_after period, because that would be the same as alert_after = 0" do
+      it do
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 60
+        subject.event['check']['realert_every'] = "100000"
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
     context "It should fire an alert after it first reaches the alert_after, regardless of the realert_every" do
       it do
-        subject.event['occurrences'] = 2
+        subject.event['occurrences'] = 3
         subject.event['check']['interval'] = 60
         subject.event['check']['alert_after'] = 120
         subject.event['check']['realert_every'] = "100000"
@@ -219,6 +230,72 @@ describe BaseHandler do
         subject.event['occurrences'] = 5
         subject.event['check']['interval'] = 20
         subject.event['check']['realert_every'] = "-1"
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the first time" do
+      it do
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the second time" do
+      it do
+        subject.event['occurrences'] = 2
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the third time" do
+      it do
+        subject.event['occurrences'] = 3
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should alert the forth time" do
+      it do
+        subject.event['occurrences'] = 4
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the fith time" do
+      it do
+        subject.event['occurrences'] = 5
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
+        subject.event['action'] = 'create'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "When exponential backoff, and alert_after, it should not alert the sixth time" do
+      it do
+        subject.event['occurrences'] = 6
+        subject.event['check']['interval'] = 20
+        subject.event['check']['realert_every'] = "-1"
+        subject.event['check']['alert_after'] = 60
         subject.event['action'] = 'create'
         expect(subject).to receive(:bail).and_return(nil).once
         expect(subject.filter_repeated).to eql(nil)
