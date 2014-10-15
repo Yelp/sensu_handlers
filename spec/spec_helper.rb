@@ -30,8 +30,8 @@ module SensuHandlerTestHelper
     event['check']['issued'] ||= Time.now()
     subject.event = event
     subject.settings          = Hash.new
-    subject.settings['base']  = Hash.new
-    subject.settings['base']['dashboard_link'] = 'test_dashboard_link'
+    subject.settings['default']  = Hash.new
+    subject.settings['default']['dashboard_link'] = 'test_dashboard_link'
     subject.settings[settings_key] ||= Hash.new
     subject.settings[settings_key]['teams'] ||= Hash.new
     subject.settings[settings_key]['teams']['operations'] = {
