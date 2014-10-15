@@ -123,7 +123,7 @@ BODY
   end
 
   def dashboard_link
-    settings['base']['dashboard_link'] || 'Unknown dashboard link. Please set for the base handler config'
+    settings['default']['dashboard_link'] || 'Unknown dashboard link. Please set for the base handler config'
   end
 
   # == Custom Yelp Filter Logic
