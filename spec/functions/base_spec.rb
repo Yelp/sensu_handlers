@@ -176,6 +176,17 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+    context "It should fire an event after the first check, if alert_after == 0 and realert_every 1" do
+      it do
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 10
+        subject.event['check']['alert_after'] = 0
+        subject.event['check']['realert_every'] = 1
+        subject.event['action'] = 'create'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
     context "interval 0 no divide by 0 error" do
       it do
         subject.event['occurrences'] = 2

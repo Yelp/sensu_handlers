@@ -167,7 +167,7 @@ BODY
         else
           bail "not on a power of two: #{number_of_failed_attempts}"
         end
-      elsif number_of_failed_attempts % realert_every != 1
+      elsif (number_of_failed_attempts - 1) % realert_every != 0
         # Now bail if we are not in the realert_every cycle
         bail "only handling every #{realert_every} occurrences, and we are at" \
           " #{number_of_failed_attempts}"
