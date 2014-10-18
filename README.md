@@ -80,6 +80,12 @@ This handler can make a JIRA ticket for an alert.
 * Derives the Project to make the ticket in from the `project` key set in the
 event data
 * Falls back to the default project for the `team` if unset.
+* WARNING: The Jira project must *not* have special required fields
+* WARNING: Jira has special "transition" states in order to close tickets,
+this handler won't work if you have some custom "workflow"? (specifically, 
+it won't be ble to close/fix/done issues. Patches welcome)
+* WARNING: Be sure to use exponential backoff in order to not overload your
+Jira server.
 
 ### Other
 
