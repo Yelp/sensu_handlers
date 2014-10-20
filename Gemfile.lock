@@ -6,11 +6,12 @@ GIT
     hiera-puppet-helper (2.0.1)
 
 GIT
-  remote: https://github.com/rodjek/rspec-puppet.git
-  revision: 28c29d09e47211b65c0969b55082367a71d2e073
+  remote: https://github.com/bobtfish/rspec-puppet.git
+  revision: 06aa6c675baafa538b4d06107fc239cd025159fd
+  ref: 06aa6c675baafa538b4d06107fc239cd025159fd
   specs:
     rspec-puppet (1.0.1)
-      rspec (< 3.0.0)
+      rspec
 
 GEM
   remote: https://rubygems.org/
