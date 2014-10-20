@@ -53,7 +53,7 @@ class Nodebot < BaseHandler
   end
 
   def send(channel, message)
-    system('/nail/sys/bin/nodebot', channel, message)
+    system('nodebot', channel, message)
   end
 end
 
