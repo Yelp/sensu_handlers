@@ -35,6 +35,9 @@
 #  This is a special handler that inspect the AWS API to remove
 #  EC servers that no longer exist. Uses special hiera lookup keys.
 #
+# [*region*]
+#  The aws region so the aws_prune handler knows wich API endpoint to query
+#
 class sensu_handlers(
   $teams,
   $package_ensure        = 'latest',
@@ -44,6 +47,7 @@ class sensu_handlers(
   $jira_site             = "jira.${::domain}",
   $include_graphite      = true,
   $include_aws_prune     = true,
+  $region                = $::datacenter,
   $dashboard_link        = "https://sensu.${::domain}",
 ) {
 
