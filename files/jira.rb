@@ -46,7 +46,7 @@ class Jira < BaseHandler
     begin
       require 'jira'
       client = JIRA::Client.new(get_options)
-      query_string = "PROJECT='#{project}' AND labels='SENSU_#{@event['client']['name']}' AND labels='SENSU_#{@event['check']['name']}' AND resolution=Unresolved"
+      query_string = "labels='SENSU_#{@event['client']['name']}' AND labels='SENSU_#{@event['check']['name']}' AND resolution=Unresolved"
       client.Issue.jql(query_string).each do | issue |
         url = get_options[:site] + '/browse/' + issue.key
         puts "Closing Issue: #{issue.key} (#{url})"
