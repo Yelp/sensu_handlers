@@ -125,7 +125,22 @@ describe BaseHandler do
     it "should have the responsible team name in the description" do
       expect(subject.full_description).to match("Team: someotherteam")
     end
-    
+  end
+
+  context "Color filtering" do
+     before(:each) do
+      setup_event! do |e|
+        e['check']['runbook'] = 'http://some.runbook/'
+        e['check']['team'] = 'someotherteam'
+        e['check']['output'] = '[36mTEST[36mOUTPUT[0m'
+      end
+    end
+    it "should strip the colors in full_description" do
+      expect(subject.full_description).to match("^TESTOUTPUT\n")
+    end
+    it "should strip the colors in description" do
+      expect(subject.full_description_hash['Output']).to match("^TESTOUTPUT$")
+    end
   end
 
   context "check filter_repeated" do

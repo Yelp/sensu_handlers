@@ -4,6 +4,9 @@
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'sensu-handler'
 
+# Taken from https://github.com/flori/term-ansicolor/blob/e6086b7fddf53c53f8022acc1920f435e65b5e51/lib/term/ansicolor.rb#L60
+COLOR_REGEX = /\e\[(?:(?:[349]|10)[0-7]|[0-9]|[34]8;5;\d{1,3})?m/
+
 class BaseHandler < Sensu::Handler
   def event_is_ok?
     @event['check']['status'] == 0
@@ -28,6 +31,10 @@ class BaseHandler < Sensu::Handler
     else
       'UNKNOWN'
     end
+  end
+
+  def uncolorize(input)
+    input.gsub(COLOR_REGEX, '')
   end
 
   def should_page?
@@ -84,7 +91,7 @@ class BaseHandler < Sensu::Handler
 
   def full_description
     body = <<-BODY
-#{@event['check']['output']}
+#{uncolorize(@event['check']['output'])}
 
 Dashboard Link: #{dashboard_link}
 Runbook: #{runbook}
@@ -107,7 +114,7 @@ BODY
 
   def full_description_hash
     {
-      'Output' => @event['check']['output'],
+      'Output' => uncolorize(@event['check']['output']),
       'Dashboard Link' => dashboard_link,
       'Host' => @event['client']['name'],
       'Timestamp' => Time.at(@event['check']['issued']),
