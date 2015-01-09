@@ -1,9 +1,17 @@
 require 'spec_helper'
 
 describe 'sensu_handlers', :type => :class do
+
+
+  let(:facts) {{
+    :osfamily => 'Debian',
+    :lsbdistid => 'debian',
+  }}
+
   context 'By default, it needs teams to be provided' do
     it { should_not compile }
   end
+
   context 'With teams' do
     let(:teams) {{
       'operations' => {}
@@ -19,5 +27,6 @@ describe 'sensu_handlers', :type => :class do
     }}
     it { should compile }
   end
+
 end
 
