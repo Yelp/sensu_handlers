@@ -158,6 +158,30 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+    context "It should let a resolve go through as long it was failing for long enough before" do
+      it do
+        # Occurences of 1 on a resolve
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 120
+        subject.event['check']['realert_every'] = "1"
+        subject.event['action'] = 'resolve'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "It should let a resolve go through, certainly if there is no alert_after at all" do
+      it do
+        # Occurences of 1 on a resolve
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 0
+        subject.event['check']['realert_every'] = "1"
+        subject.event['action'] = 'resolve'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
     context "It should not fire an alert after one alert_after period, because that would be the same as alert_after = 0" do
       it do
         subject.event['occurrences'] = 1
