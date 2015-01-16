@@ -25,28 +25,16 @@ class sensu_handlers::graphite inherits sensu_handlers {
       require => Package['sensu-community-plugins'],
   }
 
-  if hiera(ready_for_new_sensu, false) == true {
-    sensu::handler { 'graphite':
-      type     => 'transport',
-      config => {
-        'pipe' => {
-          type    => 'topic',
-          name    => 'metrics',
-          durable => true
-        }
-      },
-      mutator  => 'graphite'
-    }
-  } else { 
-    sensu::handler { 'graphite':
-      type     => 'amqp',
-      exchange => {
+  sensu::handler { 'graphite':
+    type     => 'transport',
+    config => {
+      'pipe' => {
         type    => 'topic',
         name    => 'metrics',
         durable => true
-      },
-      mutator  => 'graphite'
-    }
+      }
+    },
+    mutator  => 'graphite'
   }
 
 }
