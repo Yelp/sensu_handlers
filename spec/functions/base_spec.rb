@@ -154,6 +154,7 @@ describe BaseHandler do
         subject.event['check']['alert_after'] = 120
         subject.event['check']['realert_every'] = "1"
         subject.event['action'] = 'create'
+        subject.event['check']['status'] = 2
         expect(subject).to receive(:bail).and_return(nil).once
         expect(subject.filter_repeated).to eql(nil)
       end

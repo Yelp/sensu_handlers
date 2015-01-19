@@ -158,7 +158,7 @@ BODY
 
     # Don't bother acting if we haven't hit the 
     # alert_after threshold
-    if number_of_failed_attempts < 1
+    if number_of_failed_attempts < 1 and !event_is_ok?
       bail "Not failing long enough, only #{number_of_failed_attempts} after " \
         "#{initial_failing_occurrences} initial failing occurrences"
     # If we have an interval, and this is a creation event, that means we are
