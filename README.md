@@ -2,9 +2,6 @@
 
 # Yelp sensu\_handlers
 
-**Note:** These still have a load of Yelp specific code in them at the moment,
-we're working on making these more generic!
-
 **Warning:** These handlers are intended for use by Advanced sensu users.
 Do not use them if you are setting up Sensu for the first time. Use 
 standard handlers from the [community plugins repo](https://github.com/sensu/sensu-community-plugins/)
@@ -154,4 +151,34 @@ sensu_handlers::teams:
     project: METAL
 ```
 
+### Team Syntax
 
+This is a very important aspect of the configuration of these sensu handlers.
+The team syntax determines the default behavior of the handlers, given an input team.
+
+*Warning*: If you typo a team name, the Sensu handlers will *not* know how to 
+associate an alert with the right outputs. This is a common source of mistakes.
+
+Lets look at the team synax in more detail:
+
+```
+sensu_handlers::teams:
+  ops:
+    pagerduty_api_key: 78923
+    pages_irc_channel: 'ops-pages'
+    notifications_irc_channel: 'operations-notifications'
+    notification_email: 'operations@localhost'
+    project: OPS
+```
+
+* *`sensu_handlers::teams:`* - Normal puppet-hiera lookup name. Matches 1:1 with the sensu_handlers module, teams parameter. This is a hash
+* *`ops:`* - Team name. This is the primary lookup key
+* *`pagerduty_api_key: deadbeef`* - In pagerduty, this corresponds to a "service". That service *must* use the "generic" or "sensu" api format. Sharing the api key with a "Nagios" service will *NOT* work
+    pages_irc_channel: 'ops-pages'  # If there is an event with page=>true, a notification will go to this channel. This parameter defaults to $team-pages. It can take an array of channels. No need to have the leading "#".
+* *`notifications_irc_channel: 'operations-notifications'`* - Non-paging events will appear here. If ommited, defaults to $team-notifications. This also can accept an array, and does not need a leading "#"
+* *`notification_email: 'operations@localhost'`* - If set, the handler will send emails for every event to this address. If ommited it will send no emails. You can send the email to multiple destinations by using comma separated list (like any email client)
+* *`project: OPS`* - Used by the JIRA handler. If a event comes in that has `ticket=>true`, the jira handler will open a ticket on this project. There no default for this parameter. Special considerations have to be made for the JIRA project to enable auto-opening and auto-closing of tickets, see the docs on the jira handler.
+
+=== Support
+
+Please open a github issue for support.
