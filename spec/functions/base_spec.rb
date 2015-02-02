@@ -149,25 +149,25 @@ describe BaseHandler do
     end
     context "When it has been failing forever" do
       it do
-        subject.event['history'] = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0]
+        subject.event['check']['history'] = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0]
         expect(subject.get_last_number_of_failing_occurences).to eql(20)
       end
     end
     context "When it only had one before last" do
       it do
-        subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0]
+        subject.event['check']['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0]
         expect(subject.get_last_number_of_failing_occurences).to eql(1)
       end
     end
     context "With a number of fails before some good ones" do
       it do
-        subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0]
+        subject.event['check']['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0]
         expect(subject.get_last_number_of_failing_occurences).to eql(5)
       end
     end
     context "With a MIXED number of fails before some good ones" do
       it do
-        subject.event['history'] = [0,2,0,1,0,2,2,0,2,2,2,0,0,0,0,2,2,2,2,2,0]
+        subject.event['check']['history'] = [0,2,0,1,0,2,2,0,2,2,2,0,0,0,0,2,2,2,2,2,0]
         expect(subject.get_last_number_of_failing_occurences).to eql(5)
       end
     end
@@ -196,7 +196,7 @@ describe BaseHandler do
         subject.event['check']['interval'] = 60
         subject.event['check']['alert_after'] = 120
         subject.event['check']['realert_every'] = "1"
-	subject.event['history'] = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0]
+	subject.event['check']['history'] = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0]
         expect(subject.get_last_number_of_failing_occurences).to eql(20)
         subject.event['action'] = 'resolve'
         expect(subject).not_to receive(:bail)
@@ -210,7 +210,7 @@ describe BaseHandler do
         subject.event['check']['interval'] = 60
         subject.event['check']['alert_after'] = 360
         subject.event['check']['realert_every'] = "1"
-	subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,2,0]
+	subject.event['check']['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,2,0]
         subject.event['action'] = 'resolve'
         expect(subject.get_last_number_of_failing_occurences).to eql(1)
         expect(subject).to receive(:bail).and_return(nil).once
@@ -223,7 +223,7 @@ describe BaseHandler do
         subject.event['occurrences'] = 1
         subject.event['check']['interval'] = 60
         subject.event['check']['alert_after'] = 0
-	subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,2,0]
+	subject.event['check']['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,2,0]
         expect(subject.get_last_number_of_failing_occurences).to eql(1)
         subject.event['check']['realert_every'] = "1"
         subject.event['action'] = 'resolve'

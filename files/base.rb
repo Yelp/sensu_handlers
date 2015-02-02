@@ -137,7 +137,7 @@ BODY
     # The history is an array like this:
     # ["2","2","2","0","2","2","1","2","2","2","2","0","2","0","2","2","2","2","2","2","0"]
     # In this case the number would be 6
-    history = @event['history']
+    history = @event['check']['history']
     # Take off the last event, which represents the "resolve"
     history.pop()
     # Reverse the list, because we want the most recent in the front
