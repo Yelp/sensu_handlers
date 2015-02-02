@@ -133,25 +133,6 @@ BODY
     settings['default']['dashboard_link'] || 'Unknown dashboard link. Please set for the base handler config'
   end
 
-  def get_last_number_of_failing_occurences
-    # The history is an array like this:
-    # ["2","2","2","0","2","2","1","2","2","2","2","0","2","0","2","2","2","2","2","2","0"]
-    # In this case the number would be 6
-    history = @event['check']['history']
-    # Take off the last event, which represents the "resolve"
-    history.pop()
-    # Reverse the list, because we want the most recent in the front
-    history.reverse!
-    # Find the first time that we got a 0, this represents the beginning of when it started failing
-    failing_occurences = history.find_index(0)
-    if failing_occurences == nil
-      # If we have never been 0, then we have been failing this whole time
-      failing_occurences = history.size
-    end
-    # Screw you rubiests
-    return failing_occurences
-  end
-
   # == Custom Yelp Filter Logic
   # We have multiple output handlers and routing logic, and we to ensure
   # that both active and passive checks and take advantage of it
@@ -172,22 +153,16 @@ BODY
     alert_after   = @event['check']['alert_after'].to_i || 0
     realert_every = @event['check']['realert_every'].to_i || 1
 
-    initial_allowed_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
-    if @event['action'] == 'resolve'
-      # On resolves, the "occurences" is set to 1. So in order to determine how many
-      # failed attempts we have, we must search the histry.
-      number_of_failed_attempts = get_last_number_of_failing_occurences() - initial_allowed_failing_occurrences
-    else
-      number_of_failed_attempts = @event['occurrences'] - initial_allowed_failing_occurrences
-    end
+    initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
+    number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
 
-    # Don't bother acting if we haven't hit the alert_after threshold
-    if number_of_failed_attempts < 0
-      bail "Not failing long enough, only #{number_of_failed_attempts.abs} after " \
-        "#{initial_allowed_failing_occurrences} initial failing occurrences"
-
+    # Don't bother acting if we haven't hit the 
+    # alert_after threshold
+    if number_of_failed_attempts < 1
+      bail "Not failing long enough, only #{number_of_failed_attempts} after " \
+        "#{initial_failing_occurrences} initial failing occurrences"
     # If we have an interval, and this is a creation event, that means we are
-    # an active check.
+    # an active check
     # Lets also filter based on the realert_every setting
     elsif interval > 0 and @event['action'] == 'create' 
       # Special case of exponential backoff
