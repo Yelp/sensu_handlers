@@ -143,6 +143,36 @@ describe BaseHandler do
     end
   end
 
+  context "Checking get_last_number_of_failing_occurences" do
+    before(:each) do
+      setup_event!
+    end
+    context "When it has been failing forever" do
+      it do
+        subject.event['history'] = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0]
+        expect(subject.get_last_number_of_failing_occurences).to eql(20)
+      end
+    end
+    context "When it only had one before last" do
+      it do
+        subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0]
+        expect(subject.get_last_number_of_failing_occurences).to eql(1)
+      end
+    end
+    context "With a number of fails before some good ones" do
+      it do
+        subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0]
+        expect(subject.get_last_number_of_failing_occurences).to eql(5)
+      end
+    end
+    context "With a MIXED number of fails before some good ones" do
+      it do
+        subject.event['history'] = [0,2,0,1,0,2,2,0,2,2,2,0,0,0,0,2,2,2,2,2,0]
+        expect(subject.get_last_number_of_failing_occurences).to eql(5)
+      end
+    end
+  end
+
   context "check filter_repeated" do
     before(:each) do
       setup_event!
@@ -154,7 +184,50 @@ describe BaseHandler do
         subject.event['check']['alert_after'] = 120
         subject.event['check']['realert_every'] = "1"
         subject.event['action'] = 'create'
+        subject.event['check']['status'] = 2
         expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "It should let a resolve go through as long it was failing for long enough before" do
+      it do
+        # Occurences of 1 on a resolve
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 120
+        subject.event['check']['realert_every'] = "1"
+	subject.event['history'] = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0]
+        expect(subject.get_last_number_of_failing_occurences).to eql(20)
+        subject.event['action'] = 'resolve'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "It should NOT let a resolve go through if it wasnt failing for long enough before" do
+      it do
+        # Occurences of 1 on a resolve
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 360
+        subject.event['check']['realert_every'] = "1"
+	subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,2,0]
+        subject.event['action'] = 'resolve'
+        expect(subject.get_last_number_of_failing_occurences).to eql(1)
+        expect(subject).to receive(:bail).and_return(nil).once
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
+    context "It should let a resolve go through, certainly if there is no alert_after at all" do
+      it do
+        # Occurences of 1 on a resolve
+        subject.event['occurrences'] = 1
+        subject.event['check']['interval'] = 60
+        subject.event['check']['alert_after'] = 0
+	subject.event['history'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,2,0]
+        expect(subject.get_last_number_of_failing_occurences).to eql(1)
+        subject.event['check']['realert_every'] = "1"
+        subject.event['action'] = 'resolve'
+        expect(subject).not_to receive(:bail)
         expect(subject.filter_repeated).to eql(nil)
       end
     end
