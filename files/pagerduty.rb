@@ -31,9 +31,13 @@ class Pagerduty < BaseHandler
     )['status'] == 'success'
   end
 
+  def log(line)
+    puts line
+  end
+
   def handle
     if !should_page? # Explicitly check for true. We don't page by default.
-      puts "pagerduty -- Ignoring incident #{incident_key} as it is not set to page."
+      log "pagerduty -- Ignoring incident #{incident_key} as it is not set to page."
       return
     end
     begin
@@ -48,13 +52,13 @@ class Pagerduty < BaseHandler
           resolve_incident
         end
         if response
-          puts 'pagerduty -- ' + action.capitalize + 'd incident -- ' + incident_key
+          log 'pagerduty -- ' + action.capitalize + 'd incident -- ' + incident_key
         else
-          puts 'pagerduty -- failed to ' + action + ' incident -- ' + incident_key
+          log 'pagerduty -- failed to ' + action + ' incident -- ' + incident_key
         end
       end
     rescue Timeout::Error
-      puts 'pagerduty -- timed out while attempting to ' + @event['action'] + ' a incident -- ' + incident_key
+      log 'pagerduty -- timed out while attempting to ' + @event['action'] + ' a incident -- ' + incident_key
     end
   end
 end

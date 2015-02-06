@@ -17,7 +17,18 @@ end
 require "#{File.dirname(__FILE__)}/../../files/pagerduty"
 
 class Pagerduty
-  attr_accessor :settings
+  attr_accessor :settings, :do_timeout, :logged
+  def timeout(t)
+    if do_timeout
+      raise Timeout::Error
+    else
+      yield
+    end
+  end
+
+  def log(line)
+    logged = line
+  end
 end
 
 describe Pagerduty do
