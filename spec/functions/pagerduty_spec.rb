@@ -17,9 +17,10 @@ end
 require "#{File.dirname(__FILE__)}/../../files/pagerduty"
 
 class Pagerduty
-  attr_accessor :settings, :do_timeout, :logged
+  attr_accessor :settings, :timeout_count, :logged
   def timeout(t)
-    if do_timeout
+    if timeout_count && timeout_count >= 1
+      timeout_count = @timeout_count - 1
       raise Timeout::Error
     else
       yield
@@ -27,7 +28,7 @@ class Pagerduty
   end
 
   def log(line)
-    logged = line
+    @logged = line
   end
 end
 
@@ -66,6 +67,14 @@ describe Pagerduty do
       subject.event['status'] = 1
       expect(subject).to receive(:resolve_incident).and_return(true)
       subject.handle
+    end
+
+    context "Pagerduty times out" do
+      it "logs an error" do
+        subject.timeout_count = 1
+        subject.handle
+        expect(subject.logged).to eql('pagerduty -- timed out while attempting to resolve an incident -- some.client/mycoolcheck')
+      end
     end
   end
 

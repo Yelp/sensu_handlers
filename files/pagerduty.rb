@@ -41,14 +41,17 @@ class Pagerduty < BaseHandler
       return
     end
     begin
+      action = case @event['check']['status'].to_i
+        when 2
+          'trigger'
+        when 0,1
+        'resolve'
+      end
       timeout(10) do
-        action = 'nil'
         response = case @event['check']['status'].to_i
         when 2
-          action = 'trigger'
           trigger_incident
         when 0,1
-          action = 'resolve'
           resolve_incident
         end
         if response
@@ -58,7 +61,7 @@ class Pagerduty < BaseHandler
         end
       end
     rescue Timeout::Error
-      log 'pagerduty -- timed out while attempting to ' + @event['action'] + ' a incident -- ' + incident_key
+      log 'pagerduty -- timed out while attempting to ' + action + ' an incident -- ' + incident_key
     end
   end
 end
