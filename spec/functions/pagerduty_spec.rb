@@ -69,6 +69,15 @@ describe Pagerduty do
     end
   end
 
+  context "events which do not page" do
+    before(:each) { subject.event['check']['page'] = false }
+    it "Does not trigger an incident" do
+      subject.event['check']['status'] = 2
+      expect(subject).not_to receive(:trigger_incident)
+      subject.handle
+    end
+  end
+
   it "has notification as description, with runbook" do
     setup_event! do |e|
       e['check']['notification'] = 'some_notification'
