@@ -35,6 +35,12 @@ class Pagerduty < BaseHandler
     puts line
   end
 
+  def timeout_and_retry
+    timeout(10) do
+      yield
+    end
+  end
+
   def handle
     if !should_page? # Explicitly check for true. We don't page by default.
       log "pagerduty -- Ignoring incident #{incident_key} as it is not set to page."
@@ -47,7 +53,7 @@ class Pagerduty < BaseHandler
         when 0,1
         'resolve'
       end
-      timeout(10) do
+      timeout_and_retry do
         response = case @event['check']['status'].to_i
         when 2
           trigger_incident
