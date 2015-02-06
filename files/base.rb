@@ -98,7 +98,7 @@ Runbook: #{runbook}
 Tip: #{tip}
 
 Command:  #{@event['check']['command']}
-Status:  #{@event['check']['status']}
+Status: #{human_check_status()} (#{@event['check']['status']})
 
 Timestamp: #{Time.at(@event['check']['issued'])}
 Occurrences:  #{@event['occurrences']}
@@ -121,7 +121,7 @@ BODY
       'Address' => @event['client']['address'],
       'Check Name' => @event['check']['name'],
       'Command' => @event['check']['command'],
-      'Status' => @event['check']['status'],
+      'Status' => "#{human_check_status()} (#{@event['check']['status']})",
       'Occurrences' => @event['occurrences'],
       'Team' => team_name,
       'Runbook' => runbook,

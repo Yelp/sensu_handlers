@@ -122,8 +122,9 @@ describe BaseHandler do
         e['check']['team'] = 'someotherteam'
       end
     end
-    it "should have the responsible team name in the description" do
-      expect(subject.full_description).to match("Team: someotherteam")
+    it "should correctly format the output" do
+      expect(subject.full_description).to include("Team: someotherteam")
+      expect(subject.full_description).to include("Status: CRITICAL (2)")
     end
   end
 
