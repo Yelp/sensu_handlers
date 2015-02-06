@@ -70,10 +70,15 @@ describe Pagerduty do
     end
 
     context "Pagerduty times out" do
-      it "logs an error" do
-        subject.timeout_count = 1
+      it "logs an error when we time out 3 times" do
+        subject.timeout_count = 4
         subject.handle
         expect(subject.logged).to eql('pagerduty -- timed out while attempting to resolve an incident -- some.client/mycoolcheck')
+      end
+      it "can succeed if we time out once" do
+        subject.timeout_count = 1
+        expect(subject).to receive(:trigger_incident).and_return(true)
+        subject.handle
       end
     end
   end
