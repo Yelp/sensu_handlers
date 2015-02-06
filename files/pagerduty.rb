@@ -35,9 +35,22 @@ class Pagerduty < BaseHandler
     puts line
   end
 
-  def timeout_and_retry
+  def do_sleep
+    sleep 3
+  end
+
+  def timeout_and_retry(&block)
+    2.times do
+      begin
+        timeout(10) do
+          return true if block.call
+        end
+      rescue Timeout::Error
+      end
+      do_sleep
+    end
     timeout(10) do
-      yield
+      block.call
     end
   end
 
