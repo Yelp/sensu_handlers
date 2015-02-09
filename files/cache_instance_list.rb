@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'fog'
-require 'json'
+require 'json/pure'
 require 'sensu-plugin/check/cli'
 require 'fileutils'
 
@@ -49,4 +49,3 @@ class Instance_list < Sensu::Plugin::Check::CLI
   end
 
 end
-
