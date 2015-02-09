@@ -133,6 +133,29 @@ BODY
     settings['default']['dashboard_link'] || 'Unknown dashboard link. Please set for the base handler config'
   end
 
+  def log(line)
+    puts line
+  end
+
+  def do_sleep
+    sleep 3
+  end
+
+  def timeout_and_retry(&block)
+    2.times do
+      begin
+        timeout(10) do
+          return true if block.call
+        end
+      rescue Timeout::Error
+      end
+      do_sleep
+    end
+    timeout(10) do
+      block.call
+    end
+  end
+
   # == Custom Yelp Filter Logic
   # We have multiple output handlers and routing logic, and we to ensure
   # that both active and passive checks and take advantage of it
