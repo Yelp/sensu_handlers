@@ -31,29 +31,6 @@ class Pagerduty < BaseHandler
     )['status'] == 'success'
   end
 
-  def log(line)
-    puts line
-  end
-
-  def do_sleep
-    sleep 3
-  end
-
-  def timeout_and_retry(&block)
-    2.times do
-      begin
-        timeout(10) do
-          return true if block.call
-        end
-      rescue Timeout::Error
-      end
-      do_sleep
-    end
-    timeout(10) do
-      block.call
-    end
-  end
-
   def handle
     if !should_page? # Explicitly check for true. We don't page by default.
       log "pagerduty -- Ignoring incident #{incident_key} as it is not set to page."
@@ -66,18 +43,18 @@ class Pagerduty < BaseHandler
         when 0,1
         'resolve'
       end
-      timeout_and_retry do
-        response = case @event['check']['status'].to_i
+      response = timeout_and_retry do
+        case @event['check']['status'].to_i
         when 2
           trigger_incident
         when 0,1
           resolve_incident
         end
-        if response
-          log 'pagerduty -- ' + action.capitalize + 'd incident -- ' + incident_key
-        else
-          log 'pagerduty -- failed to ' + action + ' incident -- ' + incident_key
-        end
+      end
+      if response
+        log 'pagerduty -- ' + action.capitalize + 'd incident -- ' + incident_key
+      else
+        log 'pagerduty -- failed to ' + action + ' incident -- ' + incident_key
       end
     rescue Timeout::Error
       log 'pagerduty -- timed out while attempting to ' + action + ' an incident -- ' + incident_key
