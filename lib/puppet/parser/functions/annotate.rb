@@ -10,13 +10,11 @@ module Puppet::Parser::Functions
   ) do |args|
     scope = self
     resource = scope.resource
+    env_reg   = /^.*(#{scope.environment.name.to_s}|production|masterbranch)\/?/
+    file_name = resource.file.gsub(env_reg, '') if "#{resource.file}" =~ env_reg
 
-    # Travel two directories up to determine the size of the prefix to chop off
-    # This is a cheap and ugly hack
-    sizeof_prefix = File.dirname(File.dirname(scope.environment.manifest)).length + 1
-
-    if scope.resource.file and scope.resource.line
-      "https://gitweb.yelpcorp.com/?p=puppet.git;a=blob;f=%s#l%d" % [resource.file[sizeof_prefix..-1], resource.line]
+    if file_name && resource.line
+      "https://gitweb.yelpcorp.com/?p=puppet.git;a=blob;f=%s#l%d" % [file_name, resource.line]
     else
       raise(Puppet::ParseError, "annotate couldn't find a file and line; is this an included class?")
     end
