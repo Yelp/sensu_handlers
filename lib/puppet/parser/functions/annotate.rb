@@ -8,10 +8,11 @@ module Puppet::Parser::Functions
   (probably) resources created with create_resources.
   EOS
   ) do |args|
-    scope = self
-    resource = scope.resource
-    env_reg   = /^.*(#{scope.environment.name.to_s}|production|masterbranch)\/?/
-    file_name = resource.file.gsub(env_reg, '') if "#{resource.file}" =~ env_reg
+    scope     = self
+    resource  = scope.resource
+    prefix    = File.realdirpath(environment.manifest).split('/')[0..-3].join('/')
+    real_file = File.realdirpath(resource.file) if resource.file
+    file_name = real_file.gsub(/^#{prefix}\//, '') if real_file =~ /^#{prefix}\//
 
     if file_name && resource.line
       "https://gitweb.yelpcorp.com/?p=puppet.git;a=blob;f=%s#l%d" % [file_name, resource.line]
