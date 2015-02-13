@@ -11,7 +11,10 @@ module Puppet::Parser::Functions
     scope     = self
     resource  = scope.resource
     prefix    = File.realdirpath(environment.manifest).split('/')[0..-3].join('/')
-    real_file = File.realdirpath(resource.file) if resource.file
+    real_file = if resource.file
+      resource.file =~ /spec\/fixtures/ ?
+        resource.file : File.realdirpath(resource.file)
+    end
     file_name = real_file.gsub(/^#{prefix}\//, '') if real_file =~ /^#{prefix}\//
 
     if file_name && resource.line
