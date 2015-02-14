@@ -68,6 +68,7 @@ class sensu_handlers(
     handlers  => $default_handler_array,
     config    => {
       dashboard_link => $dashboard_link,
+      region         => $region,
     }
   }
 
