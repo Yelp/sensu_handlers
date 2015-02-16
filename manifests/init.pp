@@ -48,6 +48,7 @@ class sensu_handlers(
   $include_graphite      = true,
   $include_aws_prune     = true,
   $region                = $::datacenter,
+  $datacenter            = $::datacenter,
   $dashboard_link        = "https://sensu.${::domain}",
 ) {
 
@@ -68,7 +69,7 @@ class sensu_handlers(
     handlers  => $default_handler_array,
     config    => {
       dashboard_link => $dashboard_link,
-      region         => $region,
+      datacenter     => $datacenter,
     }
   }
 
