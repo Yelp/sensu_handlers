@@ -125,7 +125,8 @@ BODY
       'Occurrences' => @event['occurrences'],
       'Team' => team_name,
       'Runbook' => runbook,
-      'Tip' => tip
+      'Tip' => tip,
+      'Server' => Socket.gethostname,
     }
   end
 
