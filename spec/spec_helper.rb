@@ -32,7 +32,7 @@ module SensuHandlerTestHelper
     subject.settings          = Hash.new
     subject.settings['default']  = Hash.new
     subject.settings['default']['dashboard_link'] = 'test_dashboard_link'
-    subject.settings['default']['region'] = 'data_center'
+    subject.settings['default']['datacenter'] = 'data_center'
     subject.settings[settings_key] ||= Hash.new
     subject.settings[settings_key]['teams'] ||= Hash.new
     subject.settings[settings_key]['teams']['operations'] = {
