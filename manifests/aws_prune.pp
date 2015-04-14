@@ -34,10 +34,16 @@ class sensu_handlers::aws_prune inherits sensu_handlers {
       source  => 'puppet:///modules/sensu_handlers/cache_instance_list.rb',
       require => [ Package['rubygem-fog'], Package['rubygem-sensu-plugin'], Package['rubygem-unf'] ],
     } ->
+    file { '/etc/sensu/cache_instance_list_creds.yaml':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0400',
+      content => template('sensu_handlers/cache_instance_list_creds.erb'),
+    } ->
     cron::d { 'cache_instance_list':
       minute  => '*',
       user    => 'root',
-      command => "/etc/sensu/plugins/cache_instance_list.rb -a ${access_key} -r ${region} -k ${secret_key}",
+      command => "/etc/sensu/plugins/cache_instance_list.rb -r ${region} -f /etc/sensu/cache_instance_list_creds.yaml",
     } ->
     monitoring_check { 'cache_instance_list-staleness':
      check_every => '10m',

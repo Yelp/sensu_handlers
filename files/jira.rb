@@ -3,7 +3,7 @@
 require "#{File.dirname(__FILE__)}/base"
 
 class Jira < BaseHandler
-  
+
   def create_issue(summary, full_description, project)
     begin
       require 'jira'
@@ -50,13 +50,24 @@ class Jira < BaseHandler
       client.Issue.jql(query_string).each do | issue |
         url = get_options[:site] + '/browse/' + issue.key
         puts "Closing Issue: #{issue.key} (#{url})"
+
         # Let the world know why we are closing this issue.
         comment = issue.comments.build
         comment.save(:body => "This is fine:\n#{output}")
-        # Now make the transition to the closed state.
+
+        # Find the first transition to a closed state that we can perform.
+        transitions_to_close = issue.transitions.all.select { |transition|
+          # statusCategory key will only ever be 'new', 'indeterminate', or 'done'
+          transition.attrs['to']['statusCategory']['key'] == 'done'
+        }
+        if transitions_to_close.empty?
+          puts "Couldn't close #{issue.key} because no 'done' transitions found"
+          return
+        end
+
+        # Perform a transition of the appropriate type.
         transition = issue.transitions.build()
-        # 731 is the yelp-workflow close transition
-        result = transition.save(:transition => { :id => 731 } )
+        result = transition.save(:transition => { :id => transitions_to_close.first.id } )
         unless result
           puts "Couldn't close #{issue.key}: " + transition.attrs['errorMessages']
         end
@@ -66,7 +77,7 @@ class Jira < BaseHandler
       puts e.message
     end
   end
-    
+
   def should_ticket?
     @event['check']['ticket'] || false
   end
@@ -77,7 +88,7 @@ class Jira < BaseHandler
 
   def handle
     return false if !should_ticket?
-    return false if !project 
+    return false if !project
     status = human_check_status()
     summary = @event['check']['name'] + " on " + @event['client']['name'] + " is " + status
     full_description = full_description()
