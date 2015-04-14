@@ -53,6 +53,7 @@ class sensu_handlers::aws_prune inherits sensu_handlers {
      tip         => 'talk to kwa',
      command     => "/usr/lib/nagios/plugins/check_file_age /var/cache/instance_list.json -w 1800 -c 3600",
      page        => false,
+     ticket      => true,
    }
  }
 
