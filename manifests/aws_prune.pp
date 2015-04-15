@@ -43,7 +43,7 @@ class sensu_handlers::aws_prune inherits sensu_handlers {
     cron::d { 'cache_instance_list':
       minute  => '*',
       user    => 'root',
-      command => "/etc/sensu/plugins/cache_instance_list.rb -r ${region} -f /etc/sensu/cache_instance_list_creds.yaml",
+      command => "/opt/puppet-omnibus/embedded/bin/ruby /etc/sensu/plugins/cache_instance_list.rb -r ${region} -f /etc/sensu/cache_instance_list_creds.yaml",
     } ->
     monitoring_check { 'cache_instance_list-staleness':
      check_every => '10m',
@@ -53,6 +53,7 @@ class sensu_handlers::aws_prune inherits sensu_handlers {
      tip         => 'talk to kwa',
      command     => "/usr/lib/nagios/plugins/check_file_age /var/cache/instance_list.json -w 1800 -c 3600",
      page        => false,
+     ticket      => true,
    }
  }
 

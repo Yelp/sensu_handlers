@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'fog'
-require 'json/pure'
 require 'sensu-plugin/check/cli'
 require 'fileutils'
 require 'yaml'
