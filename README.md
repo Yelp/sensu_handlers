@@ -179,6 +179,6 @@ sensu_handlers::teams:
 * *`notification_email: 'operations@localhost'`* - If set, the handler will send emails for every event to this address. If ommited it will send no emails. You can send the email to multiple destinations by using comma separated list (like any email client)
 * *`project: OPS`* - Used by the JIRA handler. If a event comes in that has `ticket=>true`, the jira handler will open a ticket on this project. There no default for this parameter. Special considerations have to be made for the JIRA project to enable auto-opening and auto-closing of tickets, see the docs on the jira handler.
 
-=== Support
+### Support
 
 Please open a github issue for support.
