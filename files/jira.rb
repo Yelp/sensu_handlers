@@ -33,7 +33,7 @@ class Jira < BaseHandler
           }
         }
         more_labels = build_extra_labels(issue_json) rescue [ ]
-        issue_json["labels"] += more_labels
+        issue_json['fields']['labels'] += more_labels
         issue.save(issue_json)
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"
