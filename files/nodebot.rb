@@ -40,11 +40,11 @@ class Nodebot < BaseHandler
     end
 
     # Max irc line length is theoretically 512 from the RFC, but after the
-    # color, line breaks etc it comes out to ~ 419 for us? Just truncate
-    # to 415 to be safe
+    # color, line breaks etc it comes out to ~ 411 for us? Just truncate
+    # to 405 to be safe
     now = Time.now
     pre = "[sensu] #{now.hour}:#{now.min}:#{now.sec} #{color} #{status} - "
-    "#{pre}#{description(415 - pre.length)}"
+    "#{pre}#{description(405 - pre.length)}"
   end
 
   def handle
