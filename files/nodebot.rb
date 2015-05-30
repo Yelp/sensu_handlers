@@ -42,7 +42,8 @@ class Nodebot < BaseHandler
     # Max irc line length is theoretically 512 from the RFC, but after the
     # color, line breaks etc it comes out to ~ 419 for us? Just truncate
     # to 415 to be safe
-    pre = "[sensu] #{color} #{status} - "
+    now = Time.now
+    pre = "[sensu] #{now.hour}:#{now.min}:#{now.sec} #{color} #{status} - "
     "#{pre}#{description(415 - pre.length)}"
   end
 
