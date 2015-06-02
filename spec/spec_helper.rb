@@ -28,6 +28,7 @@ module SensuHandlerTestHelper
     event['check']['status'] ||= 0
     event['check']['output'] ||= 'some check output'
     event['check']['issued'] ||= Time.now()
+    event['check']['habitat'] = 'somehabitat'
     subject.event = event
     subject.settings          = Hash.new
     subject.settings['default']  = Hash.new
