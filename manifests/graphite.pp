@@ -28,7 +28,7 @@ class sensu_handlers::graphite inherits sensu_handlers {
   sensu::handler { 'graphite':
     type     => 'transport',
     pipe => {
-      type    => 'topic',
+      'type'  => 'topic',
       name    => 'metrics',
       durable => true
     },
