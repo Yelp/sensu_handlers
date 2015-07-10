@@ -18,12 +18,18 @@ class Pagerduty < BaseHandler
   def trigger_incident
     return false unless api_key
     require 'redphone/pagerduty'
-    Redphone::Pagerduty.trigger_incident(
+    response = Redphone::Pagerduty.trigger_incident(
       :service_key  => api_key,
       :incident_key => incident_key,
-      :description  => description,
+      :description  => description(1024),
       :details      => full_description_hash
-    )['status'] == 'success'
+    )['status']
+    if response != 'success'
+      log response
+      false
+    else
+      true
+    end
   end
 
   def resolve_incident
