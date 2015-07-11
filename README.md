@@ -184,11 +184,11 @@ sensu_handlers::teams:
 
 You can manually invoke these handlers in order to test them, ensuring that (for example) 
 a JIRA ticket is correctly raised. Simply pipe the Sensu alert in JSON into one of the 
-handlers, and it should parse it as if it were a fresh alert:
+handlers, and it should parse it as if it were a fresh alert.
 
 ```
 $ grep 'failed' /var/log/sensu/sensu-server.log  | tail -n 1 | jq .event > last_failed_event.json
-$ cat last_failed_event | jira.rb
+$ cat last_failed_event | sudo ruby jira.rb
 ```
 
 
