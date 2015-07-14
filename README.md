@@ -188,7 +188,7 @@ handlers, and it should parse it as if it were a fresh alert.
 
 ```
 $ grep 'failed' /var/log/sensu/sensu-server.log  | tail -n 1 | jq .event > last_failed_event.json
-$ cat last_failed_event | sudo ruby jira.rb
+$ cat last_failed_event | sudo -u sensu ruby jira.rb
 ```
 
 
