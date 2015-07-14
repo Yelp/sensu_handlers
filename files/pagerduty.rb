@@ -24,11 +24,11 @@ class Pagerduty < BaseHandler
       :description  => description(1024),
       :details      => full_description_hash
     )['status']
-    if response != 'success'
+    if response == 'success'
+      true
+    else
       log response
       false
-    else
-      true
     end
   end
 
