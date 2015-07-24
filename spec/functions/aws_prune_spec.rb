@@ -31,7 +31,12 @@ class MockEc2Node < Ec2Node
         {
             'id' => 'i-after',
             'tags' => { 'Name' => 'some.other.hostname' }
-        }
+        },
+	{
+	    'id' => 'i-terminated',
+	    'tags' => { 'Name' => 'a.dead.instance' },
+	    'state' => 'terminated'
+	}
     ]
   end
   def blacklist_name_array
@@ -56,6 +61,9 @@ describe MockEc2Node do
   end
   it "Can find instance after blacklist" do
     subject.ec2_node_exists?('i-after').should == true
+  end
+  it "Cannot find terminated instance" do
+    subject.ec2_node_exists?('i-terminated').should == false
   end
 end
 
