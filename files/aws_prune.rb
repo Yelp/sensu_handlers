@@ -105,7 +105,7 @@ class Ec2Node < Sensu::Handler
 
   def ec2_node_exists?(instance_id)
     running_instances = load_instances_cache
-    instance_ids = running_instances.reject { |s| instance_id != s['id'] }.collect { |s| Hash[ 'id', s['id'], 'tags', s['tags'] ]}
+    instance_ids = running_instances.reject { |s| instance_id != s['id'] || s['state'] == 'terminated' || s['state'] == 'shutting-down' }.collect { |s| Hash[ 'id', s['id'], 'tags', s['tags'] ]}
     return false unless instance_ids.size > 0
     instance = instance_ids[0]
     # Yelp specific: pretend that the node does not exist if we are in our blacklist
