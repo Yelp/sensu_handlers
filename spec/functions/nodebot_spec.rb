@@ -38,6 +38,8 @@ describe Nodebot do
     end
     it { expect(subject.pages_irc_channel).to eql('#criticals') }
     it { expect(subject.channels).to eql(['criticals']) }
+    timestamp_regex = / \(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\)$/
+    it { expect(subject.message).to match(timestamp_regex) }
   end
   context "should page default team pages channel when not setup" do
     before(:each) do
