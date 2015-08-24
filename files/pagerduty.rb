@@ -21,7 +21,7 @@ class Pagerduty < BaseHandler
     response = Redphone::Pagerduty.trigger_incident(
       :service_key  => api_key,
       :incident_key => incident_key,
-      :description  => description(1024),
+      :description  => description(140),
       :details      => full_description_hash
     )['status']
     if response == 'success'
