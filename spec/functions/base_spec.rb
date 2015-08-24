@@ -334,4 +334,42 @@ describe BaseHandler do
     end
   end #End filter repeated
 
+  context "With display name tag" do
+    context "When display tag is not set" do
+      before(:each) do
+        setup_event! { |e|
+          e['client']['name'] = 'foo.bar'
+          e['client']['tags'] = { }
+        }
+      end
+      it {
+        expect(subject.description).to match(/^foo.bar :/)
+      }
+    end
+
+    context "When display tag is set to empty string" do
+      before(:each) do
+        setup_event! { |e|
+          e['client']['name'] = 'foo.bar'
+          e['client']['tags'] = { 'Display Name' => '' }
+        }
+      end
+      it {
+        expect(subject.description).to match(/^foo.bar :/)
+      }
+    end
+
+    context "When display tag is set" do
+      before(:each) do
+        setup_event! { |e|
+          e['client']['name'] = 'foo.bar'
+          e['client']['tags'] = { 'Display Name' => 'baz.qux' }
+        }
+      end
+      it {
+        expect(subject.description).to match(/^baz.qux :/)
+      }
+    end
+  end # End of context 'With display name tag'
+
 end # End describe  
