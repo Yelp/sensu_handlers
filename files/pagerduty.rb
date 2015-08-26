@@ -47,27 +47,21 @@ class Pagerduty < BaseHandler
       return
     end
     begin
-      action = case @event['check']['status'].to_i
-        when 2
-          'trigger'
-        when 0,1
-        'resolve'
-      end
       response = timeout_and_retry do
-        case @event['check']['status'].to_i
-        when 2
+        case @event['action']
+        when 'create'
           trigger_incident
-        when 0,1
+        when 'resolve'
           resolve_incident
         end
       end
       if response
-        log 'pagerduty -- ' + action.capitalize + 'd incident -- ' + incident_key
+        log 'pagerduty -- ' + @event['action'].capitalize + 'd incident -- ' + incident_key
       else
-        log 'pagerduty -- failed to ' + action + ' incident -- ' + incident_key
+        log 'pagerduty -- failed to ' + @event['action'] + ' incident -- ' + incident_key
       end
     rescue Timeout::Error
-      log 'pagerduty -- timed out while attempting to ' + action + ' an incident -- ' + incident_key
+      log 'pagerduty -- timed out while attempting to ' + @event['action'] + ' an incident -- ' + incident_key
     end
   end
 end
