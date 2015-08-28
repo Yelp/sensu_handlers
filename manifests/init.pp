@@ -6,7 +6,7 @@
 #
 # [*teams*]
 #  A hash configuring the different desired configuration for the default
-#  handler behavior given a particular team. See the main README.md for 
+#  handler behavior given a particular team. See the main README.md for
 #  examples. This parameter is required.
 #
 # [*package_ensure*]
@@ -23,7 +23,7 @@
 # [*jira_username*]
 # [*jira_password*]
 # [*jira_site*]
-#  If you are using the JIRA handler, it needs basic auth to work. 
+#  If you are using the JIRA handler, it needs basic auth to work.
 #  Fill in the credentials and url to your local JIRA instance.
 #
 # [*include_graphite*]
@@ -55,8 +55,6 @@ class sensu_handlers(
   validate_hash($teams)
   validate_bool($include_graphite, $include_aws_prune)
 
-  ensure_packages(['sensu-community-plugins'])
-
   file { '/etc/sensu/handlers/base.rb':
     source => 'puppet:///modules/sensu_handlers/base.rb',
     mode   => '0644',
@@ -86,4 +84,3 @@ class sensu_handlers(
     include sensu_handlers::aws_prune
   }
 }
-

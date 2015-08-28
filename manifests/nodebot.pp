@@ -10,8 +10,7 @@ class sensu_handlers::nodebot inherits sensu_handlers {
     source  => 'puppet:///modules/sensu_handlers/nodebot.rb',
     config  => {
       teams => $teams,
-    },
-    require => Package['sensu-community-plugins'];
+    }
   }
 
 }
