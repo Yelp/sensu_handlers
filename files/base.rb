@@ -67,7 +67,7 @@ class BaseHandler < Sensu::Handler
     @event['check']['tip']
   end
 
-  def description(maxlen=0)
+  def description(maxlen=100000)
     description = @event['check']['notification']
     client_display_name = @event['client']['tags']['Display Name'] rescue nil
     client_display_name = @event['client']['name'] if
@@ -81,15 +81,9 @@ class BaseHandler < Sensu::Handler
       if runbook
         toadd = "#{toadd} (#{runbook})"
       end
-      if maxlen > 0 && (toadd.length + description.length) > maxlen
-        description_size = maxlen - toadd.length - 1
-        if description_size > 0
-          description = description[0..description_size]
-        end
-      end
       description = "#{description}#{toadd}"
     end
-    description.gsub("\n", ' ')
+    description.gsub("\n", ' ')[0..maxlen-1]
   end
 
   def full_description
