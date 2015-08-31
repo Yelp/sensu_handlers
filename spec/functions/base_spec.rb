@@ -115,6 +115,16 @@ describe BaseHandler do
         end
       end
     end
+    context 'handles character limit when needed' do
+      before(:each) do
+        setup_event! do |e|
+          e['check']['status'] = 2
+          e['check']['runbook'] = 'http://some.runbook'
+          e['check']['tip'] = 'Reee' + 'e'*1000 + 'ly long tip'
+        end
+      end
+      it { expect(subject.description(42).length).to eq(42) }
+    end
   end
 
   context "full_description" do
