@@ -15,9 +15,9 @@ gem 'rspec-puppet',
 gem 'puppet', '~> 3.6.2'                     # Apache2
 gem 'facter', '1.7.5'                      # Apache2
 gem 'sensu-plugin'
+gem 'hipchat'
 gem 'hiera-puppet-helper',
   :git => 'https://github.com/bobtfish/hiera-puppet-helper.git',
   :ref => '5ed989a130bc62cc6bdb923596586284f0bd73df'
 
 gem 'mail', '~> 2.5.4'
-

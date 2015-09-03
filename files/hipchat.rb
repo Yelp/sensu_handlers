@@ -1,4 +1,5 @@
 require "#{File.dirname(__FILE__)}/base"
+require 'hipchat'
 #require_relative 'base'
 
 class Hipchat < BaseHandler
@@ -27,7 +28,7 @@ class Hipchat < BaseHandler
 
   def hipchat_message
 "
-<b>#{Time.at(@event['check']['issued'])} - #{@event['client']['name'] + '/' + @event['check']['name']} on #{@event['client']['name']} (#{@event['client']['address']}) - #{human_check_status}</b>
+<b>#{Time.at(@event['check']['issued'])} - #{@event['check']['name']} on #{@event['client']['name']} (#{@event['client']['address']}) - #{human_check_status}</b>
 <br /><br />
 &nbsp;&nbsp;#{@event['check']['notification'] || @event['check']['output']}
 "
@@ -46,11 +47,14 @@ class Hipchat < BaseHandler
     end
   end
 
+  def hipchat_room
+    team_data('hipchat_room') || false
+  end
+
   def alert_hipchat(options_or_notify = {})
     return false unless api_key
-    return true
 
-    # hipchat_client = HipChat::Client.new(api_key)
-    # hipchat_client[room].send('sensu', hipchat_message, options_or_notify)
+    hipchat_client = HipChat::Client.new(api_key)
+    hipchat_client[hipchat_room].send('sensu', hipchat_message, options_or_notify)
   end
 end
