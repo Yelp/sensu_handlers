@@ -8,7 +8,8 @@
 #
 #  hipchat api key
 class sensu_handlers::hipchat (
-  $api_key
+  $api_key,
+  $install_gem = true
 ) inherits sensu_handlers {
 
  sensu::handler { 'hipchat':
@@ -18,6 +19,10 @@ class sensu_handlers::hipchat (
       api_key => $api_key,
       teams   => $teams,
     }
+  }
+
+  if $install_gem { 
+    ensure_resource('package', 'hipchat', {'provider' => 'gem'})
   }
 
 }
