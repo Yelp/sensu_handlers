@@ -6,7 +6,7 @@ require 'hipchat'
 
 class Hipchat < BaseHandler
   def handle
-    response = timeout_and_retry do
+    timeout_and_retry do
       case @event['check']['status'].to_i
       when 1,2
         trigger_incident
