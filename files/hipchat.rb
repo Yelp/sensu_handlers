@@ -28,9 +28,13 @@ class Hipchat < BaseHandler
     alert_hipchat(color: hipchat_message_colour)
   end
 
+  def event_time
+    Time.at(@event['check']['issued']).utc.to_s
+  end
+
   def hipchat_message
 "
-<b>#{Time.at(@event['check']['issued'])} - #{@event['check']['name']} on #{@event['client']['name']} (#{@event['client']['address']}) - #{human_check_status}</b>
+<b>#{event_time} - #{@event['check']['name']} on #{@event['client']['name']} (#{@event['client']['address']}) - #{human_check_status}</b>
 <br /><br />
 &nbsp;&nbsp;#{@event['check']['notification'] || @event['check']['output']}
 "

@@ -169,12 +169,12 @@ describe Hipchat do
     end
 
     it 'correctly formats the check issued date' do
-      expect(subject.hipchat_message).to include('2015-08-06 14:03:10 +0100')
+      expect(subject.hipchat_message).to include('2015-08-06 13:03:10 UTC')
     end
 
     it 'correctly formats the line containing datetime, service, host and address' do
       expect(subject.hipchat_message)
-        .to include('2015-08-06 14:03:10 +0100 - Fake Service port 80 on test.vagrant.local (127.0.0.1)')
+        .to include('2015-08-06 13:03:10 UTC - Fake Service port 80 on test.vagrant.local (127.0.0.1)')
     end
 
     context 'when check notification is populated' do
