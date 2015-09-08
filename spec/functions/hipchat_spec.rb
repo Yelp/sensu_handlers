@@ -32,6 +32,7 @@ describe Hipchat do
   describe 'trigger_incident' do
     it 'returns false when no hipchat api_key' do
       expect(subject.trigger_incident).to be false
+      expect(subject).to receive(:alert_hipchat).exactly(0).times
     end
 
     it 'calls alert_hipchat when hipchat api_key exists' do
@@ -91,7 +92,7 @@ describe Hipchat do
       end
 
       context 'when resolve_incident returns true' do
-        it 'calls resolve_incident once (rspec)' do
+        it 'calls resolve_incident once' do
           expect(subject).to receive(:resolve_incident)
             .once
             .and_return(true)
