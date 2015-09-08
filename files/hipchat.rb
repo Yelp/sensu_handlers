@@ -21,11 +21,13 @@ class Hipchat < BaseHandler
   end
 
   def trigger_incident
-    alert_hipchat(color: hipchat_message_colour, notify: true)
+    return false unless api_key
+    alert_hipchat(hipchat_room, 'sensu', hipchat_message, color: hipchat_message_colour, notify: true)
   end
 
   def resolve_incident
-    alert_hipchat(color: hipchat_message_colour)
+    return false unless api_key
+    alert_hipchat(hipchat_room, 'sensu', hipchat_message, color: hipchat_message_colour)
   end
 
   def event_time
@@ -57,10 +59,10 @@ class Hipchat < BaseHandler
     team_data('hipchat_room') || false
   end
 
-  def alert_hipchat(options_or_notify = {})
+  def alert_hipchat(room, sender, message, options_or_notify = {})
     return false unless api_key
 
     hipchat_client = HipChat::Client.new(api_key)
-    hipchat_client[hipchat_room].send('sensu', hipchat_message, options_or_notify)
+    hipchat_client[room].send(sender, message, options_or_notify)
   end
 end

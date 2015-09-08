@@ -20,7 +20,8 @@ describe Hipchat do
   subject { described_class.new }
   before(:each) do
     setup_event!
-    subject.event['check']['team'] = 'Slumbering Dropbears'
+    subject.event['check']['team'] = 'testteam1'
+    subject.event['check']['issued'] = 1438866190
     HipChat::Room.any_instance.stubs(:send)
   end
 
@@ -37,7 +38,20 @@ describe Hipchat do
       subject.settings['hipchat']['apikey'] = 'fakekey'
       subject.event['check']['status'] = 2
 
-      expect(subject).to receive(:alert_hipchat).with({ :color => "red", :notify => true })
+      subject.expects(:alert_hipchat)
+        .once
+        .with(
+        'Test team #1',
+        'sensu',
+        includes(
+          "2015-08-06 13:03:10 UTC",
+          "mycoolcheck on some.client",
+          "CRITICAL",
+          "some check output"
+        ),
+        { :color => "red", :notify => true }
+      )
+
       subject.trigger_incident
     end
   end
@@ -51,7 +65,18 @@ describe Hipchat do
       subject.settings['hipchat']['apikey'] = 'fakekey'
       subject.event['check']['status'] = 0
 
-      expect(subject).to receive(:alert_hipchat).with({ :color => 'green' })
+      subject.expects(:alert_hipchat).with(
+        'Test team #1',
+        'sensu',
+        includes(
+          "2015-08-06 13:03:10 UTC",
+          "mycoolcheck on some.client",
+          "OK",
+          "some check output",
+        ),
+        { :color => "green" }
+      )
+
       subject.resolve_incident
     end
   end
@@ -63,7 +88,7 @@ describe Hipchat do
       end
 
       context 'when resolve_incident returns true' do
-        it 'calls resolve_incident once' do
+        it 'calls resolve_incident once (rspec)' do
           expect(subject).to receive(:resolve_incident)
             .once
             .and_return(true)
@@ -72,9 +97,20 @@ describe Hipchat do
         end
 
         it 'calls alert_hipchat with options color green' do
-          expect(subject).to receive(:alert_hipchat)
-            .with( { :color => 'green' } )
-            .and_return(true)
+          subject.expects(:alert_hipchat)
+            .at_most_once
+            .with(
+              'Test team #1',
+              'sensu',
+              includes(
+                "2015-08-06 13:03:10 UTC",
+                "mycoolcheck on some.client",
+                "OK",
+                "some check output"
+              ),
+              { :color => "green" }
+            )
+            .returns(true)
 
           subject.handle
         end
@@ -93,6 +129,7 @@ describe Hipchat do
 
     context 'when check status is 1' do
       before do
+        subject.settings['hipchat']['apikey'] = 'fakekey'
         subject.event['check']['status'] = 1
       end
 
@@ -118,7 +155,13 @@ describe Hipchat do
 
       it 'calls alert_hipchat with options color yellow & notify true' do
         expect(subject).to receive(:alert_hipchat)
-          .with( { :color => 'yellow', :notify => true } )
+          .once
+          .with(
+            'Test team #1',
+            'sensu',
+            "\n<b>2015-08-06 13:03:10 UTC - mycoolcheck on some.client () - WARNING</b>\n<br /><br />\n&nbsp;&nbsp;some check output\n",
+            { :color => 'yellow', :notify => true }
+          )
           .and_return(true)
 
         subject.handle
@@ -127,6 +170,7 @@ describe Hipchat do
 
     context 'when check status is 2' do
       before do
+        subject.settings['hipchat']['apikey'] = 'fakekey'
         subject.event['check']['status'] = 2
       end
 
@@ -152,7 +196,13 @@ describe Hipchat do
 
       it 'calls alert_hipchat with options color red & notify true' do
         expect(subject).to receive(:alert_hipchat)
-          .with( { :color => 'red', :notify => true } )
+          .once
+          .with(
+            'Test team #1',
+            'sensu',
+            "\n<b>2015-08-06 13:03:10 UTC - mycoolcheck on some.client () - CRITICAL</b>\n<br /><br />\n&nbsp;&nbsp;some check output\n",
+            { :color => 'red', :notify => true }
+          )
           .and_return(true)
 
         subject.handle
