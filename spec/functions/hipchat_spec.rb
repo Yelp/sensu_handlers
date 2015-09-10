@@ -36,7 +36,7 @@ describe Hipchat do
     end
 
     it 'calls alert_hipchat when hipchat api_key exists' do
-      subject.settings['hipchat']['apikey'] = 'fakekey'
+      subject.settings['hipchat']['api_key'] = 'fakekey'
       subject.event['check']['status'] = 2
 
       expect(subject).to receive(:alert_hipchat)
@@ -63,7 +63,7 @@ describe Hipchat do
     end
 
     it 'calls alert_hipchat when hipchat api_key exists' do
-      subject.settings['hipchat']['apikey'] = 'fakekey'
+      subject.settings['hipchat']['api_key'] = 'fakekey'
       subject.event['check']['status'] = 0
 
       expect(subject).to receive(:alert_hipchat)
@@ -87,7 +87,7 @@ describe Hipchat do
   describe 'handle' do
     context 'when check status is 0' do
       before do
-        subject.settings['hipchat']['apikey'] = 'fakekey'
+        subject.settings['hipchat']['api_key'] = 'fakekey'
         subject.event['check']['status'] = 0
       end
 
@@ -133,7 +133,7 @@ describe Hipchat do
 
     context 'when check status is 1' do
       before do
-        subject.settings['hipchat']['apikey'] = 'fakekey'
+        subject.settings['hipchat']['api_key'] = 'fakekey'
         subject.event['check']['status'] = 1
       end
 
@@ -179,7 +179,7 @@ describe Hipchat do
 
     context 'when check status is 2' do
       before do
-        subject.settings['hipchat']['apikey'] = 'fakekey'
+        subject.settings['hipchat']['api_key'] = 'fakekey'
         subject.event['check']['status'] = 2
       end
 

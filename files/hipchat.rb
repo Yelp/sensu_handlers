@@ -17,7 +17,7 @@ class Hipchat < BaseHandler
   end
 
   def api_key
-    settings[self.class.name.downcase]['apikey'] || false
+    settings[self.class.name.downcase]['api_key'] || false
   end
 
   def trigger_incident
