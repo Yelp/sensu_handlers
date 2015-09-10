@@ -60,8 +60,8 @@ class Hipchat < BaseHandler
   end
 
   def hipchat_room
-    team_data('hipchat_room') || default_room
-  end
+    team_data('hipchat_room') || default_room || nil
+  end 
 
   def alert_hipchat(room, sender, message, options_or_notify = {})
     return false unless api_key
