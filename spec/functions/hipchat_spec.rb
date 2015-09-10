@@ -91,44 +91,33 @@ describe Hipchat do
         subject.event['check']['status'] = 0
       end
 
-      context 'when resolve_incident returns true' do
-        it 'calls resolve_incident once' do
-          expect(subject).to receive(:resolve_incident)
-            .once
-            .and_return(true)
+      it 'calls resolve_incident' do
+	expect(subject).to receive(:resolve_incident)
+	  .once
+	  .and_return(true)
 
-          subject.handle
-        end
-
-        it 'calls alert_hipchat with options color green' do
-          expect(subject).to receive(:alert_hipchat)
-            .once
-            .with(
-              'Test team #1',
-              'sensu',
-              include(
-                "2015-08-06 13:03:10 UTC",
-                "mycoolcheck on some.client",
-                "OK",
-                "some check output"
-              ),
-              { :color => "green" }
-            )
-            .and_return(true)
-
-          subject.handle
-        end
+	subject.handle
       end
 
-      context 'when resolve_incident returns false' do
-        it 'calls resolve_incident 3 times' do
-          expect(subject).to receive(:resolve_incident)
-            .exactly(3).times
-            .and_return(false)
+      it 'calls alert_hipchat with options color green' do
+	expect(subject).to receive(:alert_hipchat)
+	  .once
+	  .with(
+	    'Test team #1',
+	    'sensu',
+	    include(
+	      "2015-08-06 13:03:10 UTC",
+	      "mycoolcheck on some.client",
+	      "OK",
+	      "some check output"
+	    ),
+	    { :color => "green" }
+	  )
+	  .and_return(true)
 
-          subject.handle
-        end
+	subject.handle
       end
+
     end
 
     context 'when check status is 1' do
@@ -137,25 +126,13 @@ describe Hipchat do
         subject.event['check']['status'] = 1
       end
 
-      context 'when trigger_incident returns true' do
-        it 'calls trigger_incident once' do
-          expect(subject).to receive(:trigger_incident)
-            .once
-            .and_return(true)
+      it 'calls trigger_incident once' do
+	expect(subject).to receive(:trigger_incident)
+	  .once
+	  .and_return(true)
 
-          subject.handle
-        end
+	subject.handle
       end
-
-      # context 'when trigger_incident returns false' do
-      #   it 'calls trigger_incident 3 times' do
-      #     expect(subject).to receive(:trigger_incident)
-      #       .exactly(3).times
-      #       .and_return(false)
-      #
-      #     subject.handle
-      #   end
-      # end
 
       it 'calls alert_hipchat with options color yellow & notify true' do
         expect(subject).to receive(:alert_hipchat)
@@ -183,25 +160,14 @@ describe Hipchat do
         subject.event['check']['status'] = 2
       end
 
-      context 'when trigger_incident returns true' do
-        it 'calls trigger_incident once' do
-          expect(subject).to receive(:trigger_incident)
-            .once
-            .and_return(true)
+      it 'calls trigger_incident' do
+	expect(subject).to receive(:trigger_incident)
+	  .once
+	  .and_return(true)
 
-          subject.handle
-        end
+	subject.handle
       end
 
-      context 'when trigger_incident returns false' do
-        it 'calls trigger_incident 3 times' do
-          expect(subject).to receive(:trigger_incident)
-            .exactly(3).times
-            .and_return(false)
-
-          subject.handle
-        end
-      end
 
       it 'calls alert_hipchat with options color red & notify true' do
         expect(subject).to receive(:alert_hipchat)
