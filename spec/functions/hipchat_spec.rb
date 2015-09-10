@@ -300,4 +300,40 @@ describe Hipchat do
       end
     end
   end
+
+  describe '#hipchat_room' do
+    let (:expected_room) { 'the_room' }
+
+    context "with hipchat_room configured in team settings" do
+      before do
+	subject.settings[settings_key]['teams']['testteam1']['hipchat_room'] = expected_room
+      end
+
+      it "returns the room in the event" do
+	expect(subject.hipchat_room).to eq expected_room
+      end
+    end
+
+    context "with hipchat_room missing in team settings" do
+      before do
+	subject.settings[settings_key]['teams']['testteam1'].delete('hipchat_room')
+      end
+
+      context "and no default_team specified" do
+	it "returns nil" do
+	  expect(subject.hipchat_room).to be_nil
+	end
+      end
+
+      context "and deafult room is configured" do
+	before do
+	  subject.settings[settings_key]['hipchat_room'] = expected_room
+	end
+	it "returns the default room" do
+	  expect(subject.hipchat_room).to eq expected_room
+	end
+      end
+
+    end
+  end
 end
