@@ -173,7 +173,10 @@ BODY
       interval      = @event['check']['interval'].to_i || 0
     end
     alert_after   = @event['check']['alert_after'].to_i || 0
-    realert_every = @event['check']['realert_every'].to_i || 1
+
+    # nil.to_i == 0
+    # 0 || 1   == 0
+    realert_every = ( @event['check']['realert_every'] || 1 ).to_i 
 
     initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
     number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
