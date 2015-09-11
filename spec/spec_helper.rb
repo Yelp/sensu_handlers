@@ -39,8 +39,7 @@ module SensuHandlerTestHelper
     subject.settings[settings_key]['teams']['operations'] = {
       'pagerduty_api_key' => 'operations_pagerduty_key'
     }
-    subject.settings[settings_key]['teams']['testteam1'] = {
-      'hipchat_room'      => 'Test team #1',
+    subject.settings[settings_key]['teams']['someotherteam'] = {
       'pagerduty_api_key' => 'someotherteam_pagerduty_key'
     }
     yield(event) if block_given?
