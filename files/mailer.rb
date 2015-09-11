@@ -104,10 +104,10 @@ class Mailer < BaseHandler
           body    body
         end
 
-        puts 'mail -- sent alert for ' + short_name + ' to ' + mail_to.to_s
+        log 'mail -- sent alert for ' + short_name + ' to ' + mail_to.to_s
       end
     rescue Timeout::Error
-      puts 'mail -- timed out while attempting to ' + @event['action'] + ' an incident -- ' + short_name
+      log 'mail -- timed out while attempting to ' + @event['action'] + ' an incident -- ' + short_name
     end
   end
 
