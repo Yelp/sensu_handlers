@@ -97,30 +97,30 @@ describe Hipchat do
       end
 
       it 'calls resolve_incident' do
-	expect(subject).to receive(:resolve_incident)
-	  .once
-	  .and_return(true)
+        expect(subject).to receive(:resolve_incident)
+          .once
+          .and_return(true)
 
-	subject.handle
+        subject.handle
       end
 
       it 'calls alert_hipchat with options color green' do
-	expect(subject).to receive(:alert_hipchat)
-	  .once
-	  .with(
-	    'Test team #1',
-	    'sensu',
-	    include(
-	      "2015-08-06 13:03:10 UTC",
-	      "mycoolcheck on some.client",
-	      "OK",
-	      "some check output"
-	    ),
-	    { :color => "green" }
-	  )
-	  .and_return(true)
+        expect(subject).to receive(:alert_hipchat)
+          .once
+          .with(
+            'Test team #1',
+            'sensu',
+            include(
+              "2015-08-06 13:03:10 UTC",
+              "mycoolcheck on some.client",
+              "OK",
+              "some check output"
+            ),
+            { :color => "green" }
+          )
+          .and_return(true)
 
-	subject.handle
+        subject.handle
       end
 
     end
@@ -132,11 +132,11 @@ describe Hipchat do
       end
 
       it 'calls trigger_incident once' do
-	expect(subject).to receive(:trigger_incident)
-	  .once
-	  .and_return(true)
+        expect(subject).to receive(:trigger_incident)
+          .once
+          .and_return(true)
 
-	subject.handle
+        subject.handle
       end
 
       it 'calls alert_hipchat with options color yellow & notify true' do
@@ -166,11 +166,11 @@ describe Hipchat do
       end
 
       it 'calls trigger_incident' do
-	expect(subject).to receive(:trigger_incident)
-	  .once
-	  .and_return(true)
+        expect(subject).to receive(:trigger_incident)
+          .once
+          .and_return(true)
 
-	subject.handle
+        subject.handle
       end
 
 
@@ -277,45 +277,45 @@ describe Hipchat do
 
     context "with hipchat_room configured in team settings" do
       before do
-	subject.settings[settings_key]['teams']['testteam1']['hipchat_room'] = expected_room
+        subject.settings[settings_key]['teams']['testteam1']['hipchat_room'] = expected_room
       end
 
       it "returns the configured room" do
-	expect(subject.hipchat_room).to eq expected_room
+        expect(subject.hipchat_room).to eq expected_room
       end
     end
 
     context "with hipchat_room missing from team settings" do
 
       before do
-	subject.settings[settings_key]['teams']['testteam1'].delete('hipchat_room')
+        subject.settings[settings_key]['teams']['testteam1'].delete('hipchat_room')
       end
 
       shared_examples "default room" do
-	context "and no default_team specified" do
-	  it "returns nil" do
-	    expect(subject.hipchat_room).to be_nil
-	  end
-	end
+        context "and no default_team specified" do
+          it "returns nil" do
+            expect(subject.hipchat_room).to be_nil
+          end
+        end
 
-	context "and deafult room is configured" do
-	  before do
-	    subject.settings[settings_key]['hipchat_room'] = expected_room
-	  end
-	  it "returns the default room" do
-	    expect(subject.hipchat_room).to eq expected_room
-	  end
-	end
+        context "and deafult room is configured" do
+          before do
+            subject.settings[settings_key]['hipchat_room'] = expected_room
+          end
+          it "returns the default room" do
+            expect(subject.hipchat_room).to eq expected_room
+          end
+        end
       end
 
       context "and hipchat_room in handler settings set to false" do
-	before { subject.settings[settings_key]['hipchat_room'] = false }
-	it_behaves_like "default room"
+        before { subject.settings[settings_key]['hipchat_room'] = false }
+        it_behaves_like "default room"
       end
 
       context "and hipchat_room in handler settings missing" do
-	before { subject.settings[settings_key].delete('hipchat_room') }
-	it_behaves_like "default room"
+        before { subject.settings[settings_key].delete('hipchat_room') }
+        it_behaves_like "default room"
       end
 
     end
