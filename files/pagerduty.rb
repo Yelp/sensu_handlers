@@ -3,11 +3,11 @@
 require "#{File.dirname(__FILE__)}/base"
 
 class Pagerduty < BaseHandler
-    def habitat
-      @event['check']['habitat']
-    end
+  def habitat
+    @event['check']['habitat']
+  end
 
-    def incident_key
+  def incident_key
     "sensu #{habitat} #{@event['client']['name']} #{@event['check']['name']}"
   end
 
