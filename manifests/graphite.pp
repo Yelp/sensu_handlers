@@ -22,7 +22,6 @@ class sensu_handlers::graphite inherits sensu_handlers {
       group   => root,
       mode    => '0444',
       content => inline_template('<%= require "json"; JSON.generate @graphite_data %>'),
-      require => Package['sensu-community-plugins'],
   }
 
   sensu::handler { 'graphite':
