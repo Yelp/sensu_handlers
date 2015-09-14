@@ -2,20 +2,12 @@
 #
 # Sensu handler to send emails.
 #
-class sensu_handlers::mailer inherits sensu_handlers {
+class sensu_handlers::mailer (
+  $mail_package = 'ruby-mail',
+  $mail_version = 'latest'
+) inherits sensu_handlers {
 
   ensure_packages(['nagios-plugins-basic'])
-
-  case $::osfamily {
-    'Debian': {
-      $mail_package = 'ruby-mail'
-      $mail_version = '2.5.4-2'
-    }
-    default:  {
-      $mail_package = 'rubygem-mail'
-      $mail_version = '2.5.4'
-    }
-  }
 
   package { $mail_package:
     ensure => $mail_version,
