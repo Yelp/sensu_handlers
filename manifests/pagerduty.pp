@@ -11,7 +11,7 @@ class sensu_handlers::pagerduty inherits sensu_handlers {
     config  => {
       teams => $teams,
     },
-    require => [ Package['sensu-community-plugins'], Package['rubygem-redphone'] ],
+    require => [ Package['rubygem-redphone'] ],
   }
   # If we are going to send pagerduty alerts, we need to be sure it actually is up
   monitoring_check { 'check_pagerduty':
