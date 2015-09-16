@@ -4,6 +4,12 @@ require "#{File.dirname(__FILE__)}/base"
 
 class Jira < BaseHandler
 
+  def build_labels
+    [ "SENSU_#{@event['client']['name']}",
+      "SENSU_#{@event['check']['name']}",
+      "SENSU", *@event['check']['tags'] ].uniq
+  end
+
   def create_issue(summary, full_description, project)
     begin
       require 'jira'
@@ -25,11 +31,7 @@ class Jira < BaseHandler
             "description"=> full_description,
             "project"=> { "id"=>project_id },
             "issuetype"=> {"id"=>1},
-            "labels" => [
-               "SENSU_#{@event['client']['name']}",
-               "SENSU_#{@event['check']['name']}",
-               "SENSU"
-            ]
+            "labels" => build_labels
           }
         }
         issue.save(issue_json)
