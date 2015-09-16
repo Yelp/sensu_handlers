@@ -46,6 +46,7 @@ describe Mailer do
     subject.event['check']['name'] = 'fake_alert'
     subject.event['client']['name'] = 'fake_client'
     Mail.stub(:deliver).and_return(true)
+    subject.stub(:log).and_return(nil) # quiet specs
     subject.handle
   end
 

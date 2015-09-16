@@ -342,6 +342,17 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+    context "when realert_every is not set" do
+      it "treats realert_every as 1" do
+        subject.event['occurrences'] = 6
+        subject.event['check']['interval'] = 20
+        subject.event['check']['alert_after'] = 60
+        subject.event['check'].delete('realert_every')
+        subject.event['action'] = 'create'
+        expect(subject).not_to receive(:bail)
+        expect(subject.filter_repeated).to eql(nil)
+      end
+    end
   end #End filter repeated
 
   context "With display name tag" do

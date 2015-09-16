@@ -61,15 +61,15 @@ class Mailer < BaseHandler
 
     mail_from = 'sensu@yelp.com'
 
-    delivery_method = settings['mailer']['delivery_method'] || 'smtp'
-    smtp_address = settings['mailer']['smtp_address'] || 'localhost'
-    smtp_port = settings['mailer']['smtp_port'] || '25'
-    smtp_domain = settings['mailer']['smtp_domain'] || 'localhost.localdomain'
+    delivery_method = handler_settings['delivery_method'] || 'smtp'
+    smtp_address = handler_settings['smtp_address'] || 'localhost'
+    smtp_port = handler_settings['smtp_port'] || '25'
+    smtp_domain = handler_settings['smtp_domain'] || 'localhost.localdomain'
 
-    smtp_username = settings['mailer']['smtp_username'] || nil
-    smtp_password = settings['mailer']['smtp_password'] || nil
-    smtp_authentication = settings['mailer']['smtp_authentication'] || :plain
-    smtp_enable_starttls_auto = settings['mailer']['smtp_enable_starttls_auto'] == "false" ? false : true
+    smtp_username = handler_settings['smtp_username'] || nil
+    smtp_password = handler_settings['smtp_password'] || nil
+    smtp_authentication = handler_settings['smtp_authentication'] || :plain
+    smtp_enable_starttls_auto = handler_settings['smtp_enable_starttls_auto'] == "false" ? false : true
 
     body = full_description
     subject = "#{action_to_string} - #{short_name}: #{@event['check']['notification']}"
@@ -104,10 +104,10 @@ class Mailer < BaseHandler
           body    body
         end
 
-        puts 'mail -- sent alert for ' + short_name + ' to ' + mail_to.to_s
+        log 'mail -- sent alert for ' + short_name + ' to ' + mail_to.to_s
       end
     rescue Timeout::Error
-      puts 'mail -- timed out while attempting to ' + @event['action'] + ' an incident -- ' + short_name
+      log 'mail -- timed out while attempting to ' + @event['action'] + ' an incident -- ' + short_name
     end
   end
 

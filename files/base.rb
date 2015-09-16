@@ -55,7 +55,7 @@ class BaseHandler < Sensu::Handler
 
   def team_data(lookup_key = nil)
     return unless team_name
-    data = settings[self.class.name.downcase]['teams'][team_name] || {}
+    data = handler_settings['teams'][team_name] || {}
     if lookup_key
       data = data[lookup_key]
     end
@@ -173,7 +173,10 @@ BODY
       interval      = @event['check']['interval'].to_i || 0
     end
     alert_after   = @event['check']['alert_after'].to_i || 0
-    realert_every = @event['check']['realert_every'].to_i || 1
+
+    # nil.to_i == 0
+    # 0 || 1   == 0
+    realert_every = ( @event['check']['realert_every'] || 1 ).to_i 
 
     initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
     number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
@@ -209,6 +212,14 @@ BODY
       x /= 2
     end
     x==1
+  end
+
+  def settings_key
+    self.class.name.downcase
+  end
+
+  def handler_settings
+    settings[settings_key]
   end
 
 end

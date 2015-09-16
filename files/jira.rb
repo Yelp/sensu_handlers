@@ -111,9 +111,9 @@ class Jira < BaseHandler
 
   def get_options
     options = {
-      :username         => settings['jira']['username'],
-      :password         => settings['jira']['password'],
-      :site             => settings['jira']['site'],
+      :username         => handler_settings['username'],
+      :password         => handler_settings['password'],
+      :site             => handler_settings['site'],
       :context_path     => '',
       :auth_type        => :basic,
       :use_ssl          => true,
