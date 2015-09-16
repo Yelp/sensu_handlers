@@ -81,6 +81,14 @@ describe Jira do
       subject.handle
     end
 
+    it "Tags exists in the Event" do
+      subject.event['check']['status'] = 2
+      subject.event['check']['tags'] = ["some_tag"]
+      expect(subject.build_labels).to match_array(["SENSU", "SENSU_mycoolcheck", "SENSU_some.client", "some_tag"])
+      expect(subject).to receive(:create_issue).and_return(true)
+      subject.handle
+    end
+
   end
 
 end
