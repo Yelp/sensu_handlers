@@ -4,6 +4,24 @@ require "#{File.dirname(__FILE__)}/base"
 
 class Jira < BaseHandler
 
+  def create_issue_loop(client, issue_json)
+    3.times do
+      begin
+        issue = client.Issue.build
+        if issue.save(issue_json)
+          return issue
+        else
+          return
+        end
+      rescue JIRA::HTTPError
+        sleep 10
+      end
+      issue = client.Issue.build
+      return if !issue.save(issue_json)
+      issue
+    end
+  end
+
   def create_issue(summary, full_description, project)
     begin
       require 'jira'
@@ -18,7 +36,6 @@ class Jira < BaseHandler
       else
         puts "Creating a new jira ticket for: #{summary} on project #{project}"
         project_id = client.Project.find(project).id
-        issue = client.Issue.build
         issue_json = {
           "fields"=>{
             "summary"=> summary,
@@ -32,9 +49,18 @@ class Jira < BaseHandler
             ]
           }
         }
-        issue.save(issue_json)
-        url = get_options[:site] + '/browse/' + issue.key
-        puts "Created issue #{issue.key} at #{url}"
+        # FIXME - would this work
+        components = []
+        if components.size?
+          issue_json['fields']['components'] = components
+        end
+        # JIRA::HTTPError ?
+        if issue = create_issue_loop(client, issue_json)
+          url = get_options[:site] + '/browse/' + issue.key
+          puts "Created issue #{issue.key} at #{url}"
+        else
+          puts "FAILED to create issue in #{project} - are you missing components?"
+        end
       end
       handler_success
     rescue Exception => e
