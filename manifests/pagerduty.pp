@@ -8,13 +8,7 @@ class sensu_handlers::pagerduty (
   }
 ) inherits sensu_handlers {
 
-  if $dependencies {
-    create_resources(
-      'package',
-      $dependencies,
-      {before => Sensu::Handler['pagerduty']}
-    )
-  }
+  sensu_handlers::deps {'pagerduty': dependencies => $dependencies }
 
   sensu::handler { 'pagerduty':
     type    => 'pipe',
