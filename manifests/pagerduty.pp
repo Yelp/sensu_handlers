@@ -3,13 +3,17 @@
 # Sensu handler for communicating with Pagerduty
 #
 class sensu_handlers::pagerduty (
-  $pagerduty_package       = 'redphone',
-  $pagerduty_package_opts  = { 'provider' => 'gem' }
+  $dependencies = {
+    'redphone' => { 'provider' => 'gem' }
+  }
 ) inherits sensu_handlers {
 
-  if $pagerduty_package {
-    ensure_resource('package', $pagerduty_package, $pagerduty_package_opts)
-    Package[$pagerduty_package] -> Sensu::Handler['pagerduty']
+  if $dependencies {
+    create_resources(
+      'package',
+      $dependencies,
+      {before => Sensu::Handler['pagerduty']}
+    )
   }
 
   sensu::handler { 'pagerduty':
@@ -19,6 +23,7 @@ class sensu_handlers::pagerduty (
       teams => $teams,
     }
   }
+
   # If we are going to send pagerduty alerts, we need to be sure it actually is up
   monitoring_check { 'check_pagerduty':
     check_every => '60m',
