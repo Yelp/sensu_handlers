@@ -3,6 +3,7 @@
 # Sensu handler to send emails.
 #
 class sensu_handlers::mailer (
+  $mail_from = 'sensu@yelp.com',
   $dependencies = {
     'nagios-plugins-basic' => {
       ensure => 'installed',
@@ -24,7 +25,8 @@ class sensu_handlers::mailer (
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/mailer.rb',
     config  => {
-      teams => $teams,
+      teams     => $teams,
+      mail_from => $mail_from
     }
   } ->
 

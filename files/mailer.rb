@@ -54,12 +54,12 @@ class Mailer < BaseHandler
   end
 
   def handle
-    
+
     mail_to = mail_destination
     # Only procede if we have an email address to work with
     return false unless mail_to
 
-    mail_from = 'sensu@yelp.com'
+    mail_from = settings['mailer']['mail_from'] || 'sensu@yelp.com'
 
     delivery_method = handler_settings['delivery_method'] || 'smtp'
     smtp_address = handler_settings['smtp_address'] || 'localhost'
