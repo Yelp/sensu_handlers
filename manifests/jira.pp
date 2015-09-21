@@ -2,9 +2,18 @@
 #
 # Sensu handler to open and close Jira tickets for you.
 #
-class sensu_handlers::jira inherits sensu_handlers {
+class sensu_handlers::jira (
+  $manage_deps = $sensu_handlers::manage_deps
+) inherits sensu_handlers {
 
-  package { 'rubygem-jira-ruby': ensure => '0.1.9' } ->
+  if $manage_deps {
+    package { 'jira-ruby':
+      ensure   => '0.1.9',
+      provider => $gem_provider,
+      before   => Sensu::Handler['jira']
+    }
+  }
+
   sensu::handler { 'jira':
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/jira.rb',

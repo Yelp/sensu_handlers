@@ -2,7 +2,16 @@
 #
 # Sensu handler for communicating with Pagerduty
 #
-class sensu_handlers::pagerduty inherits sensu_handlers {
+class sensu_handlers::pagerduty (
+  $manage_deps = $sensu_handlers::manage_deps
+) inherits sensu_handlers {
+
+  if $manage_deps {
+    package{'redphone':
+      provider => $gem_provider,
+      before   => Sensu::Handler['pagerduty']
+    }
+  }
 
   ensure_packages(['rubygem-redphone'])
   sensu::handler { 'pagerduty':
