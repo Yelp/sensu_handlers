@@ -50,10 +50,17 @@ class sensu_handlers(
   $region                = $::datacenter,
   $datacenter            = $::datacenter,
   $dashboard_link        = "https://sensu.${::domain}",
+  $manage_deps           = true,
+  $use_embedded_ruby     = false,
 ) {
 
   validate_hash($teams)
   validate_bool($include_graphite, $include_aws_prune)
+
+  $gem_provider = $use_embedded_ruby ? {
+    true  => 'sensu_gem',
+    false => 'gem'
+  }
 
   file { '/etc/sensu/handlers/base.rb':
     source => 'puppet:///modules/sensu_handlers/base.rb',
