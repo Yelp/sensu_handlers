@@ -2,13 +2,22 @@
 #
 # Sensu handler to send emails.
 #
-class sensu_handlers::mailer inherits sensu_handlers {
+class sensu_handlers::mailer (
+  $mail_package = 'ruby-mail',
+  $mail_version = 'latest'
+) inherits sensu_handlers {
 
   ensure_packages(['nagios-plugins-basic'])
 
-  package { 'rubygem-mail':
-    ensure => '2.5.4',
-  } ->
+  # allow $mail_package = false to allow others to manage the mail package
+  # separately.
+  if $mail_package { 
+    package { $mail_package:
+      ensure => $mail_version,
+      before => Sensu::Handler['mailer']
+    }
+  }
+
   sensu::handler { 'mailer':
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/mailer.rb',
@@ -16,6 +25,7 @@ class sensu_handlers::mailer inherits sensu_handlers {
       teams => $teams,
     }
   }
+
   monitoring_check { 'check_smtp_for_sensu_handler':
     check_every   => '5m',
     alert_after   => '10m',
