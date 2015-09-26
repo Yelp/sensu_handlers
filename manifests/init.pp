@@ -38,6 +38,8 @@
 # [*region*]
 #  The aws region so the aws_prune handler knows wich API endpoint to query
 #
+# [*use_embeded_ruby*]
+#  use provider => sensu_gem for any gem packages
 class sensu_handlers(
   $teams,
   $package_ensure        = 'latest',
@@ -50,10 +52,16 @@ class sensu_handlers(
   $region                = $::datacenter,
   $datacenter            = $::datacenter,
   $dashboard_link        = "https://sensu.${::domain}",
+  $use_embedded_ruby     = false,
 ) {
 
   validate_hash($teams)
   validate_bool($include_graphite, $include_aws_prune)
+
+  $gem_provider = $use_embedded_ruby ? {
+    true    => 'sensu_gem',
+    default => 'gem'
+  }
 
   file { '/etc/sensu/handlers/base.rb':
     source => 'puppet:///modules/sensu_handlers/base.rb',
