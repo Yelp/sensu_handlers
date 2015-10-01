@@ -3,18 +3,28 @@
 # Sensu handler for removing clients from sensu if they are not in the AWS
 # API.
 #
-class sensu_handlers::aws_prune inherits sensu_handlers {
+class sensu_handlers::aws_prune (
+  $dependencies = {
+    'fog' => { provider => $gem_provider },
+    'unf' => { provider => $gem_provider },
+  },
+) inherits sensu_handlers {
 
-  # Only EC2 Sensu servers need to worry about querying the AWS api to know if 
+  # Only EC2 Sensu servers need to worry about querying the AWS api to know if
   # They need to prune or not
   if str2bool($::is_ec2) == true {
+
+    create_resources(
+      package,
+      $dependencies,
+      { before => Sensu::Handler['aws_prune'] }
+    )
 
     $access_key = hiera('sensu::aws_key')
     $secret_key = hiera('sensu::aws_secret')
 
     validate_string($access_key, $secret_key, $region)
 
-    ensure_packages(['rubygem-fog', 'rubygem-unf'])
     $aws_config_hash =  {
       access_key => $access_key,
       secret_key => $secret_key,
@@ -25,14 +35,12 @@ class sensu_handlers::aws_prune inherits sensu_handlers {
       type    => 'pipe',
       source  => 'puppet:///modules/sensu_handlers/aws_prune.rb',
       config  => $aws_config_hash,
-      require => [ Package['rubygem-fog'], Package['rubygem-sensu-plugin'], Package['rubygem-unf'] ],
     }
     file { '/etc/sensu/plugins/cache_instance_list.rb':
       owner   => 'root',
       group   => 'root',
       mode    => '0500',
       source  => 'puppet:///modules/sensu_handlers/cache_instance_list.rb',
-      require => [ Package['rubygem-fog'], Package['rubygem-sensu-plugin'], Package['rubygem-unf'] ],
     } ->
     file { '/etc/sensu/cache_instance_list_creds.yaml':
       owner   => 'root',
