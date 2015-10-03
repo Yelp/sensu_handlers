@@ -9,11 +9,19 @@
 #  hipchat api key
 class sensu_handlers::hipchat (
   $api_key,
-  $install_gem  = true,
   $default_room = false,
+  $dependencies = {
+    'hipchat' => {'provider' => $gem_provider }
+  }
 ) inherits sensu_handlers {
 
- sensu::handler { 'hipchat':
+  create_resources(
+    package,
+    $dependencies,
+    { before => Sensu::Handler['mailer'] }
+  )
+
+  sensu::handler { 'hipchat':
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/hipchat.rb',
     config  => {
@@ -21,10 +29,6 @@ class sensu_handlers::hipchat (
       teams        => $teams,
       default_room => $default_room,
     }
-  }
-
-  if $install_gem { 
-    ensure_resource('package', 'hipchat', {'provider' => 'gem'})
   }
 
 }
