@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "#{File.dirname(__FILE__)}/base"
-require 'hipchat'
 #require_relative 'base'
 
 class Hipchat < BaseHandler
@@ -65,6 +64,8 @@ class Hipchat < BaseHandler
 
   def alert_hipchat(room, sender, message, options_or_notify = {})
     return false unless api_key
+
+    require 'hipchat'
 
     # TODO handle failure to send,  such as bad room.
     hipchat_client = HipChat::Client.new(api_key)

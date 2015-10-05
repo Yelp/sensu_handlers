@@ -22,7 +22,6 @@ describe Hipchat do
     setup_event!
     subject.event['check']['team'] = 'testteam1'
     subject.event['check']['issued'] = 1438866190
-    HipChat::Room.any_instance.stubs(:send)
 
     subject.settings[settings_key]['teams']['testteam1'] = {
       'hipchat_room' => 'Test team #1'
