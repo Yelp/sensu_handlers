@@ -21,16 +21,26 @@ class Hipchat < BaseHandler
 
   def trigger_incident
     return false unless api_key
-    alert_hipchat(hipchat_room, 'sensu', hipchat_message, color: hipchat_message_colour, notify: true)
+    alert_hipchat(
+      hipchat_room,
+      'sensu',
+      hipchat_message,
+      { :color => hipchat_message_colour, :notify =>  true }
+    )
   end
 
   def resolve_incident
     return false unless api_key
-    alert_hipchat(hipchat_room, 'sensu', hipchat_message, color: hipchat_message_colour)
+    alert_hipchat(
+      hipchat_room,
+      'sensu',
+      hipchat_message,
+      { :color => hipchat_message_colour }
+    )
   end
 
   def event_time
-    Time.at(@event['check']['issued']).utc.to_s
+    Time.at(@event['check']['issued']).utc.strftime "%Y-%m-%d %H:%M:%S UTC"
   end
 
   def hipchat_message

@@ -43,8 +43,8 @@ describe Hipchat do
       subject.settings['hipchat']['api_key'] = 'fakekey'
       subject.event['check']['status'] = 2
 
-      expect(subject).to receive(:alert_hipchat)
-        .once
+      expect(subject).to receive(:alert_hipchat) \
+        .once \
         .with(
         'Test team #1',
         'sensu',
@@ -70,8 +70,8 @@ describe Hipchat do
       subject.settings['hipchat']['api_key'] = 'fakekey'
       subject.event['check']['status'] = 0
 
-      expect(subject).to receive(:alert_hipchat)
-        .once
+      expect(subject).to receive(:alert_hipchat) \
+        .once \
         .with(
           'Test team #1',
           'sensu',
@@ -79,7 +79,7 @@ describe Hipchat do
             "2015-08-06 13:03:10 UTC",
             "mycoolcheck on some.client",
             "OK",
-            "some check output",
+            "some check output"
           ),
           { :color => "green" }
         )
@@ -96,16 +96,16 @@ describe Hipchat do
       end
 
       it 'calls resolve_incident' do
-        expect(subject).to receive(:resolve_incident)
-          .once
+        expect(subject).to receive(:resolve_incident) \
+          .once \
           .and_return(true)
 
         subject.handle
       end
 
       it 'calls alert_hipchat with options color green' do
-        expect(subject).to receive(:alert_hipchat)
-          .once
+        expect(subject).to receive(:alert_hipchat) \
+          .once \
           .with(
             'Test team #1',
             'sensu',
@@ -116,7 +116,7 @@ describe Hipchat do
               "some check output"
             ),
             { :color => "green" }
-          )
+          ) \
           .and_return(true)
 
         subject.handle
@@ -131,16 +131,16 @@ describe Hipchat do
       end
 
       it 'calls trigger_incident once' do
-        expect(subject).to receive(:trigger_incident)
-          .once
+        expect(subject).to receive(:trigger_incident) \
+          .once \
           .and_return(true)
 
         subject.handle
       end
 
       it 'calls alert_hipchat with options color yellow & notify true' do
-        expect(subject).to receive(:alert_hipchat)
-          .once
+        expect(subject).to receive(:alert_hipchat) \
+          .once \
           .with(
             'Test team #1',
             'sensu',
@@ -151,7 +151,7 @@ describe Hipchat do
               "some check output"
             ),
             { :color => 'yellow', :notify => true }
-          )
+          ) \
           .and_return(true)
 
         subject.handle
@@ -165,8 +165,8 @@ describe Hipchat do
       end
 
       it 'calls trigger_incident' do
-        expect(subject).to receive(:trigger_incident)
-          .once
+        expect(subject).to receive(:trigger_incident) \
+          .once \
           .and_return(true)
 
         subject.handle
@@ -174,8 +174,8 @@ describe Hipchat do
 
 
       it 'calls alert_hipchat with options color red & notify true' do
-        expect(subject).to receive(:alert_hipchat)
-          .once
+        expect(subject).to receive(:alert_hipchat) \
+          .once \
           .with(
             'Test team #1',
             'sensu',
@@ -186,7 +186,7 @@ describe Hipchat do
               "some check output"
             ),
             { :color => 'red', :notify => true }
-          )
+          ) \
           .and_return(true)
 
         subject.handle
@@ -207,8 +207,8 @@ describe Hipchat do
     end
 
     it 'correctly formats the line containing datetime, service, host and address' do
-      expect(subject.hipchat_message)
-        .to include('2015-08-06 13:03:10 UTC - Fake Service port 80 on test.vagrant.local (127.0.0.1)')
+      expect(subject.hipchat_message).to \
+        include('2015-08-06 13:03:10 UTC - Fake Service port 80 on test.vagrant.local (127.0.0.1)')
     end
 
     context 'when check notification is populated' do
