@@ -2,8 +2,11 @@
 #
 # Sensu handler to send emails.
 #
+# [*mail_from*]
+#  required.  the "From: " address for emails sent from this handler
+#
 class sensu_handlers::mailer (
-  $mail_from = 'sensu@yelp.com',
+  $mail_from,
   $dependencies = {
     'nagios-plugins-basic' => {
       ensure => 'installed',

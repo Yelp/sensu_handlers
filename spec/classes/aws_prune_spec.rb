@@ -11,6 +11,7 @@ describe 'sensu_handlers::aws_prune', :type => :class do
 
   let(:hiera_data) {{
     :'sensu_handlers::teams' => { 'operations' => {} },
+    :'sensu_handlers::default_handler_array' => [],
     :'sensu::aws_key' => 'mock_sensu_aws_key',
     :'sensu::aws_secret'  => 'mock_sensu_aws_secret',
   }}

@@ -24,7 +24,8 @@ describe 'sensu_handlers', :type => :class do
         :teams     => teams
       }}
       let(:hiera_data) {{
-        :'sensu_handlers::teams' => teams
+        :'sensu_handlers::teams'             => teams,
+        :'sensu_handlers::mailer::mail_from' => "foo@bar.com"
       }}
       it { should compile }
     end
