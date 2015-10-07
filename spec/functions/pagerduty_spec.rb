@@ -56,31 +56,26 @@ describe Pagerduty do
     before(:each) { subject.event['check']['page'] = true }
 
     it "Event resolved in pagerduty if OK" do
+      subject.event['action'] = 'resolve'
       expect(subject).to receive(:resolve_incident).and_return(true)
       subject.handle
     end
 
-   it "Event sent to pagerduty if critical" do
-     subject.event['check']['status'] = 2
+   it "Event sent to pagerduty if sensu creates and event" do
+     subject.event['action'] = 'create'
      expect(subject).to receive(:trigger_incident).and_return(true)
      subject.handle
    end
 
-    it "Event resolved in pagerduty if WARNING" do
-      subject.event['status'] = 1
-      expect(subject).to receive(:resolve_incident).and_return(true)
-      subject.handle
-    end
-
     context "Pagerduty times out / errors" do
       before(:each) do
-        subject.event['check']['status'] = 2
+        subject.event['action'] = 'create'
         subject.event['check']['team'] = 'operations'
       end
       it "logs an error when we time out 3 times" do
         subject.timeout_count = 4
         subject.handle
-        expect(subject.logged).to eql('pagerduty -- timed out while attempting to trigger an incident -- sensu somehabitat some.client mycoolcheck')
+        expect(subject.logged).to eql('pagerduty -- timed out while attempting to create an incident -- sensu somehabitat some.client mycoolcheck')
       end
       it "can succeed if we time out once" do
         subject.timeout_count = 1
@@ -95,18 +90,18 @@ describe Pagerduty do
       it "Fails if we error 3 times" do
         expect(subject).to receive(:trigger_incident).and_return(false, false, false)
         subject.handle
-        expect(subject.logged).to eql('pagerduty -- failed to trigger incident -- sensu somehabitat some.client mycoolcheck')
+        expect(subject.logged).to eql('pagerduty -- failed to create incident -- sensu somehabitat some.client mycoolcheck')
       end
       it "Succeeds if we error 2 times" do
         expect(subject).to receive(:trigger_incident).and_return(false, false, true)
         subject.handle
-        expect(subject.logged).to eql('pagerduty -- Triggerd incident -- sensu somehabitat some.client mycoolcheck')
+        expect(subject.logged).to eql('pagerduty -- Created incident -- sensu somehabitat some.client mycoolcheck')
       end
       it "Succeeds if we timeout then error once" do
         subject.timeout_count = 1
         expect(subject).to receive(:trigger_incident).and_return(false, true)
         subject.handle
-        expect(subject.logged).to eql('pagerduty -- Triggerd incident -- sensu somehabitat some.client mycoolcheck')
+        expect(subject.logged).to eql('pagerduty -- Created incident -- sensu somehabitat some.client mycoolcheck')
       end
     end
   end
@@ -116,7 +111,7 @@ describe Pagerduty do
       subject.event['check']['page'] = false
     end
     it "Does not trigger an incident" do
-      subject.event['check']['status'] = 2
+      subject.event['action'] = 'create'
       expect(subject).not_to receive(:trigger_incident)
       subject.handle
     end
@@ -125,6 +120,7 @@ describe Pagerduty do
   it "has notification as description, with runbook" do
     setup_event! do |e|
       e['check']['notification'] = 'some_notification'
+      e['action'] = 'create'
       e['check']['status'] = 2
       e['check']['runbook'] = 'http://my.runbook'
     end
@@ -133,14 +129,15 @@ describe Pagerduty do
 
   it "has default client/check/output as description, with runbook" do
     setup_event! do |e|
-      e['check']['status'] = 2
+      e['action'] = 'create'
       e['check']['runbook'] = 'http://my.runbook'
+      e['check']['status'] = 2
     end
     subject.description.should == 'some.client : mycoolcheck : some check output (http://my.runbook)'
   end
 
   it "has default client/check/output as description, without runbook" do
-    setup_event! { |e| e['check']['runbook'] = nil; e['check']['status'] = 2 }
+    setup_event! { |e| e['check']['runbook'] = nil; e['action'] = 'create' }
     subject.description.should == 'some.client : mycoolcheck : some check output'
   end
 
@@ -157,4 +154,3 @@ describe Pagerduty do
     end
   end
 end
-
