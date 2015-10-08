@@ -26,7 +26,6 @@ describe Hipchat do
   let(:handler_settings) { subject.handler_settings }
   let(:check_data)       { subject.event['check'] }
   let(:client_data)      { subject.event['client'] }
-  #let(:team_data)       { settings['teams'][team] }
 
   before(:each) do
     setup_event!
