@@ -31,11 +31,15 @@ class Hipchat < BaseHandler
     Time.at(check_data['issued']).utc.strftime "%Y-%m-%d %H:%M:%S UTC"
   end
 
+  def check_notification_string
+    check_data['notification'] || check_data['output']
+  end
+
   def hipchat_message
-"<b>#{event_time} - #{check_data['name']} on #{client_data['name']} (#{client_data['address']}) - #{human_check_status}</b>
-<br /><br />
-&nbsp;&nbsp;#{check_data['notification'] || check_data['output']}
-"
+    "<b>#{event_time} - #{check_data['name']} on #{client_data['name']} " +
+      "(#{client_data['address']}) - #{human_check_status}</b><br />" +
+    "<br />" +
+    "&nbsp;&nbsp;#{check_notification_string}"
   end
 
   def hipchat_message_colour
