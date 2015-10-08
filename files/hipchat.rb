@@ -20,23 +20,11 @@ class Hipchat < BaseHandler
   end
 
   def trigger_incident
-    return false unless api_key
-    alert_hipchat(
-      hipchat_room,
-      'sensu',
-      hipchat_message,
-      { :color => hipchat_message_colour, :notify =>  true }
-    )
+    alert(true)
   end
 
   def resolve_incident
-    return false unless api_key
-    alert_hipchat(
-      hipchat_room,
-      'sensu',
-      hipchat_message,
-      { :color => hipchat_message_colour }
-    )
+    alert()
   end
 
   def event_time
@@ -78,11 +66,19 @@ class Hipchat < BaseHandler
     channels.first
   end
 
-  def alert_hipchat(room, sender, message, options_or_notify = {})
+  def alert(notify = false)
     return false unless api_key
+    alert_hipchat(
+      hipchat_room,
+      'sensu',
+      hipchat_message, 
+      { :color => hipchat_message_colour, :notify => notify } 
+    )
+  end
 
+
+  def alert_hipchat(room, sender, message, options_or_notify = {})
     require 'hipchat'
-
     # TODO handle failure to send,  such as bad room.
     hipchat_client = HipChat::Client.new(api_key)
     hipchat_client[room].send(sender, message, options_or_notify)

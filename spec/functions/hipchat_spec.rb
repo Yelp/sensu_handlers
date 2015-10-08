@@ -54,7 +54,7 @@ describe Hipchat do
           "CRITICAL",
           "some check output"
         ),
-        { :color => "red", :notify => true }
+        hash_including(:color => "red", :notify => true)
       )
 
       subject.trigger_incident
@@ -81,7 +81,7 @@ describe Hipchat do
             "OK",
             "some check output"
           ),
-          { :color => "green" }
+          hash_including(:color => "green")
         )
 
       subject.resolve_incident
@@ -115,7 +115,7 @@ describe Hipchat do
               "OK",
               "some check output"
             ),
-            { :color => "green" }
+            hash_including(:color => "green")
           ) \
           .and_return(true)
 
