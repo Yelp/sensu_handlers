@@ -9,7 +9,6 @@
 #  hipchat api key
 class sensu_handlers::hipchat (
   $api_key,
-  $default_room = false,
   $dependencies = {
     'hipchat' => {'provider' => $gem_provider }
   }
@@ -27,7 +26,6 @@ class sensu_handlers::hipchat (
     config  => {
       api_key      => $api_key,
       teams        => $teams,
-      default_room => $default_room,
     }
   }
 

@@ -64,13 +64,19 @@ class Hipchat < BaseHandler
     end
   end
 
-  def default_room
-    handler_settings['hipchat_room']
+  # hipchat prefers room before channel
+  def channel_keys
+    %w[ hipchat_room room channel ]
+  end
+
+  def pager_channel_keys
+    %w[ hipchat_pager_room pager_room pager_channel ]
   end
 
   def hipchat_room
-    team_data('hipchat_room') || default_room || nil
-  end 
+    # TODO handle multiple rooms/channels!
+    channels.first
+  end
 
   def alert_hipchat(room, sender, message, options_or_notify = {})
     return false unless api_key
