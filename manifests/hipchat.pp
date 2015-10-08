@@ -17,7 +17,7 @@ class sensu_handlers::hipchat (
   create_resources(
     package,
     $dependencies,
-    { before => Sensu::Handler['mailer'] }
+    { before => Sensu::Handler['hipchat'] }
   )
 
   sensu::handler { 'hipchat':
