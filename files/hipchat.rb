@@ -61,19 +61,20 @@ class Hipchat < BaseHandler
     %w[ hipchat_pager_room pager_room pager_channel ]
   end
 
-  def hipchat_room
-    # TODO handle multiple rooms/channels!
-    channels.first
-  end
 
+  alias :rooms :channels
   def alert(notify = false)
     return false unless api_key
-    alert_hipchat(
-      hipchat_room,
-      'sensu',
-      hipchat_message, 
-      { :color => hipchat_message_colour, :notify => notify } 
-    )
+
+    rooms.each do |room|
+      alert_hipchat(
+        room,
+        'sensu',
+        hipchat_message,
+        { :color => hipchat_message_colour, :notify => notify }
+      )
+    end
+
   end
 
 

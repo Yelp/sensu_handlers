@@ -76,6 +76,29 @@ describe Hipchat do
 
         trigger_incident
       end
+
+      context "with lists of rooms for notifications" do
+        before do
+          settings['teams'][team] = {
+            'pager_room' => ['pager_room1', 'pager_room2'],
+            'room'       => ['room1', 'room2']
+          }
+          check_data['room'] = ['event_room1', 'event_room2']
+          check_data['page'] = true
+        end
+
+        def alert_room(room)
+          receive(:alert_hipchat).with(room, anything, anything, anything)
+        end
+        it "notifies the appropriate rooms" do
+          expect(subject).to alert_room('pager_room1')
+          expect(subject).to alert_room('pager_room2')
+          expect(subject).to alert_room('event_room1')
+          expect(subject).to alert_room('event_room2')
+
+          trigger_incident
+        end
+      end
     end
   end
 
