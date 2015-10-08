@@ -6,7 +6,7 @@ require "#{File.dirname(__FILE__)}/base"
 class Hipchat < BaseHandler
   def handle
     timeout_and_retry do
-      case @event['check']['status'].to_i
+      case check_data['status'].to_i
       when 1,2
         trigger_incident
       when 0
@@ -28,19 +28,18 @@ class Hipchat < BaseHandler
   end
 
   def event_time
-    Time.at(@event['check']['issued']).utc.strftime "%Y-%m-%d %H:%M:%S UTC"
+    Time.at(check_data['issued']).utc.strftime "%Y-%m-%d %H:%M:%S UTC"
   end
 
   def hipchat_message
-"
-<b>#{event_time} - #{@event['check']['name']} on #{@event['client']['name']} (#{@event['client']['address']}) - #{human_check_status}</b>
+"<b>#{event_time} - #{check_data['name']} on #{client_data['name']} (#{client_data['address']}) - #{human_check_status}</b>
 <br /><br />
-&nbsp;&nbsp;#{@event['check']['notification'] || @event['check']['output']}
+&nbsp;&nbsp;#{check_data['notification'] || check_data['output']}
 "
   end
 
   def hipchat_message_colour
-    case @event['check']['status']
+    case check_data['status']
     when 0
       'green'
     when 1

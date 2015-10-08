@@ -63,6 +63,24 @@ class BaseHandler < Sensu::Handler
     data
   end
 
+  def check_data(lookup_key = nil)
+    data = @event['check']
+    if lookup_key
+      data = data[lookup_key]
+    end
+    yield(data) if data && block_given?
+    data
+  end
+
+  def client_data(lookup_key = nil)
+    data = @event['client']
+    if lookup_key
+      data = data[lookup_key]
+    end
+    yield(data) if data && block_given?
+    data
+  end
+
   def tip
     @event['check']['tip']
   end
