@@ -81,10 +81,14 @@ describe Hipchat do
 
   describe 'handle' do
     before { handler_settings['api_key'] = 'fakekey' }
+
     after  { subject.handle } # note! 
 
-    context 'when event status is 0' do
-      before { check_data['status'] = 0 }
+    context 'when event action is resolve' do
+      before do
+        subject.event['action'] = 'resolve'
+        check_data['status']    = 0
+      end
 
       it 'calls alert_hipchat with options color green' do
         expect(subject).to receive(:alert_hipchat) \
@@ -105,46 +109,60 @@ describe Hipchat do
 
     end
 
-    context 'when check status is 1' do
-      before { check_data['status'] = 1 }
+    context 'when event action is create' do
+      before { subject.event['action'] = 'create' }
 
-      it 'calls alert_hipchat with options color yellow & notify true' do
-        expect(subject).to receive(:alert_hipchat) \
-          .once \
-          .with(
-            'Test team #1',
-            'sensu',
-            include(
-              "2015-08-06 13:03:10 UTC",
-              "mycoolcheck on some.client",
-              "WARNING",
-              "some check output"
-            ),
-            { :color => 'yellow', :notify => true }
-          ) \
-          .and_return(true)
+      context 'and check status is 1, warning' do
+        before { check_data['status'] = 1 }
+
+        it 'calls alert_hipchat with options color yellow & notify true' do
+          expect(subject).to receive(:alert_hipchat) \
+            .once \
+            .with(
+              'Test team #1',
+              'sensu',
+              include(
+                "2015-08-06 13:03:10 UTC",
+                "mycoolcheck on some.client",
+                "WARNING",
+                "some check output"
+              ),
+              { :color => 'yellow', :notify => true }
+            ) \
+            .and_return(true)
+        end
       end
+
+      context 'and check status is 2, critical' do
+        before { check_data['status'] = 2 }
+
+        it 'calls alert_hipchat with options color red & notify true' do
+          expect(subject).to receive(:alert_hipchat) \
+            .once \
+            .with(
+              'Test team #1',
+              'sensu',
+              include(
+                "2015-08-06 13:03:10 UTC",
+                "mycoolcheck on some.client",
+                "CRITICAL",
+                "some check output"
+              ),
+              { :color => 'red', :notify => true }
+            ) \
+            .and_return(true)
+
+        end
+      end
+
     end
 
-    context 'when check status is 2' do
-      before { check_data['status'] = 2 }
+    context 'when action is flapping' do
+      before { subject.event['action'] = 'flapping' }
 
-      it 'calls alert_hipchat with options color red & notify true' do
-        expect(subject).to receive(:alert_hipchat) \
-          .once \
-          .with(
-            'Test team #1',
-            'sensu',
-            include(
-              "2015-08-06 13:03:10 UTC",
-              "mycoolcheck on some.client",
-              "CRITICAL",
-              "some check output"
-            ),
-            { :color => 'red', :notify => true }
-          ) \
-          .and_return(true)
-
+      # TODO is this the right course of action?
+      it 'does not call allert_hipchat' do
+        expect(subject).not_to receive(:alert_hipchat)
       end
     end
   end

@@ -5,11 +5,13 @@ require "#{File.dirname(__FILE__)}/base"
 class Hipchat < BaseHandler
   def handle
     timeout_and_retry do
-      case @event['check']['status'].to_i
-      when 1,2
+      case @event['action']
+      when 'create'
         alert(true)
-      when 0
+      when 'resolve'
         alert
+      when 'flapping'
+        true
       end
     end
   end
