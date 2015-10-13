@@ -12,6 +12,14 @@ require "#{File.dirname(__FILE__)}/../../files/base"
 
 class BaseHandler
   attr_accessor :settings
+
+  def fake_handle1
+    timeout(2) { sleep 5; :ok }
+  end
+
+  def fake_handle2
+    timeout(2) { sleep 11 }
+  end
 end
 
 describe BaseHandler do
@@ -392,5 +400,12 @@ describe BaseHandler do
       }
     end
   end # End of context 'With display name tag'
+
+  context "timeout override" do
+    it {
+      expect(subject.fake_handle1).to eql(:ok)
+      expect { subject.fake_handle2 }.to raise_error
+    }
+  end
 
 end # End describe  

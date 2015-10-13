@@ -3,6 +3,7 @@
 
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'sensu-handler'
+require 'timeout'
 
 # Taken from https://github.com/flori/term-ansicolor/blob/e6086b7fddf53c53f8022acc1920f435e65b5e51/lib/term/ansicolor.rb#L60
 COLOR_REGEX = /\e\[(?:(?:[349]|10)[0-7]|[0-9]|[34]8;5;\d{1,3})?m/
@@ -220,6 +221,14 @@ BODY
 
   def handler_settings
     settings[settings_key]
+  end
+
+  # force all timeout calls to go through this method where all we do
+  # is ensure timeout value is at least 10; it's meant for
+  # timeout calls hard coded in Sensu::Handler that are too aggressive
+  def timeout(arg)
+    raise "timeout without block" unless block_given?
+    Timeout::timeout(arg > 9 ? arg : 10) { yield }
   end
 
 end
