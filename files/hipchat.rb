@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "#{File.dirname(__FILE__)}/base"
-#require_relative 'base'
 
 class Hipchat < BaseHandler
   def handle
