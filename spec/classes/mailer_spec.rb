@@ -9,7 +9,8 @@ describe "sensu_handlers::mailer" do
     'operations' => {}
   }}
   let(:hiera_data) {{
-    'sensu_handlers::teams' => teams
+    'sensu_handlers::teams'             => teams,
+    'sensu_handlers::mailer::mail_from' => "foo@bar.com"
   }}
 
   it { should compile }

@@ -2,7 +2,11 @@
 #
 # Sensu handler to send emails.
 #
+# [*mail_from*]
+#  required.  the "From: " address for emails sent from this handler
+#
 class sensu_handlers::mailer (
+  $mail_from,
   $dependencies = {
     'nagios-plugins-basic' => {
       ensure => 'installed',
@@ -24,7 +28,8 @@ class sensu_handlers::mailer (
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/mailer.rb',
     config  => {
-      teams => $teams,
+      teams     => $teams,
+      mail_from => $mail_from
     }
   } ->
 
