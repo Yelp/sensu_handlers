@@ -7,23 +7,15 @@ class Hipchat < BaseHandler
     timeout_and_retry do
       case @event['check']['status'].to_i
       when 1,2
-        trigger_incident
+        alert(true)
       when 0
-        resolve_incident
+        alert
       end
     end
   end
 
   def api_key
     handler_settings['api_key'] || false
-  end
-
-  def trigger_incident
-    alert(true)
-  end
-
-  def resolve_incident
-    alert()
   end
 
   def event_time

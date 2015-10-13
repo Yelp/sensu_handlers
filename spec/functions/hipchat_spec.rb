@@ -42,39 +42,16 @@ describe Hipchat do
   it { expect(subject).to be_a BaseHandler }
   it { expect(subject).to be_a Sensu::Handler }
 
-  describe 'trigger_incident' do
-    let(:trigger_incident) { subject.trigger_incident }
+  describe "#alert" do
 
     context "with no hipchat api_key" do
       it 'returns false' do
-        expect(trigger_incident).to be false
+        expect(subject.alert).to be false
       end
     end
 
     context "with hipchat api_key" do
-
-      before do
-        handler_settings['api_key'] = 'fakekey'
-        check_data['status'] = 2
-      end
-
-      it 'calls alert_hipchat when hipchat api_key exists' do
-        expect(subject).to receive(:alert_hipchat) \
-          .once \
-          .with(
-          'Test team #1',
-          'sensu',
-          include(
-            "2015-08-06 13:03:10 UTC",
-            "mycoolcheck on some.client",
-            "CRITICAL",
-            "some check output"
-          ),
-          hash_including(:color => "red", :notify => true)
-        )
-
-        trigger_incident
-      end
+      before { handler_settings['api_key'] = 'fakekey' }
 
       context "with lists of rooms for notifications" do
         before do
@@ -84,6 +61,7 @@ describe Hipchat do
           }
           check_data['room'] = ['event_room1', 'event_room2']
           check_data['page'] = true
+
         end
 
         def alert_room(room)
@@ -95,44 +73,8 @@ describe Hipchat do
           expect(subject).to alert_room('event_room1')
           expect(subject).to alert_room('event_room2')
 
-          trigger_incident
+          subject.alert()
         end
-      end
-    end
-  end
-
-  describe 'resolve_incident' do
-    let(:resolve_incident) { subject.resolve_incident }
-
-    context "with no hipchat api_key" do
-      it "returns false" do
-        expect(resolve_incident).to be false
-      end
-    end
-
-    context "with hipchat api_key" do
-      before do
-        handler_settings['api_key'] = 'fakekey'
-        check_data['status'] = 0
-      end
-
-      it 'calls alert_hipchat when hipchat api_key exists' do
-
-        expect(subject).to receive(:alert_hipchat) \
-          .once \
-          .with(
-            'Test team #1',
-            'sensu',
-            include(
-              "2015-08-06 13:03:10 UTC",
-              "mycoolcheck on some.client",
-              "OK",
-              "some check output"
-            ),
-            hash_including(:color => "green")
-          )
-
-        resolve_incident
       end
     end
   end
@@ -141,14 +83,8 @@ describe Hipchat do
     before { handler_settings['api_key'] = 'fakekey' }
     after  { subject.handle } # note! 
 
-    context 'when check status is 0' do
+    context 'when event status is 0' do
       before { check_data['status'] = 0 }
-
-      it 'calls resolve_incident' do
-        expect(subject).to receive(:resolve_incident) \
-          .once \
-          .and_return(true)
-      end
 
       it 'calls alert_hipchat with options color green' do
         expect(subject).to receive(:alert_hipchat) \
@@ -172,12 +108,6 @@ describe Hipchat do
     context 'when check status is 1' do
       before { check_data['status'] = 1 }
 
-      it 'calls trigger_incident once' do
-        expect(subject).to receive(:trigger_incident) \
-          .once \
-          .and_return(true)
-      end
-
       it 'calls alert_hipchat with options color yellow & notify true' do
         expect(subject).to receive(:alert_hipchat) \
           .once \
@@ -198,14 +128,6 @@ describe Hipchat do
 
     context 'when check status is 2' do
       before { check_data['status'] = 2 }
-
-      it 'calls trigger_incident' do
-        expect(subject).to receive(:trigger_incident) \
-          .once \
-          .and_return(true)
-
-      end
-
 
       it 'calls alert_hipchat with options color red & notify true' do
         expect(subject).to receive(:alert_hipchat) \
