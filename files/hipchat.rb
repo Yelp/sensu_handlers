@@ -65,6 +65,16 @@ class Hipchat < BaseHandler
   end
 
 
+  # hipchat message room api takes a notify option: 
+  #
+  # Whether this message should trigger a user notification (change the tab
+  # color, play a sound, notify mobile phones, etc). Each recipient's
+  # notification preferences are taken into account"
+  #
+  # https://www.hipchat.com/docs/apiv2/method/send_room_notification
+  #
+  # we use notify on normal alerts, but on resolve we just message the room
+  # without extra notifications.  reduces noise.
   alias :rooms :channels
   def alert(notify = false)
     return false unless api_key
@@ -74,7 +84,10 @@ class Hipchat < BaseHandler
         room,
         'sensu',
         hipchat_message,
-        { :color => hipchat_message_colour, :notify => notify }
+        { 
+          :color  => hipchat_message_colour,
+          :notify => notify  # see note on notify above
+        }
       )
     end
 
