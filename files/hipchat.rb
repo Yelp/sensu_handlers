@@ -4,15 +4,13 @@ require "#{File.dirname(__FILE__)}/base"
 
 class Hipchat < BaseHandler
   def handle
-    timeout_and_retry do
-      case @event['action']
-      when 'create'
-        alert(true)
-      when 'resolve'
-        alert
-      when 'flapping'
-        true
-      end
+    case @event['action']
+    when 'create'
+      alert(true)
+    when 'resolve'
+      alert
+    when 'flapping'
+      true
     end
   end
 
@@ -86,11 +84,16 @@ class Hipchat < BaseHandler
 
   end
 
+  def hipchat_client
+    require 'hipchat'
+    @hipchat_client ||= HipChat::Client.new(api_key)
+  end
+
 
   def alert_hipchat(room, sender, message, options_or_notify = {})
-    require 'hipchat'
     # TODO handle failure to send,  such as bad room.
-    hipchat_client = HipChat::Client.new(api_key)
-    hipchat_client[room].send(sender, message, options_or_notify)
+    timeout_and_retry do
+      hipchat_client[room].send(sender, message, options_or_notify)
+    end
   end
 end
