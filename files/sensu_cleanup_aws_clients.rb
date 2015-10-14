@@ -18,86 +18,87 @@ require 'json'
 PATH_SENSU_API_JSON = '/etc/sensu/conf.d/api.json'
 PATH_AWS_INSTANCE_LIST_JSON = '/var/cache/instance_list.json'
 
-$logger = Logger.new(STDOUT)
-$logger.level = Logger::DEBUG
+class SensuCleanupAwsClients
 
-
-def load_instances_cache
-  $logger.debug("Loading AWS data from cache (#{PATH_AWS_INSTANCE_LIST_JSON})")
-  f = File.open(PATH_AWS_INSTANCE_LIST_JSON)
-  instances = JSON.load(f)
-  bail if instances.nil?
-  id_hash = Hash.new
-  instances.each { |r| id_hash[r['id']] = { 'state' => r['state'], 'tags' => r['tags']} }
-  $logger.debug("Loaded #{id_hash.keys.count} instances.")
-  id_hash
-end
-
-def sensu_api_creds
-  $logger.debug("Loading Sensu API creds from #{PATH_SENSU_API_JSON}")
-  f = File.open(PATH_SENSU_API_JSON)
-  c = JSON.load(f)
-  c = c['api']
-  { 'host' => c['host'], 'port' => c['port'], 
-    'user' => c['user'], 'pass' => c['password'] }
-end
-
-#def send_http_request(host, port, request)
-#end
-
-def sensu_get_clients_with_instance_id(creds)
-  $logger.debug('Retrieving clients list from Sensu API.')
-  uri = URI("http://#{creds[:host]}/clients")
-  response = nil
-  Net::HTTP.start(creds['host'], creds['port']) do |http|
-    request = Net::HTTP::Get.new uri
-    request.basic_auth creds['user'], creds['pass']
-    response = http.request request # Net::HTTPResponse object
+  def initialize
+    @logger = Logger.new(STDOUT)
+    @logger.level = Logger::DEBUG
+    @sensu_creds = sensu_api_creds
   end
 
-  json = JSON.parse(response.body)
-  id_hash = Hash.new
-  json.each do |c| 
-    if !c['instance_id'].nil?
-      id_hash[c['instance_id']] = c['name']
+  def load_instances_cache
+    @logger.debug("Loading AWS data from cache (#{PATH_AWS_INSTANCE_LIST_JSON})")
+    f = File.open(PATH_AWS_INSTANCE_LIST_JSON)
+    instances = JSON.load(f)
+    bail if instances.nil?
+    id_hash = Hash.new
+    instances.each { |r| id_hash[r['id']] = { 'state' => r['state'], 'tags' => r['tags']} }
+    @logger.debug("Loaded #{id_hash.keys.count} instances.")
+    id_hash
+  end
+
+  def sensu_api_creds
+    #@logger.debug("Loading Sensu API creds from #{PATH_SENSU_API_JSON}")
+    f = File.open(PATH_SENSU_API_JSON)
+    c = JSON.load(f)
+    c = c['api']
+    { 'host' => c['host'], 'port' => c['port'], 
+      'user' => c['user'], 'pass' => c['password'] }
+  end
+
+  def send_http_request(request)
+    response = nil
+    Net::HTTP.start(@sensu_creds['host'], @sensu_creds['port']) do |http|
+      request.basic_auth @sensu_creds['user'], @sensu_creds['pass']
+      response = http.request request # Net::HTTPResponse object
+    end
+    response
+  end
+
+  def sensu_get_clients_with_instance_id
+    @logger.debug('Retrieving clients list from Sensu API.')
+    request = Net::HTTP::Get.new URI("http://#{@sensu_creds[:host]}/clients")
+    response = send_http_request(request)
+
+    json = JSON.parse(response.body)
+    id_hash = Hash.new
+    json.each do |c| 
+      if !c['instance_id'].nil?
+        id_hash[c['instance_id']] = c['name']
+      end
+    end
+
+    @logger.debug("Got #{id_hash.keys.count} (AWS) out of #{json.count} clients.")
+    id_hash
+  end
+
+  def sensu_delete_client(client)
+    request = Net::HTTP::Get.new URI("http://#{@sensu_creds[:host]}/clients/#{client}") # TODO switch from Get to Delete
+    response = send_http_request(request)
+
+    case response.code
+    when '202'
+        @logger.info("EC2 Node - [202] Successfully deleted Sensu client: #{client}")
+    when '404'
+        @logger.error("EC2 Node - [404] Unable to delete #{client}, doesn't exist!")
+    when '500'
+        @logger.error("EC2 Node - [500] Miscellaneous error when deleting #{client}")
+    else
+        @logger.error("EC2 Node - [#{response.code}] Completely unsure of what happened!")
     end
   end
 
-  $logger.debug("Got #{id_hash.keys.count} (AWS) out of #{json.count} clients.")
-  id_hash
-end
-
-def sensu_delete_client(creds, client)
-  uri = URI("http://#{creds[:host]}/clients/#{client}")
-  response = nil
-  Net::HTTP.start(creds['host'], creds['port']) do |http|
-    request = Net::HTTP::Get.new uri # TODO switch from Get to Delete
-    request.basic_auth creds['user'], creds['pass']
-    response = http.request request # Net::HTTPResponse object
-  end
-
-  case response.code
-  when '202'
-      $logger.info("EC2 Node - [202] Successfully deleted Sensu client: #{client}")
-  when '404'
-      $logger.error("EC2 Node - [404] Unable to delete #{client}, doesn't exist!")
-  when '500'
-      $logger.error("EC2 Node - [500] Miscellaneous error when deleting #{client}")
-  else
-      $logger.error("EC2 Node - [#{response.code}] Completely unsure of what happened!")
-  end
-end
-
-def main
-  sensu_creds = sensu_api_creds
-
-  sensu_clients = sensu_get_clients_with_instance_id(sensu_creds)
-  aws_instances = load_instances_cache
+  def main
+    sensu_clients = sensu_get_clients_with_instance_id
+    aws_instances = load_instances_cache
   
-  diff = sensu_clients.keys - aws_instances.keys
-  $logger.info("#{diff.count} Sunsu clients to delete.")
-  diff.each { |h| sensu_delete_client(sensu_creds, sensu_clients[h]) }
-end
+    diff = sensu_clients.keys - aws_instances.keys
+    @logger.info("#{diff.count} Sunsu clients to delete.")
+    diff.each { |h| sensu_delete_client(sensu_clients[h]) }
+  end
 
-main
+end # SensuCleanupAwsClients
+
+job = SensuCleanupAwsClients.new
+job.main
 
