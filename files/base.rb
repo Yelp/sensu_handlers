@@ -222,5 +222,55 @@ BODY
     settings[settings_key]
   end
 
+
+  ##################################
+  ## channels helper for chat handlers
+  def channel_keys
+    %w[ channel room ]
+  end
+
+  def pager_channel_keys
+    %w[ pager_channel pager_room ]
+  end
+
+  def find_channel(keys, &block)
+    keys \
+      .map(&block) \
+      .detect { |item| item } # first non nil/false item
+  end
+
+  def event_channel(keys = channel_keys)
+    find_channel(keys) { |key| @event['check'][key] }
+  end
+
+  def team_channel(keys = channel_keys)
+    find_channel(keys) { |key| team_data(key) }
+  end
+
+  def event_pager_channel
+    event_channel(pager_channel_keys)
+  end
+
+  def team_pager_channel
+    team_channel(pager_channel_keys)
+  end
+
+  def notifications_channel
+    event_channel || team_channel || []
+  end
+
+  def pager_channel
+    event_pager_channel || team_pager_channel || []
+  end
+
+  def channels
+    channels = []
+    channels.push pager_channel if should_page?
+    channels.push notifications_channel
+    channels.flatten
+  end
+  ## end channels helper
+  #####################################
+
 end
 
