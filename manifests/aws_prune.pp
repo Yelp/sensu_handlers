@@ -43,8 +43,8 @@ class sensu_handlers::aws_prune (
       source  => 'puppet:///modules/sensu_handlers/cache_instance_list.rb',
     } ->
     file { '/etc/sensu/cache_instance_list_creds.yaml':
-      owner   => 'root',
-      group   => 'root',
+      owner   => 'sensu',
+      group   => 'sensu',
       mode    => '0400',
       content => template('sensu_handlers/cache_instance_list_creds.erb'),
     } ->
