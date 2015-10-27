@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/opt/puppet-omnibus/embedded/bin/ruby
 
 # Delete all terminated or missing AWS clients from sensu
 #
