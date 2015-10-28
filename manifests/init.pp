@@ -26,9 +26,6 @@
 #  If you are using the JIRA handler, it needs basic auth to work.
 #  Fill in the credentials and url to your local JIRA instance.
 #
-# [*include_graphite*]
-#  Boolean to include the standard graphite extension.
-#
 # [*include_aws_prune*]
 #  Bool to have the AWS pruning handler enabled.
 #
@@ -47,7 +44,6 @@ class sensu_handlers(
   $jira_username         = 'sensu',
   $jira_password         = 'sensu',
   $jira_site             = "jira.${::domain}",
-  $include_graphite      = true,
   $include_aws_prune     = true,
   $region                = $::datacenter,
   $datacenter            = $::datacenter,
@@ -56,7 +52,7 @@ class sensu_handlers(
 ) {
 
   validate_hash($teams)
-  validate_bool($include_graphite, $include_aws_prune)
+  validate_bool($include_aws_prune)
 
   $gem_provider = $use_embedded_ruby ? {
     true    => 'sensu_gem',
@@ -83,10 +79,6 @@ class sensu_handlers(
   $handler_classes = prefix($default_handler_array, 'sensu_handlers::')
   # This ends up being something like [ 'sensu_handlers::nodebot', 'sensu_handlers::pagerduty' ]
   include $handler_classes
-
-  if $include_graphite {
-    include sensu_handlers::graphite
-  }
 
   if $include_aws_prune {
     include sensu_handlers::aws_prune
