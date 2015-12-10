@@ -502,5 +502,34 @@ describe BaseHandler do
 
   end
 
+  describe 'api_client settings overrides' do
+    settings_api = { 'api' => { 'host' => 'foo', 'port' => 12345 } }
+    settings_api_client = { 'api_client' => { 'host' => 'bar', 'port' => 54321 } }
+
+    context 'when api_client is not defined' do
+      it 'should not change settings["api"]' do
+        subject.settings = settings_api
+        subject.reset_api_settings!
+        expect(subject.settings['api']).to eql(settings_api['api'])
+      end
+    end
+
+    context 'when api_client is empty hash' do
+      it 'should not change settings["api"]' do
+        subject.settings = settings_api.merge('api_client' => {})
+        subject.reset_api_settings!
+        expect(subject.settings['api']).to eql(settings_api['api'])
+      end
+    end
+
+    context 'when api_client is set' do
+      it 'should adjust settings["api"]' do
+        subject.settings = settings_api.merge(settings_api_client)
+        subject.reset_api_settings!
+        expect(subject.settings['api']).to eql(settings_api_client['api_client'])
+      end
+    end
+  end
+
 
 end # End describe

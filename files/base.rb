@@ -164,6 +164,7 @@ BODY
   # create an alert or not:
   #
   def filter_repeated
+    reset_api_settings!
     if @event['check']['name'] == 'keepalive'
       # Keepalives are a special case because they don't emit an interval.
       # They emit a heartbeat every 20 seconds per
@@ -222,6 +223,9 @@ BODY
     settings[settings_key]
   end
 
+  def reset_api_settings!
+    @settings['api'].merge!(settings['api_client']) if settings['api_client']
+  end
 
   ##################################
   ## channels helper for chat handlers
