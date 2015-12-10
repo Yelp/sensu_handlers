@@ -225,7 +225,6 @@ BODY
 
   def reset_api_settings!
     @settings['api'].merge!(settings['api_client']) if settings['api_client']
-    settings['api']
   end
 
   ##################################
