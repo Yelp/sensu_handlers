@@ -95,10 +95,6 @@ This is a modification of the `ec2_node` community handler. It caches the list
 of ec2 instances from the Amazon API and will automatically remove servers
 from Sensu if they do not exist in the API.
 
-#### graphite
-
-Standard handler, sends graphite metrics.
-
 ## Puppet Usage
 
 If you are using the module itself, it can deploy the handlers and configure them.

@@ -62,5 +62,31 @@ describe 'sensu_handlers', :type => :class do
 
   end
 
+  describe 'api_client_config' do
+    let(:hiera_data) {{
+      'sensu_handlers::teams' => { 'operations' => {} },
+      'sensu_handlers::mailer::mail_from' => 'hello@example.com',
+    }}
+
+    context 'when empty (default)' do
+      it {
+        should_not contain_file('/etc/sensu/conf.d/api_client.json')
+      }
+    end
+
+    context 'when set' do
+      let(:hiera_data) {{
+        'sensu_handlers::teams' => { 'operations' => {} },
+        'sensu_handlers::mailer::mail_from' => 'hello@example.com',
+        'sensu_handlers::api_client_config' => { 'host' => 'foo', 'port' => 12345 },
+      }}
+      it {
+        should contain_file('/etc/sensu/conf.d/api_client.json') \
+                 .with_content(/"host": "foo"/) \
+                 .with_content(/"port": 12345/)
+      }
+    end
+  end
+
 end
 

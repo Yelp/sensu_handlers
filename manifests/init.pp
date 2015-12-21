@@ -26,9 +26,6 @@
 #  If you are using the JIRA handler, it needs basic auth to work.
 #  Fill in the credentials and url to your local JIRA instance.
 #
-# [*include_graphite*]
-#  Boolean to include the standard graphite extension.
-#
 # [*include_aws_prune*]
 #  Bool to have the AWS pruning handler enabled.
 #
@@ -40,6 +37,12 @@
 #
 # [*use_embeded_ruby*]
 #  use provider => sensu_gem for any gem packages
+#
+# [*api_client_config*]
+# Out of the box Sensu::Handler connects to sensu-api instance described in
+# /etc/sensu/conf.d/api.json which is a local instance. This param sets
+# alternative endpoint - for example, by pointing to haproxy. Expects hash
+# with at least 'host' and 'port' keys.
 class sensu_handlers(
   $teams,
   $package_ensure        = 'latest',
@@ -47,20 +50,30 @@ class sensu_handlers(
   $jira_username         = 'sensu',
   $jira_password         = 'sensu',
   $jira_site             = "jira.${::domain}",
-  $include_graphite      = true,
   $include_aws_prune     = true,
   $region                = $::datacenter,
   $datacenter            = $::datacenter,
   $dashboard_link        = "https://sensu.${::domain}",
   $use_embedded_ruby     = false,
+  $api_client_config     = {},
 ) {
 
-  validate_hash($teams)
-  validate_bool($include_graphite, $include_aws_prune)
+  validate_hash($teams, $api_client_config)
+  validate_bool($include_aws_prune)
 
   $gem_provider = $use_embedded_ruby ? {
     true    => 'sensu_gem',
     default => 'gem'
+  }
+
+  if !empty($api_client_config) {
+    file { '/etc/sensu/conf.d/api_client.json':
+      owner   => 'sensu',
+      group   => 'sensu',
+      mode    => '0444',
+      content => inline_template('<%= JSON.pretty_generate("api_client" => @api_client_config) %>'),
+      before  => File['/etc/sensu/handlers/base.rb'],
+    }
   }
 
   file { '/etc/sensu/handlers/base.rb':
@@ -83,10 +96,6 @@ class sensu_handlers(
   $handler_classes = prefix($default_handler_array, 'sensu_handlers::')
   # This ends up being something like [ 'sensu_handlers::nodebot', 'sensu_handlers::pagerduty' ]
   include $handler_classes
-
-  if $include_graphite {
-    include sensu_handlers::graphite
-  }
 
   if $include_aws_prune {
     include sensu_handlers::aws_prune
