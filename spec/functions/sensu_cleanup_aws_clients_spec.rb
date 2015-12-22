@@ -121,6 +121,15 @@ RSpec.describe SensuCleanupTerminatedAwsClients do
       expect(job._run).to eq(1)
     end
 
+    it 'should return 0 when there is nothing to delete' do
+      @sensu_mock = double('sensu', :get_clients_with_instance_id => {'id-1' => 'host1', 'id-4' => 'host4',})
+      job = SensuCleanupTerminatedAwsClients.new('fake', Logger::UNKNOWN, false)
+      job.instance_variable_set('@sensu', @sensu_mock)
+      job.instance_variable_set('@aws', @ec2_mock)
+      expect(@sensu_mock).to receive(:delete_client).exactly(0).times
+      expect(job._run).to eq(0)
+    end
+
   end
 
 end

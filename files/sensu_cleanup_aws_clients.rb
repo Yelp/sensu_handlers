@@ -61,7 +61,7 @@ class SensuApiConnector
           |h, node| h[node['instance_id']] = \
           node['name'] if !node['instance_id'].nil?; h }
 
-        @logger.debug("Got #{id_hash.keys.count} (AWS) out of #{json.count} Sensu clients.")
+        @logger.debug("Got #{id_hash.keys.count} instance_ids out of #{json.count} Sensu clients.")
         return id_hash
       else
         @logger.fatal("Unexpected response from Sensu API (code: #{response.code}, message: #{response.message})")
@@ -126,10 +126,11 @@ end
 
 class SensuCleanupTerminatedAwsClients
 
-  def initialize(aws_region, log_level, noop=false)
+  def initialize(aws_region, log_level, noop=false, silent=false)
     @logger = Logger.new(STDOUT)
     @logger.level = log_level
     @noop = noop
+    @silent = silent
     @aws_region = aws_region
   end
 
@@ -146,12 +147,12 @@ class SensuCleanupTerminatedAwsClients
   end
 
   def _read_aws_creds_from_yaml(creds_yaml)
-    @logger.debug("Retrieving AWS API creds from #{creds_yaml}")
+    @logger.debug("Reading AWS API creds from #{creds_yaml}")
     YAML.load_file(creds_yaml)['default']
   end
 
   def _sensu_api_creds
-    @logger.debug("Retrieving Sensu connection info from #{PATH_SENSU_API_JSON}")
+    @logger.debug("Reading Sensu connection info from #{PATH_SENSU_API_JSON}")
     f = File.open(PATH_SENSU_API_JSON)
     c = JSON.load(f)
     c = c['api']
@@ -176,14 +177,23 @@ class SensuCleanupTerminatedAwsClients
     @logger.debug("Found #{aws_instances.keys.count} non-terminated AWS instances.")
 
     diff = sensu_clients.keys - aws_instances.keys
-    @logger.info("#{diff.count} Sunsu clients to delete.")
+    hosts_to_delete = []
+    diff.each { |id| hosts_to_delete << sensu_clients[id] }
+
+    @logger.info(diff.count > 0 ? "#{diff.count} Sunsu clients to delete: " +
+                hosts_to_delete.join(',') : "#{diff.count} Sunsu clients to delete.")
+
+    puts hosts_to_delete.join(' ') if @silent
 
     if !(sensu_clients.keys.count == diff.count and diff.count > 1)
-      diff.each { |h| @sensu.delete_client(sensu_clients[h]) } if !@noop
+      hosts_to_delete.each { |h| @sensu.delete_client(h) } if !@noop
       return 0
-    else
+    elsif sensu_clients.keys.count == diff.count
       @logger.warn("Reject deletion of all Sensu clients.")
       return 1
+    else
+      # nothing to delete
+      return 0
     end
   end
 
@@ -192,16 +202,18 @@ end # SensuCleanupAwsClients
 if __FILE__ == $0
 
   opts = Trollop::options do
+    opt :region, "AWS region to query", :type => String
     opt :verbose, "Run verbosely", :default => false
     opt :noop, "Do not delete sensu clients", :default => false
-    opt :region, "AWS region to query", :type => String
+    opt :silent, "Only print hostnames that will be deleted from sensu", :default => false
   end
 
   Trollop::die :region, "must be set" unless !opts[:region].nil?
 
   log_level = opts[:verbose] ? Logger::DEBUG : Logger::INFO
+  log_level = Logger::UNKNOWN if opts[:silent]
 
-  job = SensuCleanupTerminatedAwsClients.new(opts.region, log_level, opts.noop)
+  job = SensuCleanupTerminatedAwsClients.new(opts.region, log_level, opts.noop, opts.silent)
   job.main()
 end
 
