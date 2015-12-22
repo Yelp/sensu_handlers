@@ -6,10 +6,8 @@
 # 2. Get Sensu clients that have a valid instance_id
 # 3. Get AWS instance_id list
 # 4. Find a diff between two lists
-# 5. Delete all sensu clients listed in diff
+# 5. Delete all sensu clients listed in diff (but avoid deleting all sensu clients)
 #
-# TODO: prevent from deletion all sensu clients when 
-# instance_list.json is (partially?) empty
 
 require 'trollop'
 require 'logger'
@@ -126,7 +124,7 @@ class AwsApiConnector
 end
 
 
-class SensuCleanupAwsClients
+class SensuCleanupTerminatedAwsClients
 
   def initialize(aws_region, log_level, noop=false)
     @logger = Logger.new(STDOUT)
@@ -134,22 +132,24 @@ class SensuCleanupAwsClients
     @noop = noop
   end
 
-  def connect()
+  def connect_sensu()
     sc = sensu_api_creds
-    @sensu = SensuApiConnector.new(
+    SensuApiConnector.new(
       sc['host'], sc['port'], sc['user'], sc['pass'], @logger)
+  end
 
+  def connect_aws()
     ac = read_aws_creds_from_yaml(PATH_AWS_API_JSON)
-    @aws = AwsApiConnector.new(
+    AwsApiConnector.new(
       aws_region, ac['aws_access_key_id'], ac['aws_secret_access_key'], @logger)
   end
 
-  def read_aws_creds_from_yaml(creds_yaml)
+  def _read_aws_creds_from_yaml(creds_yaml)
     @logger.debug("Retrieving AWS API creds from #{creds_yaml}")
     YAML.load_file(creds_yaml)['default']
   end
 
-  def sensu_api_creds
+  def _sensu_api_creds
     @logger.debug("Retrieving Sensu connection info from #{PATH_SENSU_API_JSON}")
     f = File.open(PATH_SENSU_API_JSON)
     c = JSON.load(f)
@@ -159,11 +159,16 @@ class SensuCleanupAwsClients
   end
 
   def main
-    connect()
+    @sensu = connect_sensu()
+    @aws = connect_aws()
 
+    _run
+  end
+
+  def _run()
     sensu_clients = @sensu.get_clients_with_instance_id
     if sensu_clients.nil?
-      return
+      return 0
     end
 
     aws_instances = @aws.get_ec2_instanses_info.reject { |id, val| val['state'] == 'terminated' }
@@ -173,9 +178,11 @@ class SensuCleanupAwsClients
     @logger.info("#{diff.count} Sunsu clients to delete.")
 
     if !(sensu_clients.keys.count == diff.count and diff.count > 1)
-      diff.each { |h| sensu_delete_client(sensu_clients[h]) } if !@noop
+      diff.each { |h| @sensu.delete_client(sensu_clients[h]) } if !@noop
+      return 0
     else
-      @logger.warn("Rejecting to delete all Sensu clients.")
+      @logger.warn("Reject deletion of all Sensu clients.")
+      return 1
     end
   end
 
@@ -193,7 +200,7 @@ if __FILE__ == $0
 
   log_level = opts[:verbose] ? Logger::DEBUG : Logger::INFO
 
-  job = SensuCleanupAwsClients.new(opts.region, log_level, opts.noop)
+  job = SensuCleanupTerminatedAwsClients.new(opts.region, log_level, opts.noop)
   job.main()
 end
 
