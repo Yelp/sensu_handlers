@@ -107,8 +107,8 @@ class AwsApiConnector
     end
 
     Aws.config.update({
-      'region'      => region,
-      'credentials' => Aws::Credentials.new(aws_access_key_id, aws_secret_access_key),
+      :region      => region,
+      :credentials => Aws::Credentials.new(aws_access_key_id, aws_secret_access_key),
     })
   end
 
@@ -130,18 +130,19 @@ class SensuCleanupTerminatedAwsClients
     @logger = Logger.new(STDOUT)
     @logger.level = log_level
     @noop = noop
+    @aws_region = aws_region
   end
 
   def connect_sensu()
-    sc = sensu_api_creds
+    sc = _sensu_api_creds
     SensuApiConnector.new(
       sc['host'], sc['port'], sc['user'], sc['pass'], @logger)
   end
 
   def connect_aws()
-    ac = read_aws_creds_from_yaml(PATH_AWS_API_JSON)
+    ac = _read_aws_creds_from_yaml(PATH_AWS_API_JSON)
     AwsApiConnector.new(
-      aws_region, ac['aws_access_key_id'], ac['aws_secret_access_key'], @logger)
+      @aws_region, ac['aws_access_key_id'], ac['aws_secret_access_key'], @logger)
   end
 
   def _read_aws_creds_from_yaml(creds_yaml)
