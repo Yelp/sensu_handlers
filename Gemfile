@@ -21,3 +21,4 @@ gem 'hiera-puppet-helper',
 
 gem 'mail', '~> 2.5.4'
 gem 'aws-sdk', '~> 2'
+gem 'trollop'

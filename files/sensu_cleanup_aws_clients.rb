@@ -11,8 +11,7 @@
 # TODO: prevent from deletion all sensu clients when 
 # instance_list.json is (partially?) empty
 
-require 'optparse'
-require 'ostruct'
+require 'trollop'
 require 'logger'
 require 'net/http'
 require 'json'
@@ -86,13 +85,13 @@ class SensuApiConnector
   def log_delete_result(client, code)
     case code
     when '202'
-        @logger.info("EC2 Node - [202] Successfully deleted Sensu client: #{client}")
+        @logger.info("[202] Successfully deleted Sensu client: #{client}")
     when '404'
-        @logger.error("EC2 Node - [404] Unable to delete #{client}, doesn't exist!")
+        @logger.error("[404] Unable to delete #{client}, doesn't exist!")
     when '500'
-        @logger.error("EC2 Node - [500] Miscellaneous error when deleting #{client}")
+        @logger.error("[500] Miscellaneous error when deleting #{client}")
     else
-        @logger.error("EC2 Node - [#{response.code}] Completely unsure of what happened!")
+        @logger.error("[#{response.code}] Completely unsure of what happened!")
     end
   end
 
@@ -110,8 +109,8 @@ class AwsApiConnector
     end
 
     Aws.config.update({
-      region: region,
-      credentials: Aws::Credentials.new(aws_access_key_id, aws_secret_access_key),
+      'region'      => region,
+      'credentials' => Aws::Credentials.new(aws_access_key_id, aws_secret_access_key),
     })
   end
 
@@ -133,7 +132,9 @@ class SensuCleanupAwsClients
     @logger = Logger.new(STDOUT)
     @logger.level = log_level
     @noop = noop
+  end
 
+  def connect()
     sc = sensu_api_creds
     @sensu = SensuApiConnector.new(
       sc['host'], sc['port'], sc['user'], sc['pass'], @logger)
@@ -158,6 +159,8 @@ class SensuCleanupAwsClients
   end
 
   def main
+    connect()
+
     sensu_clients = @sensu.get_clients_with_instance_id
     if sensu_clients.nil?
       return
@@ -180,42 +183,17 @@ end # SensuCleanupAwsClients
 
 if __FILE__ == $0
 
-  options = OpenStruct.new
-  options.verbose = false
-  options.noop = false
-  options.region = ''
-
-  optparse = OptionParser.new do |opts|
-    opts.banner = "Usage: #{$0} [options]"
-
-    opts.on("-v", "--verbose", "Run verbosely") do |v|
-      options.verbose = v
-    end
-
-    opts.on("-n", "--noop", "Do not delete sensu clients.") do |n|
-      options.noop = n
-    end
-
-    opts.on("-r", "--region AWS_REGION", "AWS region to query.") do |r|
-      options.region << r
-    end
+  opts = Trollop::options do
+    opt :verbose, "Run verbosely", :default => false
+    opt :noop, "Do not delete sensu clients", :default => false
+    opt :region, "AWS region to query", :type => String
   end
 
-  begin
-    optparse.parse!(ARGV)
-  rescue OptionParser::InvalidOption, OptionParser::MissingArgument => e
-    puts e, optparse.help
-    exit(1)
-  end
+  Trollop::die :region, "must be set" unless !opts[:region].nil?
 
-  if options.region.empty?
-    puts 'AWS_REGION must be set', optparse.help
-    exit(1)
-  end
+  log_level = opts[:verbose] ? Logger::DEBUG : Logger::INFO
 
-  log_level = options.verbose ? Logger::DEBUG : Logger::INFO
-
-  job = SensuCleanupAwsClients.new(options.region, log_level, options.noop)
+  job = SensuCleanupAwsClients.new(opts.region, log_level, opts.noop)
   job.main()
 end
 

@@ -1,4 +1,4 @@
-require 'spec_helper'
+
 require "#{File.dirname(__FILE__)}/../../files/sensu_cleanup_aws_clients"
 
 RSpec.describe SensuApiConnector do
@@ -65,6 +65,7 @@ RSpec.describe AwsApiConnector do
       expect(@ec2_mock).to receive(:instances).and_return([@instance_mock])
       expect(@aws_api.get_ec2_instanses_info).to eq({"id-1"=>{"state"=>"running", "tags"=>nil}})
     end
+
   end
 
 end
