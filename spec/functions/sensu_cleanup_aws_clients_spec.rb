@@ -1,4 +1,4 @@
-
+require 'spec_helper'
 require "#{File.dirname(__FILE__)}/../../files/sensu_cleanup_aws_clients"
 
 RSpec.describe SensuApiConnector do
