@@ -124,7 +124,7 @@ class AwsApiConnector
 end
 
 
-class SensuCleanupTerminatedAwsClients
+class DeleteTerminatedEc2Clients
 
   def initialize(aws_region, log_level, noop=false, silent=false)
     @logger = Logger.new(STDOUT)
@@ -183,7 +183,9 @@ class SensuCleanupTerminatedAwsClients
     @logger.info(diff.count > 0 ? "#{diff.count} Sunsu clients to delete: " +
                 hosts_to_delete.join(',') : "#{diff.count} Sunsu clients to delete.")
 
-    puts hosts_to_delete.join(' ') if @silent
+    if (@silent and hosts_to_delete.count > 0)
+    	puts "The following hosts will be deleted from sensu: #{hosts_to_delete.join(' ')}."
+    end
 
     if !(sensu_clients.keys.count == diff.count and diff.count > 1)
       hosts_to_delete.each { |h| @sensu.delete_client(h) } if !@noop
@@ -213,7 +215,7 @@ if __FILE__ == $0
   log_level = opts[:verbose] ? Logger::DEBUG : Logger::INFO
   log_level = Logger::UNKNOWN if opts[:silent]
 
-  job = SensuCleanupTerminatedAwsClients.new(opts.region, log_level, opts.noop, opts.silent)
+  job = DeleteTerminatedEc2Clients.new(opts.region, log_level, opts.noop, opts.silent)
   job.main()
 end
 

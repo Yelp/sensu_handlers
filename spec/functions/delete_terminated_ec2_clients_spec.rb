@@ -1,5 +1,5 @@
 require 'spec_helper'
-require "#{File.dirname(__FILE__)}/../../files/sensu_cleanup_aws_clients"
+require "#{File.dirname(__FILE__)}/../../files/delete_terminated_ec2_clients"
 
 RSpec.describe SensuApiConnector do
 
@@ -70,7 +70,7 @@ RSpec.describe AwsApiConnector do
 end
 
 
-RSpec.describe SensuCleanupTerminatedAwsClients do
+RSpec.describe DeleteTerminatedEc2Clients do
 
   describe '#main' do
 
@@ -94,7 +94,7 @@ RSpec.describe SensuCleanupTerminatedAwsClients do
     end
 
     it 'should work properly' do
-      job = SensuCleanupTerminatedAwsClients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).once.with('host2')
@@ -105,7 +105,7 @@ RSpec.describe SensuCleanupTerminatedAwsClients do
     end
 
     it 'should not delete sensu clients in the noop mode' do
-      job = SensuCleanupTerminatedAwsClients.new('fake', Logger::UNKNOWN, true)
+      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, true)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
@@ -114,7 +114,7 @@ RSpec.describe SensuCleanupTerminatedAwsClients do
 
     it 'should not delete all sensu aws clients' do
       @ec2_mock = double('ec2', :get_ec2_instanses_info => {})
-      job = SensuCleanupTerminatedAwsClients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
@@ -123,7 +123,7 @@ RSpec.describe SensuCleanupTerminatedAwsClients do
 
     it 'should return 0 when there is nothing to delete' do
       @sensu_mock = double('sensu', :get_clients_with_instance_id => {'id-1' => 'host1', 'id-4' => 'host4',})
-      job = SensuCleanupTerminatedAwsClients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
