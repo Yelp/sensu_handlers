@@ -531,5 +531,32 @@ describe BaseHandler do
     end
   end
 
+  describe 'client_display_name' do
+    event = {
+      'client' => { 'name' => 'foo' },
+      'check'  => { 'output' => 'hello world',
+                    'issued' => 1,
+                    'status' => 2,
+                    'team'   => 'noop',
+                  },
+    }
+
+    context 'when Display Name tag is not set' do
+      it 'should be the same as client name' do
+        subject.event = event
+        expect(subject.client_display_name).to eql('foo')
+        expect(subject.full_description).to match(/Host: foo/)
+      end
+    end
+
+    context 'when Display Name tag is set' do
+      it 'should be set correctly' do
+        subject.event = event
+        subject.event['client']['tags'] = { 'Display Name' => 'bar' }
+        expect(subject.client_display_name).to eql('bar')
+        expect(subject.full_description).to match(/Host: bar/)
+      end
+    end
+  end
 
 end # End describe
