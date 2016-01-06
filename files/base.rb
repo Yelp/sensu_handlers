@@ -67,11 +67,15 @@ class BaseHandler < Sensu::Handler
     @event['check']['tip']
   end
 
-  def description(maxlen=100000)
-    description = @event['check']['notification']
+  def client_display_name
     client_display_name = @event['client']['tags']['Display Name'] rescue nil
     client_display_name = @event['client']['name'] if
       client_display_name.nil? || client_display_name.empty?
+    client_display_name
+  end
+
+  def description(maxlen=100000)
+    description = @event['check']['notification']
     description ||= [client_display_name, @event['check']['name'], uncolorize(@event['check']['output'])].join(' : ')
     if event_is_critical? or event_is_warning?
       toadd = ""
@@ -101,7 +105,7 @@ Timestamp: #{Time.at(@event['check']['issued'])}
 Occurrences:  #{@event['occurrences']}
 
 Team: #{team_name}
-Host: #{@event['client']['name']}
+Host: #{client_display_name}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
 
