@@ -58,7 +58,7 @@ class SensuApiConnector
       if response.code == '200'
         json = JSON.parse(response.body)
 
-        id_hash = json.inject({}) { 
+        id_hash = json.inject({}) {
           |h, node| h[node['instance_id']] = \
           node['name'] if !node['instance_id'].nil?; h }
 
@@ -113,7 +113,7 @@ class AwsApiConnector
     })
   end
 
-  def get_ec2_instanses_info
+  def get_ec2_instances_info
     @logger.debug('Retrieving list of EC2 instances from AWS API.')
     ec2 = Aws::EC2::Resource.new
     id_hash = ec2.instances().inject({}) \
@@ -174,15 +174,15 @@ class DeleteTerminatedEc2Clients
       return 0
     end
 
-    aws_instances = @aws.get_ec2_instanses_info.reject { |id, val| val['state'] == 'terminated' }
+    aws_instances = @aws.get_ec2_instances_info.reject { |id, val| val['state'] == 'terminated' }
     @logger.debug("Found #{aws_instances.keys.count} non-terminated AWS instances.")
 
     diff = sensu_clients.keys - aws_instances.keys
     hosts_to_delete = []
     diff.each { |id| hosts_to_delete << sensu_clients[id] }
 
-    @logger.info(diff.count > 0 ? "#{diff.count} Sunsu clients to delete: " +
-                hosts_to_delete.join(',') : "#{diff.count} Sunsu clients to delete.")
+    @logger.info(diff.count > 0 ? "#{diff.count} Sensu clients to delete: " +
+                hosts_to_delete.join(',') : "#{diff.count} Sensu clients to delete.")
 
     if (@silent and hosts_to_delete.count > 0)
     	puts "The following hosts will be deleted from sensu: #{hosts_to_delete.join(' ')}."

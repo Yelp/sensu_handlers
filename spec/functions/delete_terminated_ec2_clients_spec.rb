@@ -63,7 +63,7 @@ RSpec.describe AwsApiConnector do
       @instance_mock = double('instance', :id => 'id-1', :state => {'name' =>'running'}, :tags => nil)
       expect(Aws::EC2::Resource).to receive(:new).and_return(@ec2_mock)
       expect(@ec2_mock).to receive(:instances).and_return([@instance_mock])
-      expect(@aws_api.get_ec2_instanses_info).to eq({"id-1"=>{"state"=>"running", "tags"=>nil}})
+      expect(@aws_api.get_ec2_instances_info).to eq({"id-1"=>{"state"=>"running", "tags"=>nil}})
     end
   end
 
@@ -84,7 +84,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
                             'id-3' => 'host3',
                             'id-6' => 'host6',
                           })
-      @ec2_mock = double('ec2', :get_ec2_instanses_info => {
+      @ec2_mock = double('ec2', :get_ec2_instances_info => {
                             'id-1' => {'state' => 'running'},
                             'id-2' => {'state' => 'terminated'},
                             'id-3' => {'state' => 'terminated'},
@@ -113,7 +113,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
     end
 
     it 'should not delete all sensu aws clients' do
-      @ec2_mock = double('ec2', :get_ec2_instanses_info => {})
+      @ec2_mock = double('ec2', :get_ec2_instances_info => {})
       job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
