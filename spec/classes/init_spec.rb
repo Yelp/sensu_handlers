@@ -88,5 +88,39 @@ describe 'sensu_handlers', :type => :class do
     end
   end
 
+  describe 'num_occurrences_filter' do
+    let(:hiera_data) {{
+      'sensu_handlers::teams' => { 'operations' => {} },
+      'sensu_handlers::mailer::mail_from' => 'hello@example.com',
+    }}
+
+    context 'by default' do
+      it {
+        should_not contain_file('/etc/sensu/extensions/num_occurrences_filter.rb')
+        should contain_sensu__handler('jira') \
+          .with_filters(['ticket_filter'])
+        should contain_sensu__handler('pagerduty') \
+          .with_filters(['page_filter'])
+        should contain_sensu__handler('nodebot').with_filters([])
+        should contain_sensu__handler('mailer').with_filters([])
+      }
+    end
+
+    context 'when use_num_occurrences_filter is set to true' do
+      let(:params) {{ :use_num_occurrences_filter => true }}
+      it {
+        should contain_file('/etc/sensu/extensions/num_occurrences_filter.rb')
+        should contain_sensu__handler('jira') \
+          .with_filters(['ticket_filter', 'num_occurrences_filter'])
+        should contain_sensu__handler('pagerduty') \
+          .with_filters(['page_filter', 'num_occurrences_filter'])
+        should contain_sensu__handler('nodebot') \
+          .with_filters(['num_occurrences_filter'])
+        should contain_sensu__handler('mailer') \
+          .with_filters(['num_occurrences_filter'])
+      }
+    end
+  end
+
 end
 

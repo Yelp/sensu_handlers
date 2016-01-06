@@ -29,7 +29,10 @@ class sensu_handlers::jira (
       password => $jira_password,
       site     => $jira_site,
     },
-    filters => [ 'ticket_filter' ],
+    filters => flatten([
+      'ticket_filter',
+      $sensu_handlers::num_occurrences_filter,
+    ]),
   }
   if $::lsbdistcodename == 'Lucid' {
     # So sorry for the httprb monkeypatch. It is Debian bug 564168 that took

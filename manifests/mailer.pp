@@ -27,6 +27,9 @@ class sensu_handlers::mailer (
   sensu::handler { 'mailer':
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/mailer.rb',
+    filters => flatten([
+      $sensu_handlers::num_occurrences_filter,
+    ]),
     config  => {
       teams     => $teams,
       mail_from => $mail_from
