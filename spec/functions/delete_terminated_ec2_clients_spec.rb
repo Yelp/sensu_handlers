@@ -3,32 +3,35 @@ require "#{File.dirname(__FILE__)}/../../files/delete_terminated_ec2_clients"
 
 RSpec.describe SensuApiConnector do
 
-  describe 'API communication' do
+  describe 'Sensu API communication' do
 
     before :each do
+      data = "host '192.168.1.1'\nport '4567'\nuser 'sensu'\npassword '1234'"
+      allow(File).to receive(:open).with('/etc/sensu/sensu-cli/settings.rb', 'r').and_return( StringIO.new(data) )
+
       @http_mock = double('http', :open_timeout= => 2)
       expect(Net::HTTP).to receive(:new).and_return(@http_mock)
 
       @request_mock = double('http_request')
-      expect(@request_mock).to receive(:basic_auth).with('', '')
+      expect(@request_mock).to receive(:basic_auth).with('sensu', '1234')
 
       logger = Logger.new(STDOUT)
       logger.level = Logger::UNKNOWN
-      @sensu_api = SensuApiConnector.new('192.168.1.1', 80, '', '', logger)
+      @sensu_api = SensuApiConnector.new(logger)
     end
 
     it 'get_clients_with_instance_id should send a valid GET request and return hash' do
       expect(Net::HTTP::Get).to \
-        receive(:new).with(URI('http://192.168.1.1/clients')).and_return(@request_mock)
+        receive(:new).with(URI('http://192.168.1.1:4567/clients')).and_return(@request_mock)
       expect(@http_mock).to \
         receive(:request).with(@request_mock).and_return(
         double('response', :code => '200', :body => '[{"instance_id":"id-1", "name":"host1"}, {"name":"host2"}]'))
       expect(@sensu_api.get_clients_with_instance_id).to eq({'id-1' => 'host1'})
     end
 
-    it 'get_clients_with_instance_id should return nul when HTTP response code is not 200' do
+    it 'get_clients_with_instance_id should return nil when HTTP response code is not 200' do
       expect(Net::HTTP::Get).to \
-        receive(:new).with(URI('http://192.168.1.1/clients')).and_return(@request_mock)
+        receive(:new).with(URI('http://192.168.1.1:4567/clients')).and_return(@request_mock)
       expect(@http_mock).to \
         receive(:request).with(@request_mock).and_return(
         double('response', :code => '401', :message => 'Unauthorized', :body => ''))
@@ -37,7 +40,7 @@ RSpec.describe SensuApiConnector do
 
     it 'delete_client should send a valid Delete request' do
       expect(Net::HTTP::Delete).to \
-        receive(:new).with(URI('http://192.168.1.1/clients/host1')).and_return(@request_mock)
+        receive(:new).with(URI('http://192.168.1.1:4567/clients/host1')).and_return(@request_mock)
       expect(@http_mock).to \
         receive(:request).with(@request_mock).and_return(
         double('response', :code => '202'))

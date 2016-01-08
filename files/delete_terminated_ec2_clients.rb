@@ -18,15 +18,12 @@ require 'aws-sdk'
 require 'aws-sdk-resources'
 
 PATH_SENSU_API_JSON = '/etc/sensu/conf.d/api.json'
+PATH_SENSU_CLI_CFG = '/etc/sensu/sensu-cli/settings.rb'
 PATH_AWS_API_JSON = '/etc/sensu/cache_instance_list_creds.yaml'
 
 class SensuApiConnector
 
-  def initialize(host, port, user, pass, logger=nil)
-    @sensu_host = host
-    @sensu_port = port
-    @sensu_user = user
-    @sensu_pass = pass
+  def initialize(logger=nil)
     if logger.nil?
       @logger = Logger.new(STDOUT)
       @logger.level = Logger::ERROR
@@ -34,12 +31,45 @@ class SensuApiConnector
       @logger = logger
     end
 
-    @sensu_http = Net::HTTP.new(@sensu_host, @sensu_port)
+    @settings = settings
+
+    @sensu_http = Net::HTTP.new(@settings[:host], @settings[:port])
     @sensu_http.open_timeout = 2
   end
 
+  def settings
+    @logger.debug("Reading #{PATH_SENSU_CLI_CFG} ..")
+    s = _read_sensu_cli_cfg rescue nil
+    if s.nil?
+      @logger.debug("Failed to read #{PATH_SENSU_CLI_CFG}.")
+      @logger.debug("Reading #{PATH_SENSU_API_JSON} ..")
+      s = _read_sensu_api_cfg rescue nil
+      @logger.debug("Failed to read #{PATH_SENSU_API_JSON}.")
+    end
+    s
+  end
+
+  def _read_sensu_cli_cfg
+    s = File.open(PATH_SENSU_CLI_CFG, 'r').read
+    {
+      :host => s[/host\s+'(.*)'/, 1],
+      :port => s[/port\s+'([0-9]+)'/, 1].to_i,
+      :user => s[/user\s+'(\w+)'/, 1],
+      :password => s[/password\s+'(.*)'/, 1],
+    }
+  end
+
+  def _read_sensu_api_cfg
+    c = JSON.load(File.open(PATH_SENSU_API_JSON, 'r'))
+    if !c.nil? and c.has_key?('api')
+      c = c['api']
+      { :host => c['host'], :port => c['port'],
+        :user => c['user'], :password => c['password'] }
+    end
+  end
+
   def send_http_request(request)
-    request.basic_auth @sensu_user, @sensu_pass
+    request.basic_auth @settings[:user], @settings[:password]
     response = nil
     begin
       response = @sensu_http.request request # Net::HTTPResponse object
@@ -51,7 +81,7 @@ class SensuApiConnector
 
   def get_clients_with_instance_id
     @logger.debug('Retrieving clients list from Sensu API.')
-    request = Net::HTTP::Get.new URI("http://#{@sensu_host}/clients")
+    request = Net::HTTP::Get.new URI("http://#{@settings[:host]}:#{@settings[:port]}/clients")
     response = send_http_request(request)
 
     if !response.nil?
@@ -73,7 +103,7 @@ class SensuApiConnector
   end
 
   def delete_client(client)
-    request = Net::HTTP::Delete.new URI("http://#{@sensu_host}/clients/#{client}")
+    request = Net::HTTP::Delete.new URI("http://#{@settings[:host]}:#{@settings[:port]}/clients/#{client}")
     response = send_http_request(request)
 
     if !response.nil?
@@ -135,12 +165,6 @@ class DeleteTerminatedEc2Clients
     @aws_region = aws_region
   end
 
-  def connect_sensu()
-    sc = _sensu_api_creds
-    SensuApiConnector.new(
-      sc['host'], sc['port'], sc['user'], sc['pass'], @logger)
-  end
-
   def connect_aws()
     ac = _read_aws_creds_from_yaml(PATH_AWS_API_JSON)
     AwsApiConnector.new(
@@ -152,17 +176,13 @@ class DeleteTerminatedEc2Clients
     YAML.load_file(creds_yaml)['default']
   end
 
-  def _sensu_api_creds
-    @logger.debug("Reading Sensu connection info from #{PATH_SENSU_API_JSON}")
-    f = File.open(PATH_SENSU_API_JSON)
-    c = JSON.load(f)
-    c = c['api']
-    { 'host' => c['host'], 'port' => c['port'], 
-      'user' => c['user'], 'pass' => c['password'] }
-  end
-
   def main
-    @sensu = connect_sensu()
+    @sensu = SensuApiConnector.new(@logger) rescue nil
+    if @sensu.nil?
+      @logger.fatal('Failed to connect to Sesnu API.')
+      return 1
+    end
+
     @aws = connect_aws()
 
     _run
@@ -185,7 +205,7 @@ class DeleteTerminatedEc2Clients
                 hosts_to_delete.join(',') : "#{diff.count} Sensu clients to delete.")
 
     if (@silent and hosts_to_delete.count > 0)
-    	puts "The following hosts will be deleted from sensu: #{hosts_to_delete.join(' ')}."
+	puts "The following hosts will be deleted from sensu: #{hosts_to_delete.join(' ')}."
     end
 
     if !(sensu_clients.keys.count == diff.count and diff.count > 1)
@@ -219,4 +239,3 @@ if __FILE__ == $0
   job = DeleteTerminatedEc2Clients.new(opts.region, log_level, opts.noop, opts.silent)
   job.main()
 end
-
