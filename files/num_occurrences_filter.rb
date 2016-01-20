@@ -72,7 +72,7 @@ module Sensu::Extension
           # If our number of failed attempts is an exponent of 2
           if power_of_two?(number_of_failed_attempts)
             # Then This is our MOMENT!
-            return ALLOW_PROCESSING, 'can be processed now'
+            return ALLOW_PROCESSING, "can be processed now: #{number_of_failed_attempts}"
           else
             return STOP_PROCESSING,
                    "not on a power of two: #{number_of_failed_attempts}"
@@ -91,7 +91,7 @@ module Sensu::Extension
     end
 
     def power_of_two?(x)
-      return false if x.odd?
+      return false if x > 1 && x.odd?
       while ( x % 2) == 0 and x > 1
         x /= 2
       end

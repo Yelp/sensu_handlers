@@ -320,7 +320,7 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
-    context "When exponential backoff, and alert_after, it should not alert the fith time" do
+    context "When exponential backoff, and alert_after, it should alert the fith time" do
       it do
         subject.event['occurrences'] = 5
         subject.event['check']['interval'] = 20
