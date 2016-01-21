@@ -320,7 +320,7 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
-    context "When exponential backoff, and alert_after, it should not alert the fith time" do
+    context "When exponential backoff, and alert_after, it should alert the fith time" do
       it do
         subject.event['occurrences'] = 5
         subject.event['check']['interval'] = 20
@@ -531,5 +531,32 @@ describe BaseHandler do
     end
   end
 
+  describe 'client_display_name' do
+    event = {
+      'client' => { 'name' => 'foo' },
+      'check'  => { 'output' => 'hello world',
+                    'issued' => 1,
+                    'status' => 2,
+                    'team'   => 'noop',
+                  },
+    }
+
+    context 'when Display Name tag is not set' do
+      it 'should be the same as client name' do
+        subject.event = event
+        expect(subject.client_display_name).to eql('foo')
+        expect(subject.full_description).to match(/Host: foo/)
+      end
+    end
+
+    context 'when Display Name tag is set' do
+      it 'should be set correctly' do
+        subject.event = event
+        subject.event['client']['tags'] = { 'Display Name' => 'bar' }
+        expect(subject.client_display_name).to eql('bar')
+        expect(subject.full_description).to match(/Host: bar/)
+      end
+    end
+  end
 
 end # End describe

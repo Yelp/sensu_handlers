@@ -23,7 +23,10 @@ class sensu_handlers::pagerduty (
     config  => {
       teams => $teams,
     },
-    filters => [ 'page_filter' ],
+    filters => flatten([
+      'page_filter',
+      $sensu_handlers::num_occurrences_filter,
+    ]),
   } ->
   # If we are going to send pagerduty alerts, we need to be sure it actually is up
   monitoring_check { 'check_pagerduty':

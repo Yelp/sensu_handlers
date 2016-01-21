@@ -43,19 +43,26 @@
 # /etc/sensu/conf.d/api.json which is a local instance. This param sets
 # alternative endpoint - for example, by pointing to haproxy. Expects hash
 # with at least 'host' and 'port' keys.
+#
+# [*use_num_occurrences_filter*]
+# Boolean toggle whether to use num_occurrences_filter (this filter is
+# implemented as a sensu extension, it runs witin sensu-process). If not sure,
+# don't use it and set this to false.
+#
 class sensu_handlers(
   $teams,
-  $package_ensure        = 'latest',
-  $default_handler_array = [ 'nodebot', 'pagerduty', 'mailer', 'jira' ],
-  $jira_username         = 'sensu',
-  $jira_password         = 'sensu',
-  $jira_site             = "jira.${::domain}",
-  $include_aws_prune     = true,
-  $region                = $::datacenter,
-  $datacenter            = $::datacenter,
-  $dashboard_link        = "https://sensu.${::domain}",
-  $use_embedded_ruby     = false,
-  $api_client_config     = {},
+  $package_ensure             = 'latest',
+  $default_handler_array      = [ 'nodebot', 'pagerduty', 'mailer', 'jira' ],
+  $jira_username              = 'sensu',
+  $jira_password              = 'sensu',
+  $jira_site                  = "jira.${::domain}",
+  $include_aws_prune          = true,
+  $region                     = $::datacenter,
+  $datacenter                 = $::datacenter,
+  $dashboard_link             = "https://sensu.${::domain}",
+  $use_embedded_ruby          = false,
+  $api_client_config          = {},
+  $use_num_occurrences_filter = false,
 ) {
 
   validate_hash($teams, $api_client_config)
@@ -74,6 +81,20 @@ class sensu_handlers(
       content => inline_template('<%= JSON.pretty_generate("api_client" => @api_client_config) %>'),
       before  => File['/etc/sensu/handlers/base.rb'],
     }
+  }
+
+  if $use_num_occurrences_filter {
+    $num_occurrences_filter = [ 'num_occurrences_filter' ]
+    file { '/etc/sensu/extensions/num_occurrences_filter.rb':
+      owner  => 'sensu',
+      group  => 'sensu',
+      mode   => '0444',
+      source => 'puppet:///modules/sensu_handlers/num_occurrences_filter.rb',
+      notify => Service['sensu-server'],
+    }
+  }
+  else {
+    $num_occurrences_filter = []
   }
 
   file { '/etc/sensu/handlers/base.rb':
