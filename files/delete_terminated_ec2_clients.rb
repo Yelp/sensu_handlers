@@ -11,6 +11,7 @@
 #
 
 require 'trollop'
+require 'syslog/logger'
 require 'logger'
 require 'net/http'
 require 'json'
@@ -162,11 +163,9 @@ end
 
 class DeleteTerminatedEc2Clients
 
-  def initialize(aws_region, log_level, noop=false, silent=false)
-    @logger = Logger.new(STDOUT)
-    @logger.level = log_level
+  def initialize(aws_region, logger, noop=false)
+    @logger = logger
     @noop = noop
-    @silent = silent
     @aws_region = aws_region
   end
 
@@ -210,20 +209,15 @@ class DeleteTerminatedEc2Clients
     @logger.info(diff.count > 0 ? "#{diff.count} Sensu clients to delete: " +
                 hosts_to_delete.join(',') : "#{diff.count} Sensu clients to delete.")
 
-    if (@silent and hosts_to_delete.count > 0)
-      deleted_hosts = []
-
-      open(PATH_LOG_FILE, "r") { |f|
-        f.each_line { |line| deleted_hosts << /^(\S+)\s.*/.match(line)[1] }
-      } rescue nil
-
-      open(PATH_LOG_FILE, 'a') { |f|
-        hosts_to_delete.each { |h| f.puts "#{h} #{Time.new.to_s}" if !deleted_hosts.include?(h) }
-      } rescue nil
-    end
-
     if !(sensu_clients.keys.count == diff.count and diff.count > 1)
-      hosts_to_delete.each { |h| @sensu.delete_client(h) } if !@noop
+      hosts_to_delete.each { |h|
+        if @noop
+	  @logger.info("Would delete #{h}, but noop mode is set.")
+        else
+          @logger.info("Deleting #{h} ..")
+	  @sensu.delete_client(h)
+	end
+      }
       return 0
     elsif sensu_clients.keys.count == diff.count
       @logger.warn("Reject deletion of all Sensu clients.")
@@ -242,14 +236,21 @@ if __FILE__ == $0
     opt :region, "AWS region to query", :type => String
     opt :verbose, "Run verbosely", :default => false
     opt :noop, "Do not delete sensu clients", :default => false
-    opt :silent, "Only print hostnames that will be deleted from sensu", :default => false
+    opt :silent, "Be quiet, write to syslog.", :default => false
   end
 
   Trollop::die :region, "must be set" unless !opts[:region].nil?
 
-  log_level = opts[:verbose] ? Logger::DEBUG : Logger::INFO
-  log_level = Logger::UNKNOWN if opts[:silent]
+  if opts[:silent]
+    logger = Syslog::Logger.new File.basename(__FILE__)
+  elsif opts[:verbose]
+    logger = Logger.new(STDOUT)
+    logger.level = Logger::DEBUG
+  else
+    logger = Logger.new(STDOUT)
+    logger.level = Logger::INFO
+  end
 
-  job = DeleteTerminatedEc2Clients.new(opts.region, log_level, opts.noop, opts.silent)
+  job = DeleteTerminatedEc2Clients.new(opts.region, logger, opts.noop)
   job.main()
 end

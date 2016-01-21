@@ -94,10 +94,12 @@ RSpec.describe DeleteTerminatedEc2Clients do
                             'id-4' => {'state' => 'running'},
                             'id-5' => {'state' => 'terminated'},
                          })
+      @logger = Logger.new(STDOUT)
+      @logger.level = Logger::UNKNOWN
     end
 
     it 'should work properly' do
-      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', @logger, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).once.with('host2')
@@ -108,7 +110,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
     end
 
     it 'should not delete sensu clients in the noop mode' do
-      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, true)
+      job = DeleteTerminatedEc2Clients.new('fake', @logger, true)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
@@ -117,7 +119,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
 
     it 'should not delete all sensu aws clients' do
       @ec2_mock = double('ec2', :get_ec2_instances_info => {})
-      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', @logger, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
@@ -126,7 +128,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
 
     it 'should return 0 when there is nothing to delete' do
       @sensu_mock = double('sensu', :get_clients_with_instance_id => {'id-1' => 'host1', 'id-4' => 'host4',})
-      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', @logger, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
@@ -135,7 +137,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
 
     it 'should return 1 when sensu client list is nil' do
       @sensu_mock = double('sensu', :get_clients_with_instance_id => nil)
-      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', @logger, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
@@ -144,7 +146,7 @@ RSpec.describe DeleteTerminatedEc2Clients do
 
     it 'should return 1 when AWS instance list is nil' do
       @ec2_mock = double('ec2', :get_ec2_instances_info => nil)
-      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job = DeleteTerminatedEc2Clients.new('fake', @logger, false)
       job.instance_variable_set('@sensu', @sensu_mock)
       job.instance_variable_set('@aws', @ec2_mock)
       expect(@sensu_mock).to receive(:delete_client).exactly(0).times
