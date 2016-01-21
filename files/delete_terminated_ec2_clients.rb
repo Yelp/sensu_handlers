@@ -20,6 +20,7 @@ require 'aws-sdk-resources'
 PATH_SENSU_API_JSON = '/etc/sensu/conf.d/api.json'
 PATH_SENSU_CLI_CFG = '/etc/sensu/sensu-cli/settings.rb'
 PATH_AWS_API_JSON = '/etc/sensu/cache_instance_list_creds.yaml'
+PATH_LOG_FILE = '/tmp/.delete_terminated_ec2_clients.log'
 
 class SensuApiConnector
 
@@ -73,8 +74,8 @@ class SensuApiConnector
     response = nil
     begin
       response = @sensu_http.request request # Net::HTTPResponse object
-    rescue Net::OpenTimeout => e
-      @logger.fatal("Can't connect to Sensu API (#{request.uri})")
+    rescue Net::OpenTimeout, SocketError => e
+      @logger.fatal("Can't connect to Sensu API (#{request.uri}): #{e.message}")
     end
     response
   end
@@ -147,8 +148,12 @@ class AwsApiConnector
     @logger.debug('Retrieving list of EC2 instances from AWS API.')
     ec2 = Aws::EC2::Resource.new
     id_hash = ec2.instances().inject({}) \
-      { |m, i| m[i.id] = { 'state' => i.state['name'], 'tags' => i.tags }; m }
-    @logger.debug("Got #{id_hash.keys.count} AWS instances.")
+	    { |m, i| m[i.id] = { 'state' => i.state['name'], 'tags' => i.tags }; m } rescue nil
+    if !id_hash.nil?
+      @logger.debug("Got #{id_hash.keys.count} AWS instances.")
+    else
+      @logger.fatal("Couldn't get the list of instances from AWS.")
+    end
     id_hash
   end
 
@@ -190,11 +195,12 @@ class DeleteTerminatedEc2Clients
 
   def _run()
     sensu_clients = @sensu.get_clients_with_instance_id
-    if sensu_clients.nil?
-      return 0
-    end
+    return 1 if sensu_clients.nil?
 
-    aws_instances = @aws.get_ec2_instances_info.reject { |id, val| val['state'] == 'terminated' }
+    aws_instances = @aws.get_ec2_instances_info
+    return 1 if aws_instances.nil?
+
+    aws_instances = aws_instances.reject { |id, val| val['state'] == 'terminated' }
     @logger.debug("Found #{aws_instances.keys.count} non-terminated AWS instances.")
 
     diff = sensu_clients.keys - aws_instances.keys
@@ -205,7 +211,15 @@ class DeleteTerminatedEc2Clients
                 hosts_to_delete.join(',') : "#{diff.count} Sensu clients to delete.")
 
     if (@silent and hosts_to_delete.count > 0)
-	puts "The following hosts will be deleted from sensu: #{hosts_to_delete.join(' ')}."
+      deleted_hosts = []
+
+      open(PATH_LOG_FILE, "r") { |f|
+        f.each_line { |line| deleted_hosts << /^(\S+)\s.*/.match(line)[1] }
+      } rescue nil
+
+      open(PATH_LOG_FILE, 'a') { |f|
+        hosts_to_delete.each { |h| f.puts "#{h} #{Time.new.to_s}" if !deleted_hosts.include?(h) }
+      } rescue nil
     end
 
     if !(sensu_clients.keys.count == diff.count and diff.count > 1)

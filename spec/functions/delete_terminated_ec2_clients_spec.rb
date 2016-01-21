@@ -133,6 +133,24 @@ RSpec.describe DeleteTerminatedEc2Clients do
       expect(job._run).to eq(0)
     end
 
+    it 'should return 1 when sensu client list is nil' do
+      @sensu_mock = double('sensu', :get_clients_with_instance_id => nil)
+      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job.instance_variable_set('@sensu', @sensu_mock)
+      job.instance_variable_set('@aws', @ec2_mock)
+      expect(@sensu_mock).to receive(:delete_client).exactly(0).times
+      expect(job._run).to eq(1)
+    end
+
+    it 'should return 1 when AWS instance list is nil' do
+      @ec2_mock = double('ec2', :get_ec2_instances_info => nil)
+      job = DeleteTerminatedEc2Clients.new('fake', Logger::UNKNOWN, false)
+      job.instance_variable_set('@sensu', @sensu_mock)
+      job.instance_variable_set('@aws', @ec2_mock)
+      expect(@sensu_mock).to receive(:delete_client).exactly(0).times
+      expect(job._run).to eq(1)
+    end
+
   end
 
 end
