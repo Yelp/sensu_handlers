@@ -11,7 +11,7 @@
 #
 
 require 'trollop'
-require 'syslog/logger'
+require 'syslog/logger' unless RUBY_VERSION < '2.0'
 require 'logger'
 require 'net/http'
 require 'json'
@@ -236,12 +236,12 @@ if __FILE__ == $0
     opt :region, "AWS region to query", :type => String
     opt :verbose, "Run verbosely", :default => false
     opt :noop, "Do not delete sensu clients", :default => false
-    opt :silent, "Be quiet, write to syslog.", :default => false
+    opt :silent, "Be quiet, write to syslog (if RUBY_VERSION >= 2).", :default => false
   end
 
   Trollop::die :region, "must be set" unless !opts[:region].nil?
 
-  if opts[:silent]
+  if opts[:silent] and RUBY_VERSION >= '2.0'
     logger = Syslog::Logger.new File.basename(__FILE__)
   elsif opts[:verbose]
     logger = Logger.new(STDOUT)
