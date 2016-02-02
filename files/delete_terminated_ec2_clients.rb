@@ -222,7 +222,6 @@ class DeleteTerminatedEc2Clients
       return 0
     elsif sensu_clients.keys.count == diff.count
       @logger.warn("Reject deletion of all Sensu clients.")
-      puts Reject 'deletion of all Sensu clients'
       return 1
     else
       # nothing to delete

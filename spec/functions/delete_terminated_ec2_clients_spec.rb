@@ -9,7 +9,7 @@ RSpec.describe SensuApiConnector do
       data = "host '192.168.1.1'\nport '4567'\nuser 'sensu'\npassword '1234'"
       allow(File).to receive(:open).with('/etc/sensu/sensu-cli/settings.rb', 'r').and_return( StringIO.new(data) )
 
-      @http_mock = double('http', :open_timeout= => 2)
+      @http_mock = double('http', :open_timeout= => 4, :read_timeout= => 4)
       expect(Net::HTTP).to receive(:new).and_return(@http_mock)
 
       @request_mock = double('http_request')
