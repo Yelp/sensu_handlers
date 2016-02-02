@@ -36,7 +36,8 @@ class SensuApiConnector
     @settings = settings
 
     @sensu_http = Net::HTTP.new(@settings[:host], @settings[:port])
-    @sensu_http.open_timeout = 2
+    @sensu_http.open_timeout = 4
+    @sensu_http.read_timeout = 4
   end
 
   def settings
@@ -75,7 +76,7 @@ class SensuApiConnector
     response = nil
     begin
       response = @sensu_http.request request # Net::HTTPResponse object
-    rescue Net::OpenTimeout, SocketError => e
+    rescue Net::OpenTimeout, Net::ReadTimeout, SocketError => e
       @logger.fatal("Can't connect to Sensu API (#{request.uri}): #{e.message}")
     end
     response
@@ -221,6 +222,7 @@ class DeleteTerminatedEc2Clients
       return 0
     elsif sensu_clients.keys.count == diff.count
       @logger.warn("Reject deletion of all Sensu clients.")
+      puts Reject 'deletion of all Sensu clients'
       return 1
     else
       # nothing to delete
