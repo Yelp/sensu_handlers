@@ -20,4 +20,5 @@ gem 'hiera-puppet-helper',
   :ref => '5ed989a130bc62cc6bdb923596586284f0bd73df'
 
 gem 'mail', '~> 2.5.4'
-
+gem 'trollop'
+gem 'aws-sdk', '~> 2'
