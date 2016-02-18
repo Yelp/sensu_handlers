@@ -20,8 +20,7 @@ require 'aws-sdk-resources'
 
 PATH_SENSU_API_JSON = '/etc/sensu/conf.d/api.json'
 PATH_SENSU_CLI_CFG = '/etc/sensu/sensu-cli/settings.rb'
-PATH_AWS_API_JSON = '/etc/sensu/cache_instance_list_creds.yaml'
-PATH_LOG_FILE = '/tmp/.delete_terminated_ec2_clients.log'
+PATH_AWS_API_JSON = '/etc/sensu/delete_terminated_ec2_creds.yaml'
 
 class SensuApiConnector
 

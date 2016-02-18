@@ -29,6 +29,9 @@
 # [*include_aws_prune*]
 #  Bool to have the AWS pruning handler enabled.
 #
+# [*delete_terminated_ec2*]
+#  Bool to have the delete_terminated_ec2 cron job enabled.
+#
 #  This is a special handler that inspect the AWS API to remove
 #  EC servers that no longer exist. Uses special hiera lookup keys.
 #
@@ -57,6 +60,7 @@ class sensu_handlers(
   $jira_password              = 'sensu',
   $jira_site                  = "jira.${::domain}",
   $include_aws_prune          = true,
+  $delete_terminated_ec2      = false,
   $region                     = $::datacenter,
   $datacenter                 = $::datacenter,
   $dashboard_link             = "https://sensu.${::domain}",
@@ -120,5 +124,9 @@ class sensu_handlers(
 
   if $include_aws_prune {
     include sensu_handlers::aws_prune
+  }
+
+  if $delete_terminated_ec2 {
+    class {'sensu_handlers::delete_terminated_ec2': region => $region, }
   }
 }
