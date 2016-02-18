@@ -2,9 +2,9 @@
 
 # Delete all terminated or missing AWS clients from sensu
 #
-# 1. Read Sensu API creds from /etc/sensu/conf.d/api.json
+# 1. Read Sensu API creds from /etc/sensu/sensu-cli/settings.rb or from /etc/sensu/conf.d/api.json
 # 2. Get Sensu clients that have a valid instance_id
-# 3. Read AWS creds from /etc/sensu/cache_instance_list_creds.yaml
+# 3. Read AWS creds from /etc/sensu/delete_terminated_ec2_creds.yaml
 # 4. Get AWS instance_id list
 # 5. Find a diff between two lists
 # 6. Delete all sensu clients listed in diff (but avoid deleting all sensu clients)
