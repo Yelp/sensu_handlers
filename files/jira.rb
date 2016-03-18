@@ -7,7 +7,8 @@ class Jira < BaseHandler
   def build_labels
     [ "SENSU_#{@event['client']['name']}",
       "SENSU_#{@event['check']['name']}",
-      "SENSU", *@event['check']['tags'] ].uniq.reject { |x| x.nil? }
+      "SENSU", *@event['check']['tags'] ].uniq.reject { |x| x.nil? }.map { |x|
+        x.strip.gsub(/\s+/, '_') }
   end
 
   def create_issue(summary, full_description, project)
