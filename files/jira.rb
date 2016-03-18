@@ -39,9 +39,9 @@ class Jira < BaseHandler
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"
       end
-      handler_success
     rescue Exception => e
       puts e.message
+      raise e
     end
   end
 
@@ -75,9 +75,9 @@ class Jira < BaseHandler
           puts "Couldn't close #{issue.key}: " + transition.attrs['errorMessages']
         end
       end
-      handler_success
     rescue Exception => e
       puts e.message
+      raise e
     end
   end
 
@@ -92,6 +92,19 @@ class Jira < BaseHandler
   def handle
     return false if !should_ticket?
     return false if !project
+
+    1.upto(5).each do |i|
+      begin
+        return do_handle
+      rescue
+        sleep i*2
+      end
+    end
+
+    puts 'FATAL: could not create jira issue'
+  end
+
+  def do_handle
     status = human_check_status()
     summary = @event['check']['name'] + " on " + @event['client']['name'] + " is " + status
     full_description = full_description()
@@ -107,6 +120,7 @@ class Jira < BaseHandler
       end
     rescue Timeout::Error
       puts 'Timed out while attempting contact JIRA for ' + @event['action'] + summary
+      raise
     end
   end
 
@@ -121,14 +135,6 @@ class Jira < BaseHandler
       :ssl_verify_mode  => OpenSSL::SSL::VERIFY_NONE
     }
     return options
-  end
-
-  def handler_failure(exception_text)
-    #File.open('/var/log/sensu/jira_handler_failure.log', 'w') { |file| file.write("Jira handler failed with: #{exception_text}") }
-  end
-
-  def handler_success
-    #File.delete('/var/log/sensu/jira_handler_failure.log')
   end
 
 end
