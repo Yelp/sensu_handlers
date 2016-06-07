@@ -188,9 +188,18 @@ describe Hipchat do
       expect(hipchat_message).to include('test.vagrant.local')
     end
 
-    it 'includes address' do
-      expect(hipchat_message).to include('127.0.0.1')
+    context 'when address is known' do
+      it 'includes address' do
+        expect(hipchat_message).to include('127.0.0.1')
+      end
     end
+    context 'when address is unknown' do
+      before { client_data['address'] = 'unknown' }
+      it 'does not include address' do
+        expect(hipchat_message).not_to include('127.0.0.1')
+      end
+    end
+
 
     context 'when check notification is populated' do
       it 'contains the notifcation data' do

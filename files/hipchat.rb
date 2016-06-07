@@ -26,10 +26,18 @@ class Hipchat < BaseHandler
     @event['check']['notification'] || @event['check']['output']
   end
 
+  def address
+    @event['client']['address']
+  end
+
+  def address_string
+    address == 'unknown' ? '' : " (#{address})"
+  end
+
   def hipchat_message
     <<-EOM.gsub(/^\s{6}/,'')
       <b>#{event_time} - #{@event['check']['name']} on #{@event['client']['name']}
-        (#{@event['client']['address']}) - #{human_check_status}</b>
+        #{address_string} - #{human_check_status}</b>
       <br />
       &nbsp;&nbsp;#{check_notification_string}
     EOM
