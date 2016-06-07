@@ -98,7 +98,8 @@ describe Hipchat do
             'sensu',
             include(
               "2015-08-06 13:03:10 UTC",
-              "mycoolcheck on some.client",
+              "mycoolcheck",
+              "some.client",
               "OK",
               "some check output"
             ),
@@ -123,7 +124,8 @@ describe Hipchat do
               'sensu',
               include(
                 "2015-08-06 13:03:10 UTC",
-                "mycoolcheck on some.client",
+                "mycoolcheck",
+                "some.client",
                 "WARNING",
                 "some check output"
               ),
@@ -144,7 +146,8 @@ describe Hipchat do
               'sensu',
               include(
                 "2015-08-06 13:03:10 UTC",
-                "mycoolcheck on some.client",
+                "mycoolcheck",
+                "some.client",
                 "CRITICAL",
                 "some check output"
               ),
@@ -188,6 +191,10 @@ describe Hipchat do
       expect(hipchat_message).to include('test.vagrant.local')
     end
 
+    it 'includes link to dashboard' do
+      expect(hipchat_message).to include(subject.dashboard_link)
+    end
+
     context 'when address is known' do
       it 'includes address' do
         expect(hipchat_message).to include('127.0.0.1')
@@ -223,7 +230,7 @@ describe Hipchat do
         before { check_data['status'] = 0 }
 
         it 'status message is OK' do
-          expect(hipchat_message).to include(' - OK')
+          expect(hipchat_message).to include('OK')
         end
       end
 
@@ -231,7 +238,7 @@ describe Hipchat do
         before { check_data['status'] = 1 }
 
         it 'status message is WARNING' do
-          expect(hipchat_message).to include(' - WARNING')
+          expect(hipchat_message).to include('WARNING')
         end
       end
 
@@ -239,7 +246,7 @@ describe Hipchat do
         before { check_data['status'] = 2 }
 
         it 'status message is CRITICAL' do
-          expect(hipchat_message).to include(' - CRITICAL')
+          expect(hipchat_message).to include('CRITICAL')
         end
       end
 
@@ -247,7 +254,7 @@ describe Hipchat do
         before { check_data['status'] = 3 }
 
         it 'status message is UNKNOWN' do
-          expect(hipchat_message).to include(' - UNKNOWN')
+          expect(hipchat_message).to include('UNKNOWN')
         end
       end
     end

@@ -31,15 +31,22 @@ class Hipchat < BaseHandler
   end
 
   def address_string
-    address == 'unknown' ? '' : " (#{address})"
+    if ['unknown', ''].include? address
+      ''
+    else
+      " (#{address})"
+    end
   end
 
   def hipchat_message
-    <<-EOM.gsub(/^\s{6}/,'')
-      <b>#{event_time} - #{@event['check']['name']} on #{@event['client']['name']}
-        #{address_string} - #{human_check_status}</b>
+    <<-EOM.gsub(/^\s{6}/, '')
+      <b>#{human_check_status}</b>
+      <a href="#{dashboard_link}"><b>#{@event['check']['name']}</b></a>
+      on #{@event['client']['name']}#{address_string}
+      <span style="color: gray">@#{event_time}</span>
       <br />
-      &nbsp;&nbsp;#{check_notification_string}
+      &nbsp;&nbsp;
+      #{check_notification_string}
     EOM
   end
 
