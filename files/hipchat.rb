@@ -27,10 +27,12 @@ class Hipchat < BaseHandler
   end
 
   def hipchat_message
-    "<b>#{event_time} - #{@event['check']['name']} on #{@event['client']['name']} " +
-      "(#{@event['client']['address']}) - #{human_check_status}</b><br />" +
-    "<br />" +
-    "&nbsp;&nbsp;#{check_notification_string}"
+    <<-EOM.gsub(/^\s{6}/,'')
+      <b>#{event_time} - #{@event['check']['name']} on #{@event['client']['name']}
+        (#{@event['client']['address']}) - #{human_check_status}</b><br />
+      <br />
+      &nbsp;&nbsp;#{check_notification_string}
+    EOM
   end
 
   def hipchat_message_colour

@@ -176,13 +176,20 @@ describe Hipchat do
       client_data['address'] = '127.0.0.1'
     end
 
-    it 'correctly formats the check issued date' do
+    it 'includes issued date' do
       expect(hipchat_message).to include('2015-08-06 13:03:10 UTC')
     end
 
-    it 'correctly formats the line containing datetime, service, host and address' do
-      expect(hipchat_message).to \
-        include('2015-08-06 13:03:10 UTC - Fake Service port 80 on test.vagrant.local (127.0.0.1)')
+    it 'includes check name' do
+      expect(hipchat_message).to include('Fake Service port 80')
+    end
+
+    it 'includes client name' do
+      expect(hipchat_message).to include('test.vagrant.local')
+    end
+
+    it 'includes address' do
+      expect(hipchat_message).to include('127.0.0.1')
     end
 
     context 'when check notification is populated' do
