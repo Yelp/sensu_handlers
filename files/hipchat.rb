@@ -59,7 +59,7 @@ class Hipchat < BaseHandler
     when 2
       'red'
     else
-      'grey'
+      'gray'
     end
   end
 
