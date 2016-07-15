@@ -75,3 +75,21 @@ describe Nodebot do
   end
 end
 
+describe "ColorHandling" do
+  # Check if things round trip without modification
+  ansi_to_irc_colors("Roundtrip").should == "Roundtrip"
+  # Check bold conversion
+  ansi_to_irc_colors("\33[1mSome text").should == "\02Some text"
+  # Check a single color
+  ansi_to_irc_colors("\33[30mBlack").should == "\03" + "01Black"
+  # bold + color
+  ansi_to_irc_colors("\33[1mBold \33[30mBlack").should == "\02Bold " + "\03" + "01Black"
+  # background color
+  ansi_to_irc_colors("\33[30;47mBlack on White").should == "\03" + "01,00Black on White"
+  # background without foreground
+  ansi_to_irc_colors("\33[47mWhite Background").should == "\03" + "99,00White Background"
+  # invalid escape sequence
+  ansi_to_irc_colors("\33!mInvalid").should == "Invalid"
+  # test reset
+  ansi_to_irc_colors("\33[1mBold \33[0mNormal").should == "\02Bold " + "\x0f" + "Normal"
+end

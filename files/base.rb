@@ -74,9 +74,17 @@ class BaseHandler < Sensu::Handler
     client_display_name
   end
 
-  def description(maxlen=100000)
+  def description(maxlen=100000, uncolorize=true)
     description = @event['check']['notification']
-    description ||= [client_display_name, @event['check']['name'], uncolorize(@event['check']['output'])].join(' : ')
+
+    message_parts = [client_display_name, @event['check']['name']]
+    if uncolorize
+      message_parts.push(uncolorize(@event['check']['output']))
+    else
+      message_parts.push(@event['check']['output'])
+    end
+
+    description ||= message_parts.join(' : ')
     if event_is_critical? or event_is_warning?
       toadd = ""
       if tip
