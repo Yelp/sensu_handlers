@@ -111,39 +111,41 @@ def ansi_to_irc_colors(message)
       # Do nothing.
     elsif next_byte == "["
       sequence = scanner.scan_until(/[\x40-\x7E]/)
-      # Discard the final byte
-      sequence = sequence[0...-1]
-      # Split by semicolon
-      sequence = sequence.split(";")
+      if sequence
+        # Discard the final byte
+        sequence = sequence[0...-1]
+        # Split by semicolon
+        sequence = sequence.split(";")
 
-      foreground = nil
-      background = nil
-      formatting = nil
-      sequence.each { |ansi_code|
-          ansi_code = Integer(ansi_code) rescue nil
-          if ansi_code
-            foreground ||= ANSI_TO_IRC_COLORS[ansi_code]
-            background ||= ANSI_TO_IRC_BACK[ansi_code]
-            formatting ||= ANSI_TO_IRC_FMT[ansi_code]
-          end
-      }
+        foreground = nil
+        background = nil
+        formatting = nil
+        sequence.each { |ansi_code|
+            ansi_code = Integer(ansi_code) rescue nil
+            if ansi_code
+              foreground ||= ANSI_TO_IRC_COLORS[ansi_code]
+              background ||= ANSI_TO_IRC_BACK[ansi_code]
+              formatting ||= ANSI_TO_IRC_FMT[ansi_code]
+            end
+        }
 
-      if !foreground.nil?
-        output += "\x03"
-        output += foreground
-      end
-      if !background.nil?
-        # Background specified, but no foreground
-        # IRC requires foreground first, then background
-        # so we send 99 to force the default foreground
-        if foreground.nil?
-           output += "\x0399"
+        if !foreground.nil?
+          output += "\x03"
+          output += foreground
         end
-        output += ","
-        output += background
-      end
-      if !formatting.nil?
-        output += formatting.chr
+        if !background.nil?
+          # Background specified, but no foreground
+          # IRC requires foreground first, then background
+          # so we send 99 to force the default foreground
+          if foreground.nil?
+             output += "\x0399"
+          end
+          output += ","
+          output += background
+        end
+        if !formatting.nil?
+          output += formatting.chr
+        end
       end
     else
       # not a color, not much we can do about this
