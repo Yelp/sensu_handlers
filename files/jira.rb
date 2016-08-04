@@ -12,6 +12,11 @@ class Jira < BaseHandler
   end
 
   def create_issue(summary, full_description, project)
+    if rate_limited? && issues_limit_per_minute_reached?
+      puts 'Not opening a new jira issue - reached limit per minute'
+      return handler_success
+    end
+
     begin
       require 'jira'
       client = JIRA::Client.new(get_options)
@@ -39,6 +44,7 @@ class Jira < BaseHandler
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"
       end
+      incr_num_issues_per_minute if rate_limited?
       handler_success
     rescue Exception => e
       puts e.message
@@ -129,6 +135,32 @@ class Jira < BaseHandler
 
   def handler_success
     #File.delete('/var/log/sensu/jira_handler_failure.log')
+  end
+
+  def issues_limit_per_minute_reached?
+   curr_value = redis.get(rate_limit_redis_key).to_i
+   limit = @event['check']['max_issues_per_minute'].to_i
+   limit = 3 if limit < 3 # safeguard against unexpected, might remove in future
+   curr_value >= limit
+  end
+
+  def rate_limited?
+    @event['check'].has_key? 'max_issues_per_minute'
+  end
+
+  # a key per event per minute, each key expires in redis automatically
+  def rate_limit_redis_key
+    return @rate_limit_redis_key if @rate_limit_redis_key
+
+    timestamp = Time.now
+    timestamp = timestamp.to_i - timestamp.sec
+    @rate_limit_redis_key =
+      "jira_handler_rate_limit::#{@event['check']['name']}::#{timestamp}"
+  end
+
+  def incr_num_issues_per_minute
+    redis.incr(rate_limit_redis_key)
+    redis.expire(rate_limit_redis_key, 120) # 2 minutes
   end
 
 end

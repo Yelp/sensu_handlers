@@ -289,5 +289,18 @@ BODY
   ## end channels helper
   #####################################
 
+  def redis
+    return @redis if @redis
+
+    $: << '/etc/sensu/plugins'
+    require 'tiny_redis'
+    redis_config = JSON.parse(
+      File.open('/etc/sensu/conf.d/redis.json') { |f| f.read })
+    @redis = TinyRedis::Client.new(host=redis_config['redis']['host'],
+                                     port=redis_config['redis']['port'])
+    rescue => e
+      raise "Unable to load redis client or connect to sensu redis: #{e.message}"
+  end
+
 end
 
