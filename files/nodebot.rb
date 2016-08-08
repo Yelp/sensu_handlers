@@ -76,16 +76,15 @@ ANSI_TO_IRC_COLORS = {
 }
 # Background colors
 ANSI_TO_IRC_BACK = {}
+ANSI_TO_IRC_COLORS.each do |k, v|
+  ANSI_TO_IRC_BACK[k + 10] = v
+end
 # Formatting characters
 ANSI_TO_IRC_FMT = {
   0  => 0xf,  # reset
   1  => 0x2,  # bold
   4  => 0x1f, # underline
   7  => 0x16, # reverse mode
-}
-# Generate background colors
-ANSI_TO_IRC_COLORS.each { |k, v|
-  ANSI_TO_IRC_BACK[k + 10] = v
 }
 ANSI_START = Regexp.new(Regexp.quote("\x1b"))
 
@@ -103,10 +102,10 @@ def ansi_to_irc_colors(message)
     # Remove the ANSI escape sequence
     # and append whatever is left to
     # the output
-    output += token[0...-1]
+    output << token[0...-1]
 
     next_byte = scanner.get_byte()
-    if next_byte >= "0x40" and next_byte <= "0x7E"
+    if next_byte >= "0x40" && next_byte <= "0x7E"
       # Already reached the end of the sequence?
       # Do nothing.
     elsif next_byte == "["
@@ -120,31 +119,31 @@ def ansi_to_irc_colors(message)
         foreground = nil
         background = nil
         formatting = nil
-        sequence.each { |ansi_code|
-            ansi_code = Integer(ansi_code) rescue nil
-            if ansi_code
-              foreground ||= ANSI_TO_IRC_COLORS[ansi_code]
-              background ||= ANSI_TO_IRC_BACK[ansi_code]
-              formatting ||= ANSI_TO_IRC_FMT[ansi_code]
-            end
-        }
+        sequence.each do |ansi_code|
+          ansi_code = Integer(ansi_code) rescue nil
+          next unless ansi_code
 
-        if !foreground.nil?
-          output += "\x03"
-          output += foreground
+          foreground ||= ANSI_TO_IRC_COLORS[ansi_code]
+          background ||= ANSI_TO_IRC_BACK[ansi_code]
+          formatting ||= ANSI_TO_IRC_FMT[ansi_code]
+       end
+
+        if foreground
+          output << "\x03"
+          output << foreground
         end
-        if !background.nil?
+        if background
           # Background specified, but no foreground
           # IRC requires foreground first, then background
           # so we send 99 to force the default foreground
-          if foreground.nil?
-             output += "\x0399"
+          if !foreground
+            output << "\x0399"
           end
-          output += ","
-          output += background
+          output << ","
+          output << background
         end
-        if !formatting.nil?
-          output += formatting.chr
+        if formatting
+          output << formatting.chr
         end
       end
     else
@@ -155,8 +154,6 @@ def ansi_to_irc_colors(message)
     token = scanner.scan_until(ANSI_START)
   end
   # Consume anything left
-  output += scanner.rest()
-
-  return output
+  output << scanner.rest()
 end
 
