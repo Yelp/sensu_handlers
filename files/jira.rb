@@ -11,7 +11,7 @@ class Jira < BaseHandler
         x.strip.gsub(/\s+/, '_') }
   end
 
-  def create_issue(summary, full_description, project)
+  def create_issue(summary, description, project)
     if rate_limited? && issues_limit_per_minute_reached?
       puts 'Not opening a new jira issue - reached limit per minute'
       return handler_success
@@ -34,7 +34,7 @@ class Jira < BaseHandler
         issue_json = {
           "fields"=>{
             "summary"=> summary,
-            "description"=> full_description,
+            "description"=> description,
             "project"=> { "id"=>project_id },
             "issuetype"=> {"id"=>1},
             "labels" => build_labels
@@ -62,7 +62,7 @@ class Jira < BaseHandler
 
         # Let the world know why we are closing this issue.
         comment = issue.comments.build
-        comment.save(:body => "This is fine:\n#{output}")
+        comment.save(:body => "This is fine:\n{code}#{uncolorize(output)}{code}")
 
         # Find the first transition to a closed state that we can perform.
         transitions_to_close = issue.transitions.all.select { |transition|
@@ -100,7 +100,7 @@ class Jira < BaseHandler
     return false if !project
     status = human_check_status()
     summary = @event['check']['name'] + " on " + @event['client']['name'] + " is " + status
-    full_description = full_description()
+    description = jira_description()
     output = @event['check']['output']
     begin
       timeout(10) do
@@ -108,7 +108,7 @@ class Jira < BaseHandler
         when 0
           close_issue(output, project)
         else
-          create_issue(summary, full_description, project)
+          create_issue(summary, description, project)
         end
       end
     rescue Timeout::Error
