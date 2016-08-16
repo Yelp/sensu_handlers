@@ -122,6 +122,33 @@ BODY
     body
   end
 
+  def jira_description
+    body = <<-BODY
+{code}
+#{uncolorize(@event['check']['output'])}
+{code}
+
+Dashboard Link: #{dashboard_link}
+Runbook: #{runbook}
+Tip: #{tip}
+
+Command: {{#{@event['check']['command']}}}
+Status: #{human_check_status()} (#{@event['check']['status']})
+
+Timestamp: #{Time.at(@event['check']['issued'])}
+Occurrences:  #{@event['occurrences']}
+
+Team: #{team_name}
+Host: {{#{client_display_name}}}
+Client Name: {{#{@event['client']['name']}}}
+Address:  #{@event['client']['address']}
+Check Name:  #{@event['check']['name']}
+
+BODY
+    body
+  end
+
+
   def full_description_hash
     {
       'Output' => uncolorize(@event['check']['output']),
