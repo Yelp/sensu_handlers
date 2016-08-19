@@ -15,8 +15,8 @@ class sensu_handlers::opsgenie inherits sensu_handlers {
   monitoring_check { 'check_opsgenie':
     check_every => '60m',
     command  => '/usr/lib/nagios/plugins/check_http -S -H api.opsgenie.com',
-    runbook  => 'http://y/rb-pagerduty',
-    tip      => 'is Ops genie up?',
+    runbook  => $sensu_handlers::opsgenie_runbook,
+    tip      => $sensu_handlers::opsgenie_tip,
   }
 
 }
