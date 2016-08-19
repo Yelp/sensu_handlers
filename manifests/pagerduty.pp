@@ -32,8 +32,8 @@ class sensu_handlers::pagerduty (
   monitoring_check { 'check_pagerduty':
     check_every => '60m',
     command  => '/usr/lib/nagios/plugins/check_http -S -H events.pagerduty.com -e 404',
-    runbook  => 'http://y/rb-pagerduty',
-    tip      => 'is PD up? https://events.pagerduty.com?',
+    runbook  => $sensu_handlers::pagerduty_runbook,
+    tip      => $sensu_handlers::pagerduty_tip,
   }
 
 }

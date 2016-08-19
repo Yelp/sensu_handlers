@@ -56,9 +56,9 @@ class sensu_handlers::aws_prune (
     monitoring_check { 'cache_instance_list-staleness':
      check_every => '10m',
      alert_after => '1h',
-     team        => 'operations',
-     runbook     => 'y/rb-unknown',
-     tip         => 'talk to kwa',
+     team        => $sensu_handlers::team,
+     runbook     => $sensu_handlers::aws_prune_runbook,
+     tip         => $sensu_handlers::aws_prune_tip,
      command     => "/usr/lib/nagios/plugins/check_file_age /var/cache/instance_list.json -w 1800 -c 3600",
      page        => false,
      ticket      => true,

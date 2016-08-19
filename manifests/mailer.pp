@@ -41,9 +41,10 @@ class sensu_handlers::mailer (
     alert_after   => '10m',
     realert_every => '10',
     page          => false,
-    team          => 'operations',
-    command       => '/usr/lib/nagios/plugins/check_smtp -H localhost',
-    runbook       => 'y/?',
+    team          => $sensu_handlers::team,
+    command       => "/usr/lib/nagios/plugins/check_smtp -H ${sensu_handlers::mailer_server},",
+    runbook       => $sensu_handlers::mailer_runbook,
+    tip           => $sensu_handlers::mailer_tip,
   }
 
 }
