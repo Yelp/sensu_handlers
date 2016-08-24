@@ -26,12 +26,6 @@
 #  If you are using the JIRA handler, it needs basic auth to work.
 #  Fill in the credentials and url to your local JIRA instance.
 #
-# [*include_aws_prune*]
-#  Bool to have the AWS pruning handler enabled.
-#
-#  This is a special handler that inspect the AWS API to remove
-#  EC servers that no longer exist. Uses special hiera lookup keys.
-#
 # [*region*]
 #  The aws region so the aws_prune handler knows wich API endpoint to query
 #
@@ -56,8 +50,6 @@ class sensu_handlers(
   $jira_username              = 'sensu',
   $jira_password              = 'sensu',
   $jira_site                  = "jira.${::domain}",
-  $aws_prune_runbook          = 'http://y/rb-unknown',
-  $aws_prune_tip              = 'talk to kwa',
   $mailer_runbook             = 'http://y/unkown',
   $mailer_server              = 'localhost',
   $mailer_tip                 = '',
@@ -65,7 +57,6 @@ class sensu_handlers(
   $opsgenie_tip               = 'is Ops genie up?',
   $pagerduty_runbook          = 'http://y/rb-pagerduty',
   $pagerduty_tip              = 'is PD up? https://events.pagerduty.com?',
-  $include_aws_prune          = true,
   $region                     = $::datacenter,
   $team                       = 'operations',
   $datacenter                 = $::datacenter,
@@ -76,7 +67,6 @@ class sensu_handlers(
 ) {
 
   validate_hash($teams, $api_client_config)
-  validate_bool($include_aws_prune)
 
   $gem_provider = $use_embedded_ruby ? {
     true    => 'sensu_gem',
@@ -127,8 +117,4 @@ class sensu_handlers(
   $handler_classes = prefix($default_handler_array, 'sensu_handlers::')
   # This ends up being something like [ 'sensu_handlers::nodebot', 'sensu_handlers::pagerduty' ]
   include $handler_classes
-
-  if $include_aws_prune {
-    include sensu_handlers::aws_prune
-  }
 }
