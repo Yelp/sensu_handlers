@@ -42,7 +42,7 @@ class sensu_handlers::mailer (
     realert_every => '10',
     page          => false,
     team          => $sensu_handlers::team,
-    command       => "/usr/lib/nagios/plugins/check_smtp -H ${sensu_handlers::mailer_server},",
+    command       => "/usr/lib/nagios/plugins/check_smtp -H ${sensu_handlers::mailer_server}",
     runbook       => $sensu_handlers::mailer_runbook,
     tip           => $sensu_handlers::mailer_tip,
   }
