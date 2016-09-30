@@ -26,9 +26,6 @@
 #  If you are using the JIRA handler, it needs basic auth to work.
 #  Fill in the credentials and url to your local JIRA instance.
 #
-# [*region*]
-#  The aws region so the aws_prune handler knows wich API endpoint to query
-#
 # [*use_embeded_ruby*]
 #  use provider => sensu_gem for any gem packages
 #
@@ -57,7 +54,6 @@ class sensu_handlers(
   $opsgenie_tip               = 'is Ops genie up?',
   $pagerduty_runbook          = 'http://y/rb-pagerduty',
   $pagerduty_tip              = 'is PD up? https://events.pagerduty.com?',
-  $region                     = $::datacenter,
   $team                       = 'operations',
   $datacenter                 = $::datacenter,
   $dashboard_link             = "https://sensu.${::domain}",
