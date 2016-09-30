@@ -43,6 +43,9 @@
 # implemented as a sensu extension, it runs witin sensu-process). If not sure,
 # don't use it and set this to false.
 #
+# [*environment*]
+#  The sensu envionment to be used in incident key
+
 class sensu_handlers(
   $teams,
   $package_ensure             = 'latest',
@@ -64,6 +67,7 @@ class sensu_handlers(
   $use_embedded_ruby          = false,
   $api_client_config          = {},
   $use_num_occurrences_filter = false,
+  $environment                = '',
 ) {
 
   validate_hash($teams, $api_client_config)

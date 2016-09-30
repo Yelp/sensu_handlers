@@ -72,7 +72,46 @@ describe Pagerduty do
       subject.handle
     end
 
-    context "Pagerduty times out / errors" do
+    context "Pagerduty with environment in config, and times out / errors" do
+      before(:each) do
+        subject.event['check']['status'] = 2
+        subject.event['check']['team'] = 'operations'
+        subject.settings[settings_key]['environment'] = 'preprod-someregion'
+      end
+      it "logs an error when we time out 3 times" do
+        subject.timeout_count = 4
+        subject.handle
+        expect(subject.logged).to eql('pagerduty -- timed out while attempting to trigger an incident -- sensu preprod-someregion some.client mycoolcheck')
+      end
+      it "can succeed if we time out once" do
+        subject.timeout_count = 1
+        expect(subject).to receive(:trigger_incident).and_return(true)
+        subject.handle
+      end
+      it "can succeed if we time out twice" do
+        subject.timeout_count = 2
+        expect(subject).to receive(:trigger_incident).and_return(true)
+        subject.handle
+      end
+      it "Fails if we error 3 times" do
+        expect(subject).to receive(:trigger_incident).and_return(false, false, false)
+        subject.handle
+        expect(subject.logged).to eql('pagerduty -- failed to trigger incident -- sensu preprod-someregion some.client mycoolcheck')
+      end
+      it "Succeeds if we error 2 times" do
+        expect(subject).to receive(:trigger_incident).and_return(false, false, true)
+        subject.handle
+        expect(subject.logged).to eql('pagerduty -- Triggerd incident -- sensu preprod-someregion some.client mycoolcheck')
+      end
+      it "Succeeds if we timeout then error once" do
+        subject.timeout_count = 1
+        expect(subject).to receive(:trigger_incident).and_return(false, true)
+        subject.handle
+        expect(subject.logged).to eql('pagerduty -- Triggerd incident -- sensu preprod-someregion some.client mycoolcheck')
+      end
+    end
+
+    context "Pagerduty without environment in config and times out / errors" do
       before(:each) do
         subject.event['check']['status'] = 2
         subject.event['check']['team'] = 'operations'
@@ -109,6 +148,7 @@ describe Pagerduty do
         expect(subject.logged).to eql('pagerduty -- Triggerd incident -- sensu someregion some.client mycoolcheck')
       end
     end
+
   end
 
   context "events which do not page" do
@@ -157,4 +197,3 @@ describe Pagerduty do
     end
   end
 end
-

@@ -7,8 +7,18 @@ class Pagerduty < BaseHandler
     @event['check']['region']
   end
 
+  def environment
+    if handler_settings.has_key?('environment') and !handler_settings['environment'].empty?
+      handler_settings['environment']
+    end
+  end
+
   def incident_key
-    "sensu #{region} #{@event['client']['name']} #{@event['check']['name']}"
+    if environment
+      "sensu #{environment} #{@event['client']['name']} #{@event['check']['name']}"
+    else
+      "sensu #{region} #{@event['client']['name']} #{@event['check']['name']}"
+    end
   end
 
   def api_key
@@ -71,4 +81,3 @@ class Pagerduty < BaseHandler
     end
   end
 end
-

@@ -29,6 +29,35 @@ describe 'sensu_handlers', :type => :class do
       }}
       it { should compile }
     end
+
+    context 'With teams and without environment' do
+      let(:params) {{
+                      :jira_username => 'foo',
+                      :jira_password => 'bar',
+                      :jira_site => 'https://jira.mycompany.com',
+                      :teams     => teams
+                    }}
+      let(:hiera_data) {{
+                         :'sensu_handlers::teams'             => teams,
+                         :'sensu_handlers::mailer::mail_from' => "foo@bar.com"
+                        }}
+      it { should compile }
+    end
+
+    context 'With teams and with environment' do
+      let(:params) {{
+                      :jira_username     => 'foo',
+                      :jira_password     => 'bar',
+                      :jira_site         => 'https://jira.mycompany.com',
+                      :teams             => teams,
+                      :environment       => 'foobar'
+                    }}
+      let(:hiera_data) {{
+                         :'sensu_handlers::teams'             => teams,
+                         :'sensu_handlers::mailer::mail_from' => "foo@bar.com"
+                        }}
+      it { should compile }
+    end
   end
 
   describe 'use_embedded_ruby' do
@@ -123,4 +152,3 @@ describe 'sensu_handlers', :type => :class do
   end
 
 end
-
