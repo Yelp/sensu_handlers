@@ -123,9 +123,10 @@ BODY
   end
 
   def jira_description
+    descr = uncolorize(@event['check']['output']).gsub(/\{code\}/, '')
     body = <<-BODY
 {code}
-#{uncolorize(@event['check']['output'])}
+#{descr}
 {code}
 
 Dashboard Link: #{dashboard_link}
