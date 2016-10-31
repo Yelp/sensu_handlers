@@ -21,7 +21,8 @@ class sensu_handlers::pagerduty (
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/pagerduty.rb',
     config  => {
-      teams => $teams,
+      teams       => $teams,
+      environment => $environment,
     },
     filters => flatten([
       'page_filter',
