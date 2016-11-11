@@ -169,7 +169,11 @@ BODY
 
   def dashboard_link
     settings['default']['dashboard_link'].gsub(/\/$/, '')
-    "#{settings['default']['dashboard_link']}/#/client/#{settings['default']['datacenter']}/#{@event['client']['name']}?check=#{@event['check']['name']}" || 'Unknown dashboard link. Please set for the base handler config'
+    "#{settings['default']['dashboard_link']}/#/client/#{datacenter}/#{@event['client']['name']}?check=#{@event['check']['name']}" || 'Unknown dashboard link. Please set for the base handler config'
+  end
+
+  def datacenter
+    settings['default']['datacenter']
   end
 
   def log(line)
