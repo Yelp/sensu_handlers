@@ -5,7 +5,7 @@ require "#{File.dirname(__FILE__)}/base"
 class Pagerduty < BaseHandler
 
   def incident_key
-    "sensu #{datacenter} #{@event['client']['name']} #{@event['check']['name']}"
+    "sensu #{environment}-#{datacenter} #{@event['client']['name']} #{@event['check']['name']}"
   end
 
   def api_key

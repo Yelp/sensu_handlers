@@ -176,6 +176,10 @@ BODY
     settings['default']['datacenter']
   end
 
+  def environment
+    settings['default']['environment']
+  end
+
   def log(line)
     puts line
   end

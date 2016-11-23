@@ -106,6 +106,7 @@ class sensu_handlers(
     config    => {
       dashboard_link => $dashboard_link,
       datacenter     => $datacenter,
+      environment    => $::environment,
     }
   }
 
