@@ -219,6 +219,10 @@ BODY
     end
     alert_after   = @event['check']['alert_after'].to_i || 0
 
+    if self.class.name =~ /Pagerduty/ && @event['check']['page_after']
+      alert_after = @event['check']['page_after'].to_i
+    end
+
     # nil.to_i == 0
     # 0 || 1   == 0
     realert_every = ( @event['check']['realert_every'] || 1 ).to_i 
