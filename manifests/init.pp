@@ -81,6 +81,7 @@ class sensu_handlers(
 
   if $use_num_occurrences_filter {
     $num_occurrences_filter = [ 'num_occurrences_filter' ]
+    $num_occurrences_filter_for_pagerduty = [ 'num_occurrences_filter_for_pagerduty' ]
     file { '/etc/sensu/extensions/num_occurrences_filter.rb':
       owner  => 'sensu',
       group  => 'sensu',
@@ -91,6 +92,7 @@ class sensu_handlers(
   }
   else {
     $num_occurrences_filter = []
+    $num_occurrences_filter_for_pagerduty = []
   }
 
   file { '/etc/sensu/handlers/base.rb':

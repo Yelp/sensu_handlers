@@ -25,7 +25,7 @@ class sensu_handlers::pagerduty (
     },
     filters => flatten([
       'page_filter',
-      $sensu_handlers::num_occurrences_filter,
+      $sensu_handlers::num_occurrences_filter_for_pagerduty,
     ]),
   } ->
   # If we are going to send pagerduty alerts, we need to be sure it actually is up

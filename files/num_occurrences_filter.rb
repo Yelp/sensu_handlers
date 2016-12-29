@@ -103,4 +103,32 @@ module Sensu::Extension
     end
 
   end
+
+  class NumOccurrencesForPagerdutyHandler < NumOccurrences
+
+    def name
+      'num_occurrences_filter_for_pagerduty'
+    end
+
+    def description
+      'filter events based on the number of occurrences for pagerduty handler'
+    end
+
+    def run(event)
+      begin
+        # this requires deep merge;
+        # this is a workaround instead of getting extra libs
+        modified_event = Marshal.load(Marshal.dump(event))
+        modified_event[:check][:alert_after] = event[:check][:page_after] if
+          event[:check][:page_after]
+        rc, msg = filter_by_num_occurrences(modified_event)
+        yield msg, rc
+      rescue => e
+        # filter crashed - let's pass this on to handler
+        yield e.message, ALLOW_PROCESSING
+      end
+    end
+
+  end
+
 end
