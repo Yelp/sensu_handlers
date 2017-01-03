@@ -60,9 +60,11 @@ class Jira < BaseHandler
         url = get_options[:site] + '/browse/' + issue.key
         puts "Closing Issue: #{issue.key} (#{url})"
 
+        occurrences = @event['occurrences'] rescue 'unknown'
+
         # Let the world know why we are closing this issue.
         comment = issue.comments.build
-        comment.save(:body => "This is fine:\n{code}#{uncolorize(output)}{code}")
+        comment.save(:body => "This is fine (occurrences=#{occurrences}):\n{code}#{uncolorize(output)}{code}")
 
         # Find the first transition to a closed state that we can perform.
         transitions_to_close = issue.transitions.all.select { |transition|
