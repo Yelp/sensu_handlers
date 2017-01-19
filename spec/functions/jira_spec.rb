@@ -89,6 +89,15 @@ describe Jira do
       subject.handle
     end
 
+    it "Event has tags when supplied by team data" do
+      subject.event['check']['team'] = 'team_with_tags'
+      subject.event['check']['tags'] = ["some_tag   with spaces     "]
+      subject.event['check']['status'] = 2
+      expect(subject.build_labels).to match_array(["SENSU", "SENSU_mycoolcheck", "SENSU_some.client", "some_tag_with_spaces", "test_team_tag", "test_team_tag_2"])
+      expect(subject).to receive(:create_issue).and_return(true)
+      subject.handle
+    end
+
   end
 
 end

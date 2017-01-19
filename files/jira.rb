@@ -5,10 +5,17 @@ require "#{File.dirname(__FILE__)}/base"
 class Jira < BaseHandler
 
   def build_labels
-    [ "SENSU_#{@event['client']['name']}",
+    user_labels = []
+    user_labels += @event['check']['tags'] || []
+    user_labels += team_data('tags') || []
+    [
+      "SENSU_#{@event['client']['name']}",
       "SENSU_#{@event['check']['name']}",
-      "SENSU", *@event['check']['tags'] ].uniq.reject { |x| x.nil? }.map { |x|
-        x.strip.gsub(/\s+/, '_') }
+      "SENSU",
+      *user_labels
+    ].uniq.reject { |x| x.nil? }.map { |x|
+      x.strip.gsub(/\s+/, '_')
+    }
   end
 
   def create_issue(summary, description, project)

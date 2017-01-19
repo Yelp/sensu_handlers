@@ -42,6 +42,9 @@ module SensuHandlerTestHelper
     subject.settings[settings_key]['teams']['someotherteam'] = {
       'pagerduty_api_key' => 'someotherteam_pagerduty_key'
     }
+    subject.settings[settings_key]['teams']['team_with_tags'] = {
+      'tags' => ['test_team_tag', 'test_team_tag_2']
+    }
     yield(event) if block_given?
   end
 end
