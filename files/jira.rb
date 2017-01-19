@@ -110,7 +110,7 @@ class Jira < BaseHandler
     return false if !should_ticket?
     return false if !project
     status = human_check_status()
-    summary = @event['check']['name'] + " on " + @event['client']['name'] + " is " + status
+    summary = "#{@event['check']['name']} on #{client_display_name()} is #{status}"
     description = jira_description()
     output = @event['check']['output']
     begin
