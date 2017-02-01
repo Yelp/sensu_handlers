@@ -5,10 +5,17 @@ require "#{File.dirname(__FILE__)}/base"
 class Jira < BaseHandler
 
   def build_labels
-    [ "SENSU_#{@event['client']['name']}",
+    user_labels = []
+    user_labels += @event['check']['tags'] || []
+    user_labels += team_data('tags') || []
+    [
+      "SENSU_#{@event['client']['name']}",
       "SENSU_#{@event['check']['name']}",
-      "SENSU", *@event['check']['tags'] ].uniq.reject { |x| x.nil? }.map { |x|
-        x.strip.gsub(/\s+/, '_') }
+      "SENSU",
+      *user_labels
+    ].uniq.reject { |x| x.nil? }.map { |x|
+      x.strip.gsub(/\s+/, '_')
+    }
   end
 
   def create_issue(summary, description, project)
@@ -103,7 +110,7 @@ class Jira < BaseHandler
     return false if !should_ticket?
     return false if !project
     status = human_check_status()
-    summary = @event['check']['name'] + " on " + @event['client']['name'] + " is " + status
+    summary = "#{@event['check']['name']} on #{client_display_name()} is #{status}"
     description = jira_description()
     output = @event['check']['output']
     begin
