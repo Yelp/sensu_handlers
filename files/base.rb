@@ -229,6 +229,18 @@ BODY
 
     initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
     number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
+    # sensu 0.26+ only, else never make  occurrences_watermark actionable
+    occurrences_watermark = @event.key?('occurrences_watermark') ? event['occurrences_watermark'] : -1
+
+    # https://github.com/Yelp/sensu_handlers/issues/103
+    # this hack takes care of scenario
+    # when event has triggered at action == create
+    # but did not resolve the corresponding event when action == resolve.
+    # occurrences_watermark > initial_failing_occurrences prove enough occurrences
+    # of the event that triggered create and hence it is safe to filter the event to resolve handler action.
+    if occurrences_watermark > initial_failing_occurrences and @event['action'] == 'resolve'
+      return nil
+    end
 
     # Don't bother acting if we haven't hit the 
     # alert_after threshold
