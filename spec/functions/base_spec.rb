@@ -353,6 +353,43 @@ describe BaseHandler do
         expect(subject.filter_repeated).to eql(nil)
       end
     end
+	context "when action == resolve" do
+	  context "when occurrences_watermark > initial_failing_occurrences" do
+        it "it should fire" do
+          subject.event['occurrences'] = 2
+          subject.event['occurrences_watermark'] = 8
+          subject.event['check']['interval'] = 20
+          subject.event['check']['realert_every'] = "-1"
+          subject.event['check']['alert_after'] = 60
+          subject.event['action'] = 'resolve'
+          expect(subject).not_to receive(:bail)
+          expect(subject.filter_repeated).to eql(nil)
+        end
+      end
+	  context "when occurrences_watermark <= initial_failing_occurrences" do
+        it "it should not fire" do
+          subject.event['occurrences'] = 3
+          subject.event['occurrences_watermark'] = 3
+          subject.event['check']['interval'] = 20
+          subject.event['check']['realert_every'] = "-1"
+          subject.event['check']['alert_after'] = 60
+          subject.event['action'] = 'resolve'
+          expect(subject).to receive(:bail)
+          expect(subject.filter_repeated).to eql(nil)
+        end
+      end
+	  context "when no occurrences_watermark" do
+        it "it should not fire" do
+          subject.event['occurrences'] = 3
+          subject.event['check']['interval'] = 20
+          subject.event['check']['realert_every'] = "-1"
+          subject.event['check']['alert_after'] = 60
+          subject.event['action'] = 'resolve'
+          expect(subject).to receive(:bail)
+          expect(subject.filter_repeated).to eql(nil)
+        end
+      end
+    end
   end #End filter repeated
 
   context "With display name tag" do
