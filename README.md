@@ -149,7 +149,7 @@ The team syntax determines the default behavior of the handlers, given an input 
 *Warning*: If you typo a team name, the Sensu handlers will *not* know how to
 associate an alert with the right outputs. This is a common source of mistakes.
 
-Lets look at the team synax in more detail:
+Lets look at the team syntax in more detail:
 
 ```
 sensu_handlers::teams:
