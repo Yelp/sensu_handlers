@@ -47,6 +47,8 @@ class Jira < BaseHandler
             "labels" => build_labels
           }
         }
+        more_labels = build_extra_labels(issue_json) rescue [ ]
+        issue_json['fields']['labels'] += more_labels
         issue.save(issue_json)
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"
@@ -56,6 +58,32 @@ class Jira < BaseHandler
     rescue Exception => e
       puts e.message
     end
+  end
+
+  def build_extra_labels(issue_hash)
+    case @event['check']['name']
+      when 'check_puppet_staleness'
+        build_extra_labels_for_check_puppet_staleness(issue_hash)
+      else
+        [ ]
+    end
+  end
+
+  def build_extra_labels_for_check_puppet_staleness(issue_hash)
+    # very basic attempt to extract a bit more information about
+    # check_puppet_staleness events
+    labels = [ ]
+    labels << "PUPPET_package_not_found_#{$1}" if
+      issue_hash['description'] =~ /could not find package (\S+)/i
+    labels << "PUPPET_catalog_retrieve_error" if
+      issue_hash['description'] =~ /could not retrieve catalog/i
+    labels << "PUPPET_missing_package_#{$1}" if
+      issue_hash['description'] =~ /could not find package (\S+)/i
+    labels << "PUPPET_disabled" if
+      issue_hash['description'] =~ /Disabled by .+ with message:/i
+    labels << "PUPPET_dependency_failure" if
+      issue_hash['description'] =~ /Dependency .+ has failures: true/i
+    labels
   end
 
   def close_issue(output, project)
