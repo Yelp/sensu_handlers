@@ -288,6 +288,18 @@ BODY
     @settings['api'].merge!(settings['api_client']) if settings['api_client']
   end
 
+  # override upstream method; if this is a recovery, do not filter
+  # it based on any dependency or whether it's disabled or not -
+  # always let recovery be processed by handlers
+  def filter
+    unless event_is_ok?
+      filter_disabled
+      filter_repeated
+      filter_silenced
+      filter_dependencies
+    end
+  end
+
   ##################################
   ## channels helper for chat handlers
   def channel_keys
