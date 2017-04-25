@@ -71,6 +71,8 @@ class BaseHandler < Sensu::Handler
     client_display_name = @event['client']['tags']['Display Name'] rescue nil
     client_display_name = @event['client']['name'] if
       client_display_name.nil? || client_display_name.empty?
+    instance_id = @event['client']['instance_id'] rescue nil
+    client_display_name += "(#{instance_id})" if instance_id
     client_display_name
   end
 
