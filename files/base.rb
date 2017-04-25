@@ -67,12 +67,14 @@ class BaseHandler < Sensu::Handler
     @event['check']['tip']
   end
 
-  def client_display_name
+  def client_display_name(with_instance_id=false)
     client_display_name = @event['client']['tags']['Display Name'] rescue nil
     client_display_name = @event['client']['name'] if
       client_display_name.nil? || client_display_name.empty?
-    instance_id = @event['client']['instance_id'] rescue nil
-    client_display_name += "(#{instance_id})" if instance_id
+    if with_instance_id
+      instance_id = @event['client']['instance_id'] rescue nil
+      client_display_name += " (#{instance_id})" if instance_id
+    end
     client_display_name
   end
 
@@ -115,7 +117,7 @@ Timestamp: #{Time.at(@event['check']['issued'])}
 Occurrences:  #{@event['occurrences']}
 
 Team: #{team_name}
-Host: #{client_display_name}
+Host: #{client_display_name(true)}
 Client Name: #{@event['client']['name']}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
