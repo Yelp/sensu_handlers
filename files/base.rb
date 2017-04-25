@@ -143,7 +143,7 @@ Timestamp: #{Time.at(@event['check']['issued'])}
 Occurrences:  #{@event['occurrences']}
 
 Team: #{team_name}
-Host: {{#{client_display_name}}}
+Host: {{#{client_display_name(true)}}}
 Client Name: {{#{@event['client']['name']}}}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
