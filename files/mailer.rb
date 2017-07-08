@@ -18,7 +18,7 @@ require 'timeout'
 # patch to fix Exim delivery_method: https://github.com/mikel/mail/pull/546
 module ::Mail
   class Exim < Sendmail
-    def self.call(path, arguments, destinations, encoded_message)
+    def self.call(path, arguments, _destinations, encoded_message)
       popen "#{path} #{arguments}" do |io|
         io.puts encoded_message.to_lf
         io.flush
@@ -35,7 +35,7 @@ class Mailer < BaseHandler
   end
 
   def action_to_string
-   @event['action'].eql?('resolve') ? "RESOLVED" : "ALERT"
+    @event['action'].eql?('resolve') ? 'RESOLVED' : 'ALERT'
   end
 
   def mail_destination
@@ -46,7 +46,7 @@ class Mailer < BaseHandler
     elsif @event['check']['notification_email'] == 'undef'
       # 'undef' is what puppet puts in, when left undefined
       team_data('notification_email')
-    elsif @event['check']['notification_email'] != nil
+    elsif !@event['check']['notification_email'].nil?
       @event['check']['notification_email']
     else
       team_data('notification_email')
@@ -54,7 +54,6 @@ class Mailer < BaseHandler
   end
 
   def handle
-
     mail_to = mail_destination
     # Only procede if we have an email address to work with
     return false unless mail_to
@@ -70,25 +69,25 @@ class Mailer < BaseHandler
     smtp_username = handler_settings['smtp_username'] || nil
     smtp_password = handler_settings['smtp_password'] || nil
     smtp_authentication = handler_settings['smtp_authentication'] || :plain
-    smtp_enable_starttls_auto = handler_settings['smtp_enable_starttls_auto'] == "false" ? false : true
+    smtp_enable_starttls_auto = handler_settings['smtp_enable_starttls_auto'] == 'false' ? false : true
 
     body = full_description
     subject = "#{action_to_string} - #{short_name}: #{@event['check']['notification']}"
 
     Mail.defaults do
       delivery_options = {
-        :address    => smtp_address,
-        :port       => smtp_port,
-        :domain     => smtp_domain,
-        :openssl_verify_mode => 'none',
-        :enable_starttls_auto => smtp_enable_starttls_auto
+        address: smtp_address,
+        port: smtp_port,
+        domain: smtp_domain,
+        openssl_verify_mode: 'none',
+        enable_starttls_auto: smtp_enable_starttls_auto
       }
 
       unless smtp_username.nil?
         auth_options = {
-          :user_name        => smtp_username,
-          :password         => smtp_password,
-          :authentication   => smtp_authentication
+          user_name: smtp_username,
+          password: smtp_password,
+          authentication: smtp_authentication
         }
         delivery_options.merge! auth_options
       end
@@ -111,5 +110,4 @@ class Mailer < BaseHandler
       log 'mail -- timed out while attempting to ' + @event['action'] + ' an incident -- ' + short_name
     end
   end
-
 end

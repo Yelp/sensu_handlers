@@ -4,8 +4,7 @@ require 'spec_helper'
 # the method used in Kernel before loading the handler.
 # This is _terrible_, see also https://github.com/sensu/sensu-plugin/pull/61
 module Kernel
-  def at_exit(&block)
-  end
+  def at_exit(&block); end
 end
 
 module Sensu
@@ -31,19 +30,19 @@ describe Jira do
     expect(subject).not_to receive(:create_issue)
   end
 
-  it "By default should not ticket issues" do
+  it 'By default should not ticket issues' do
     setup_event!
     subject.should_ticket? == false
   end
 
-  it "Works for custom Jira Project" do
+  it 'Works for custom Jira Project' do
     subject.event['check']['team'] = 'custom_team'
     subject.event['check']['ticket'] = true
     subject.event['check']['status'] = 2
     subject.event['check']['name'] = 'fake_alert'
     subject.event['client']['name'] = 'fake_client'
     subject.event['check']['project'] = 'CUSTOM'
-    expect(subject).to receive(:create_issue).with("fake_alert on fake_client is CRITICAL", /.*/, "CUSTOM").and_return(true)
+    expect(subject).to receive(:create_issue).with('fake_alert on fake_client is CRITICAL', /.*/, 'CUSTOM').and_return(true)
     expect(subject).not_to receive(:close_issue)
     subject.handle
   end
@@ -51,64 +50,62 @@ describe Jira do
   it "Wont make a ticket if it doesn't have a project available" do
     subject.event['check']['ticket'] = true
     subject.event['check']['status'] = 2
-    subject.event['check']['team'] = "bla"
+    subject.event['check']['team'] = 'bla'
     expect(subject).not_to receive(:create_issue)
     expect(subject).not_to receive(:close_issue)
     subject.handle
   end
 
-  context "With events that DO have ticket => true and a valid project" do
-    before(:each) { subject.event['check']['ticket'] = true 
-                    subject.event['check']['project'] = 'TEST'
-                    subject.event['check']['team'] = 'custom_team'
-                  }
+  context 'With events that DO have ticket => true and a valid project' do
+    before(:each) do
+      subject.event['check']['ticket'] = true
+      subject.event['check']['project'] = 'TEST'
+      subject.event['check']['team'] = 'custom_team'
+    end
 
-    it "Event resolved in Jira if OK" do
+    it 'Event resolved in Jira if OK' do
       subject.event['status'] = 0
       expect(subject).to receive(:close_issue).and_return(true)
       subject.handle
     end
 
-    it "Event sent to Jira if critical" do
+    it 'Event sent to Jira if critical' do
       subject.event['check']['status'] = 2
       expect(subject).to receive(:create_issue).and_return(true)
       subject.handle
     end
 
-    it "Event created in Jira if WARNING" do
+    it 'Event created in Jira if WARNING' do
       subject.event['check']['status'] = 1
       expect(subject).to receive(:create_issue).and_return(true)
       subject.handle
     end
 
-    it "Tags exists in the Event" do
+    it 'Tags exists in the Event' do
       subject.event['check']['status'] = 2
-      subject.event['check']['tags'] = ["some_tag   with spaces     "]
-      expect(subject.build_labels).to match_array(["SENSU", "SENSU_mycoolcheck", "SENSU_some.client", "some_tag_with_spaces"])
+      subject.event['check']['tags'] = ['some_tag   with spaces     ']
+      expect(subject.build_labels).to match_array(['SENSU', 'SENSU_mycoolcheck', 'SENSU_some.client', 'some_tag_with_spaces'])
       expect(subject).to receive(:create_issue).and_return(true)
       subject.handle
     end
 
-    it "Creates proper labels when tags are supplied by team data" do
+    it 'Creates proper labels when tags are supplied by team data' do
       subject.event['check']['team'] = 'team_with_tags'
-      subject.event['check']['tags'] = ["some_tag   with spaces     "]
+      subject.event['check']['tags'] = ['some_tag   with spaces     ']
       subject.event['check']['status'] = 2
-      expect(subject.build_labels).to match_array(["SENSU", "SENSU_mycoolcheck", "SENSU_some.client", "some_tag_with_spaces", "test_team_tag", "test_team_tag_2"])
+      expect(subject.build_labels).to match_array(['SENSU', 'SENSU_mycoolcheck', 'SENSU_some.client', 'some_tag_with_spaces', 'test_team_tag', 'test_team_tag_2'])
       expect(subject).to receive(:create_issue).and_return(true)
       subject.handle
     end
 
-    it "Incorporates client_display_name into message" do
+    it 'Incorporates client_display_name into message' do
       subject.event['check']['name'] = 'fake_alert'
       subject.event['client']['name'] = 'fake_client'
       # _client_ tags are a hash, vs _check_ tags which are a list
-      subject.event['client']['tags'] = {'Display Name' => 'really_fake_client'}
+      subject.event['client']['tags'] = { 'Display Name' => 'really_fake_client' }
       subject.event['check']['status'] = 2
-      expect(subject).to receive(:create_issue).with("fake_alert on really_fake_client is CRITICAL", /.*/, "TEST").and_return(true)
+      expect(subject).to receive(:create_issue).with('fake_alert on really_fake_client is CRITICAL', /.*/, 'TEST').and_return(true)
       subject.handle
     end
-
   end
-
 end
-

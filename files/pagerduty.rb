@@ -3,7 +3,6 @@
 require "#{File.dirname(__FILE__)}/base"
 
 class Pagerduty < BaseHandler
-
   def incident_key
     "sensu #{datacenter} #{@event['client']['name']} #{@event['check']['name']}"
   end
@@ -16,10 +15,10 @@ class Pagerduty < BaseHandler
     return false unless api_key
     require 'redphone/pagerduty'
     response = Redphone::Pagerduty.trigger_incident(
-      :service_key  => api_key,
-      :incident_key => incident_key,
-      :description  => description(140),
-      :details      => full_description_hash
+      service_key: api_key,
+      incident_key: incident_key,
+      description: description(140),
+      details: full_description_hash
     )['status']
     if response == 'success'
       true
@@ -33,28 +32,28 @@ class Pagerduty < BaseHandler
     return false unless api_key
     require 'redphone/pagerduty'
     Redphone::Pagerduty.resolve_incident(
-      :service_key  => api_key,
-      :incident_key => incident_key
+      service_key: api_key,
+      incident_key: incident_key
     )['status'] == 'success'
   end
 
   def handle
-    if !should_page? # Explicitly check for true. We don't page by default.
+    unless should_page? # Explicitly check for true. We don't page by default.
       log "pagerduty -- Ignoring incident #{incident_key} as it is not set to page."
       return
     end
     begin
       action = case @event['check']['status'].to_i
-        when 2
-          'trigger'
-        when 0,1
-        'resolve'
+               when 2
+                 'trigger'
+               when 0, 1
+                 'resolve'
       end
       response = timeout_and_retry do
         case @event['check']['status'].to_i
         when 2
           trigger_incident
-        when 0,1
+        when 0, 1
           resolve_incident
         end
       end
@@ -68,4 +67,3 @@ class Pagerduty < BaseHandler
     end
   end
 end
-

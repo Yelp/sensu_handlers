@@ -4,7 +4,6 @@
 #
 module Sensu::Extension
   class NumOccurrences < Filter
-
     STOP_PROCESSING  = 0
     ALLOW_PROCESSING = 1
 
@@ -17,13 +16,11 @@ module Sensu::Extension
     end
 
     def run(event)
-      begin
-        rc, msg = filter_by_num_occurrences(event)
-        yield msg, rc
-      rescue => e
-        # filter crashed - let's pass this on to handler
-        yield e.message, ALLOW_PROCESSING
-      end
+      rc, msg = filter_by_num_occurrences(event)
+      yield msg, rc
+    rescue => e
+      # filter crashed - let's pass this on to handler
+      yield e.message, ALLOW_PROCESSING
     end
 
     # This used to be in base.rb but was moved into a sensu extension
@@ -52,21 +49,21 @@ module Sensu::Extension
 
       # nil.to_i == 0
       # 0 || 1   == 0
-      realert_every = ( event[:check][:realert_every] || 1 ).to_i
+      realert_every = (event[:check][:realert_every] || 1).to_i
 
       initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
       number_of_failed_attempts = event[:occurrences] - initial_failing_occurrences
 
       # Don't bother acting if we haven't hit the alert_after threshold
       if number_of_failed_attempts < 1
-        return STOP_PROCESSING, strip(%Q{
+        return STOP_PROCESSING, strip(%(
           Not failing long enough, only #{number_of_failed_attempts} after
           #{initial_failing_occurrences} initial failing occurrences
-        })
+        ))
       # If we have an interval, and this is a creation event, that means we are
       # an active check
       # Lets also filter based on the realert_every setting
-      elsif interval > 0 and event[:action] == :create
+      elsif interval > 0 && event[:action] == :create
         # Special case of exponential backoff
         if realert_every == -1
           # If our number of failed attempts is an exponent of 2
@@ -79,33 +76,29 @@ module Sensu::Extension
           end
         elsif (number_of_failed_attempts - 1) % realert_every != 0
           # Now bail if we are not in the realert_every cycle
-          return STOP_PROCESSING, strip(%Q{
+          return STOP_PROCESSING, strip(%(
             only handling every #{realert_every} occurrences, and we are at
             #{number_of_failed_attempts}
-          })
+          ))
         end
       end
 
       # if we reached here, we didn't find any reason to block processing
-      return ALLOW_PROCESSING, 'the end'
+      [ALLOW_PROCESSING, 'the end']
     end
 
     def power_of_two?(x)
       return false if x > 1 && x.odd?
-      while ( x % 2) == 0 and x > 1
-        x /= 2
-      end
-      x==1
+      x /= 2 while x.even? && x > 1
+      x == 1
     end
 
     def strip(s)
       s.strip.gsub(/[\s\n]+/, ' ')
     end
-
   end
 
   class NumOccurrencesForPagerdutyHandler < NumOccurrences
-
     def name
       'num_occurrences_filter_for_pagerduty'
     end
@@ -115,20 +108,16 @@ module Sensu::Extension
     end
 
     def run(event)
-      begin
-        # this requires deep merge;
-        # this is a workaround instead of getting extra libs
-        modified_event = Marshal.load(Marshal.dump(event))
-        modified_event[:check][:alert_after] = event[:check][:page_after] if
-          event[:check][:page_after]
-        rc, msg = filter_by_num_occurrences(modified_event)
-        yield msg, rc
-      rescue => e
-        # filter crashed - let's pass this on to handler
-        yield e.message, ALLOW_PROCESSING
-      end
+      # this requires deep merge;
+      # this is a workaround instead of getting extra libs
+      modified_event = Marshal.load(Marshal.dump(event))
+      modified_event[:check][:alert_after] = event[:check][:page_after] if
+        event[:check][:page_after]
+      rc, msg = filter_by_num_occurrences(modified_event)
+      yield msg, rc
+    rescue => e
+      # filter crashed - let's pass this on to handler
+      yield e.message, ALLOW_PROCESSING
     end
-
   end
-
 end

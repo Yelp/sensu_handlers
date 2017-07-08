@@ -4,8 +4,7 @@ require 'spec_helper'
 # the method used in Kernel before loading the handler.
 # This is _terrible_, see also https://github.com/sensu/sensu-plugin/pull/61
 module Kernel
-  def at_exit(&block)
-  end
+  def at_exit(&block); end
 end
 
 require "#{File.dirname(__FILE__)}/../../files/hipchat"
@@ -17,7 +16,7 @@ end
 describe Hipchat do
   include SensuHandlerTestHelper
 
-  # because we are in spec/functions we have included 
+  # because we are in spec/functions we have included
   # Rspec::Puppet::FunctionExampleGroup which has taken over subject
   subject { described_class.new }
 
@@ -30,50 +29,47 @@ describe Hipchat do
   before(:each) do
     setup_event!
     check_data['team']   = 'testteam1'
-    check_data['issued'] = 1438866190
+    check_data['issued'] = 1_438_866_190
 
     settings['teams'][team] = {
       'hipchat_room' => 'Test team #1'
     }
   end
 
-
   # two silly tests just for starter
   it { expect(subject).to be_a BaseHandler }
   it { expect(subject).to be_a Sensu::Handler }
 
-  describe "#alert" do
-
-    context "with no hipchat api_key" do
+  describe '#alert' do
+    context 'with no hipchat api_key' do
       it 'returns false' do
         expect(subject.alert).to be false
       end
     end
 
-    context "with hipchat api_key" do
+    context 'with hipchat api_key' do
       before { handler_settings['api_key'] = 'fakekey' }
 
-      context "with lists of rooms for notifications" do
+      context 'with lists of rooms for notifications' do
         before do
           settings['teams'][team] = {
-            'pager_room' => ['pager_room1', 'pager_room2'],
-            'room'       => ['room1', 'room2']
+            'pager_room' => %w[pager_room1 pager_room2],
+            'room'       => %w[room1 room2]
           }
-          check_data['room'] = ['event_room1', 'event_room2']
+          check_data['room'] = %w[event_room1 event_room2]
           check_data['page'] = true
-
         end
 
         def alert_room(room)
           receive(:alert_hipchat).with(room, anything, anything, anything)
         end
-        it "notifies the appropriate rooms" do
+        it 'notifies the appropriate rooms' do
           expect(subject).to alert_room('pager_room1')
           expect(subject).to alert_room('pager_room2')
           expect(subject).to alert_room('event_room1')
           expect(subject).to alert_room('event_room2')
 
-          subject.alert()
+          subject.alert
         end
       end
     end
@@ -82,7 +78,7 @@ describe Hipchat do
   describe 'handle' do
     before { handler_settings['api_key'] = 'fakekey' }
 
-    after  { subject.handle } # note! 
+    after  { subject.handle } # note!
 
     context 'when event action is resolve' do
       before do
@@ -97,17 +93,16 @@ describe Hipchat do
             'Test team #1',
             'sensu',
             include(
-              "2015-08-06 13:03:10 UTC",
-              "mycoolcheck",
-              "some.client",
-              "OK",
-              "some check output"
+              '2015-08-06 13:03:10 UTC',
+              'mycoolcheck',
+              'some.client',
+              'OK',
+              'some check output'
             ),
-            hash_including(:color => "green")
+            hash_including(color: 'green')
           ) \
           .and_return(true)
       end
-
     end
 
     context 'when event action is create' do
@@ -123,13 +118,13 @@ describe Hipchat do
               'Test team #1',
               'sensu',
               include(
-                "2015-08-06 13:03:10 UTC",
-                "mycoolcheck",
-                "some.client",
-                "WARNING",
-                "some check output"
+                '2015-08-06 13:03:10 UTC',
+                'mycoolcheck',
+                'some.client',
+                'WARNING',
+                'some check output'
               ),
-              { :color => 'yellow', :notify => true }
+              color: 'yellow', notify: true
             ) \
             .and_return(true)
         end
@@ -145,25 +140,23 @@ describe Hipchat do
               'Test team #1',
               'sensu',
               include(
-                "2015-08-06 13:03:10 UTC",
-                "mycoolcheck",
-                "some.client",
-                "CRITICAL",
-                "some check output"
+                '2015-08-06 13:03:10 UTC',
+                'mycoolcheck',
+                'some.client',
+                'CRITICAL',
+                'some check output'
               ),
-              { :color => 'red', :notify => true }
+              color: 'red', notify: true
             ) \
             .and_return(true)
-
         end
       end
-
     end
 
     context 'when action is flapping' do
       before { subject.event['action'] = 'flapping' }
 
-      # TODO is this the right course of action?
+      # TODO: is this the right course of action?
       it 'does not call allert_hipchat' do
         expect(subject).not_to receive(:alert_hipchat)
       end
@@ -174,7 +167,7 @@ describe Hipchat do
     let(:hipchat_message) { subject.hipchat_message }
     before do
       check_data['name']     = 'Fake Service port 80'
-      check_data['issued']   = 1438866190
+      check_data['issued']   = 1_438_866_190
       client_data['name']    = 'test.vagrant.local'
       client_data['address'] = '127.0.0.1'
     end
@@ -206,7 +199,6 @@ describe Hipchat do
         expect(hipchat_message).not_to include('127.0.0.1')
       end
     end
-
 
     context 'when check notification is populated' do
       it 'contains the notifcation data' do
@@ -259,5 +251,4 @@ describe Hipchat do
       end
     end
   end
-
 end
