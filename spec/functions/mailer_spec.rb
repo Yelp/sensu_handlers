@@ -4,8 +4,7 @@ require 'spec_helper'
 # the method used in Kernel before loading the handler.
 # This is _terrible_, see also https://github.com/sensu/sensu-plugin/pull/61
 module Kernel
-  def at_exit(&block)
-  end
+  def at_exit(&block); end
 end
 
 module Sensu
@@ -25,12 +24,12 @@ describe Mailer do
 
   subject { Mailer.new }
   before(:each) do
-      setup_event! do |e|
-        e['check']['status'] = 2
-        e['check']['page'] = true
-        e['check']['runbook'] = 'http://some.runbook/'
-        e['check']['team'] = 'someotherteam'
-      end
+    setup_event! do |e|
+      e['check']['status'] = 2
+      e['check']['page'] = true
+      e['check']['runbook'] = 'http://some.runbook/'
+      e['check']['team'] = 'someotherteam'
+    end
   end
 
   it "Doesn't work without a mail destination" do
@@ -40,8 +39,8 @@ describe Mailer do
     subject.handle
   end
 
-  it "properly reads the email from the check" do
-    subject.event['check']['notification_email'] = "test@email"
+  it 'properly reads the email from the check' do
+    subject.event['check']['notification_email'] = 'test@email'
     subject.event['check']['status'] = 2
     subject.event['check']['name'] = 'fake_alert'
     subject.event['client']['name'] = 'fake_client'
@@ -49,6 +48,4 @@ describe Mailer do
     subject.stub(:log).and_return(nil) # quiet specs
     subject.handle
   end
-
 end
-

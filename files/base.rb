@@ -46,19 +46,17 @@ class BaseHandler < Sensu::Handler
   end
 
   def team_name
-    if @event['check']['team'] then
+    if @event['check']['team']
       @event['check']['team']
     else
-      bail "check did not provide a team name"
+      bail 'check did not provide a team name'
     end
   end
 
   def team_data(lookup_key = nil)
     return unless team_name
     data = handler_settings['teams'][team_name] || {}
-    if lookup_key
-      data = data[lookup_key]
-    end
+    data = data[lookup_key] if lookup_key
     yield(data) if data && block_given?
     data
   end
@@ -67,18 +65,26 @@ class BaseHandler < Sensu::Handler
     @event['check']['tip']
   end
 
-  def client_display_name(with_instance_id=false)
-    client_display_name = @event['client']['tags']['Display Name'] rescue nil
+  def client_display_name(with_instance_id = false)
+    client_display_name = begin
+                            @event['client']['tags']['Display Name']
+                          rescue
+                            nil
+                          end
     client_display_name = @event['client']['name'] if
       client_display_name.nil? || client_display_name.empty?
     if with_instance_id
-      instance_id = @event['client']['instance_id'] rescue nil
+      instance_id = begin
+                      @event['client']['instance_id']
+                    rescue
+                      nil
+                    end
       client_display_name += " (#{instance_id})" if instance_id
     end
     client_display_name
   end
 
-  def description(maxlen=100000, uncolorize=true)
+  def description(maxlen = 100_000, uncolorize = true)
     description = @event['check']['notification']
 
     message_parts = [client_display_name, @event['check']['name']]
@@ -89,17 +95,13 @@ class BaseHandler < Sensu::Handler
     end
 
     description ||= message_parts.join(' : ')
-    if event_is_critical? or event_is_warning?
-      toadd = ""
-      if tip
-        toadd = "#{toadd} - #{tip}"
-      end
-      if runbook
-        toadd = "#{toadd} (#{runbook})"
-      end
+    if event_is_critical? || event_is_warning?
+      toadd = ''
+      toadd = "#{toadd} - #{tip}" if tip
+      toadd = "#{toadd} (#{runbook})" if runbook
       description = "#{description}#{toadd}"
     end
-    description.gsub("\n", ' ')[0..maxlen-1]
+    description.tr("\n", ' ')[0..maxlen - 1]
   end
 
   def full_description
@@ -111,7 +113,7 @@ Runbook: #{runbook}
 Tip: #{tip}
 
 Command:  #{@event['check']['command']}
-Status: #{human_check_status()} (#{@event['check']['status']})
+Status: #{human_check_status} (#{@event['check']['status']})
 
 Timestamp: #{Time.at(@event['check']['issued'])}
 Occurrences:  #{@event['occurrences']}
@@ -137,7 +139,7 @@ Runbook: #{runbook}
 Tip: #{tip}
 
 Command: {{#{@event['check']['command']}}}
-Status: #{human_check_status()} (#{@event['check']['status']})
+Status: #{human_check_status} (#{@event['check']['status']})
 
 Timestamp: #{Time.at(@event['check']['issued'])}
 Occurrences:  #{@event['occurrences']}
@@ -152,7 +154,6 @@ BODY
     body
   end
 
-
   def full_description_hash
     {
       'Output' => uncolorize(@event['check']['output']),
@@ -162,12 +163,12 @@ BODY
       'Address' => @event['client']['address'],
       'Check Name' => @event['check']['name'],
       'Command' => @event['check']['command'],
-      'Status' => "#{human_check_status()} (#{@event['check']['status']})",
+      'Status' => "#{human_check_status} (#{@event['check']['status']})",
       'Occurrences' => @event['occurrences'],
       'Team' => team_name,
       'Runbook' => runbook,
       'Tip' => tip,
-      'Server' => Socket.gethostname,
+      'Server' => Socket.gethostname
     }
   end
 
@@ -188,18 +189,18 @@ BODY
     sleep 3
   end
 
-  def timeout_and_retry(&block)
+  def timeout_and_retry
     2.times do
       begin
         timeout(10) do
-          return true if block.call
+          return true if yield
         end
       rescue Timeout::Error
       end
       do_sleep
     end
     timeout(10) do
-      block.call
+      yield
     end
   end
 
@@ -219,9 +220,9 @@ BODY
       # http://sensuapp.org/docs/0.12/keepalives
       interval = 20
     else
-      interval      = @event['check']['interval'].to_i || 0
+      interval = @event['check']['interval'].to_i || 0
     end
-    alert_after   = @event['check']['alert_after'].to_i || 0
+    alert_after = @event['check']['alert_after'].to_i || 0
 
     if self.class.name =~ /Pagerduty/ && @event['check']['page_after']
       alert_after = @event['check']['page_after'].to_i
@@ -229,7 +230,7 @@ BODY
 
     # nil.to_i == 0
     # 0 || 1   == 0
-    realert_every = ( @event['check']['realert_every'] || 1 ).to_i 
+    realert_every = (@event['check']['realert_every'] || 1).to_i
 
     initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
     number_of_failed_attempts = @event['occurrences'] - initial_failing_occurrences
@@ -241,13 +242,13 @@ BODY
     # but did not resolve the corresponding event when action == resolve.
     # occurrences_watermark > initial_failing_occurrences prove enough occurrences
     # of the event that triggered create and hence it is safe to filter the event to resolve handler action.
-    if (@event.key?('occurrences_watermark') &&
-        @event['occurrences_watermark'] > initial_failing_occurrences &&
-        @event['action'] == 'resolve')
+    if @event.key?('occurrences_watermark') &&
+       @event['occurrences_watermark'] > initial_failing_occurrences &&
+       @event['action'] == 'resolve'
       return
     end
 
-    # Don't bother acting if we haven't hit the 
+    # Don't bother acting if we haven't hit the
     # alert_after threshold
     if number_of_failed_attempts < 1
       bail "Not failing long enough, only #{number_of_failed_attempts} after " \
@@ -255,7 +256,7 @@ BODY
     # If we have an interval, and this is a creation event, that means we are
     # an active check
     # Lets also filter based on the realert_every setting
-    elsif interval > 0 and @event['action'] == 'create' 
+    elsif interval > 0 && @event['action'] == 'create'
       # Special case of exponential backoff
       if realert_every == -1
         # If our number of failed attempts is an exponent of 2
@@ -274,10 +275,8 @@ BODY
   end
 
   def power_of_two?(x)
-    while ( x % 2) == 0 and x > 1
-      x /= 2
-    end
-    x==1
+    x /= 2 while x.even? && x > 1
+    x == 1
   end
 
   def settings_key
@@ -295,11 +294,11 @@ BODY
   ##################################
   ## channels helper for chat handlers
   def channel_keys
-    %w[ channel room ]
+    %w[channel room]
   end
 
   def pager_channel_keys
-    %w[ pager_channel pager_room ]
+    %w[pager_channel pager_room]
   end
 
   def find_channel(keys, &block)
@@ -344,15 +343,14 @@ BODY
   def redis
     return @redis if @redis
 
-    $: << '/etc/sensu/plugins'
+    $LOAD_PATH << '/etc/sensu/plugins'
     require 'tiny_redis'
     redis_config = JSON.parse(
-      File.open('/etc/sensu/conf.d/redis.json') { |f| f.read })
-    @redis = TinyRedis::Client.new(host=redis_config['redis']['host'],
-                                     port=redis_config['redis']['port'])
-    rescue => e
-      raise "Unable to load redis client or connect to sensu redis: #{e.message}"
+      File.open('/etc/sensu/conf.d/redis.json', &:read)
+    )
+    @redis = TinyRedis::Client.new(host = redis_config['redis']['host'],
+                                   port = redis_config['redis']['port'])
+  rescue => e
+    raise "Unable to load redis client or connect to sensu redis: #{e.message}"
   end
-
 end
-

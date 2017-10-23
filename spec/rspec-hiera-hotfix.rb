@@ -9,21 +9,20 @@ module RSpec::Puppet
       Puppet[:vardir] = vardir
 
       [
-        [:modulepath, :module_path],
-        [:manifestdir, :manifest_dir],
-        [:manifest, :manifest],
-        [:templatedir, :template_dir],
-        [:config, :config],
-        [:confdir, :confdir],
-        [:hiera_config, :hiera_config],
+        %i[modulepath module_path],
+        %i[manifestdir manifest_dir],
+        %i[manifest manifest],
+        %i[templatedir template_dir],
+        %i[config config],
+        %i[confdir confdir],
+        %i[hiera_config hiera_config]
       ].each do |a, b|
-        if Puppet[a]
-          if self.respond_to? b
-            Puppet[a] = self.send(b)
-          else
-            Puppet[a] = RSpec.configuration.send(b)
-          end
-        end
+        next unless Puppet[a]
+        Puppet[a] = if respond_to? b
+                      send(b)
+                    else
+                      RSpec.configuration.send(b)
+                    end
       end
 
       Puppet[:libdir] = Dir["#{Puppet[:modulepath]}/*/lib"].entries.join(File::PATH_SEPARATOR)

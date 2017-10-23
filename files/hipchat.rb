@@ -19,7 +19,7 @@ class Hipchat < BaseHandler
   end
 
   def event_time
-    Time.at(@event['check']['issued']).utc.strftime "%Y-%m-%d %H:%M:%S UTC"
+    Time.at(@event['check']['issued']).utc.strftime '%Y-%m-%d %H:%M:%S UTC'
   end
 
   def check_notification_string
@@ -65,15 +65,14 @@ class Hipchat < BaseHandler
 
   # hipchat prefers room before channel
   def channel_keys
-    %w[ hipchat_room room channel ]
+    %w[hipchat_room room channel]
   end
 
   def pager_channel_keys
-    %w[ hipchat_pager_room pager_room pager_channel ]
+    %w[hipchat_pager_room pager_room pager_channel]
   end
 
-
-  # hipchat message room api takes a notify option: 
+  # hipchat message room api takes a notify option:
   #
   # Whether this message should trigger a user notification (change the tab
   # color, play a sound, notify mobile phones, etc). Each recipient's
@@ -83,7 +82,7 @@ class Hipchat < BaseHandler
   #
   # we use notify on normal alerts, but on resolve we just message the room
   # without extra notifications.  reduces noise.
-  alias :rooms :channels
+  alias rooms channels
   def alert(notify = false)
     return false unless api_key
 
@@ -92,13 +91,12 @@ class Hipchat < BaseHandler
         room,
         'sensu',
         hipchat_message,
-        { 
-          :color  => hipchat_message_colour,
-          :notify => notify  # see note on notify above
-        }
+
+        color: hipchat_message_colour,
+        notify: notify # see note on notify above
+
       )
     end
-
   end
 
   def hipchat_client
@@ -106,9 +104,8 @@ class Hipchat < BaseHandler
     @hipchat_client ||= HipChat::Client.new(api_key)
   end
 
-
   def alert_hipchat(room, sender, message, options_or_notify = {})
-    # TODO handle failure to send,  such as bad room.
+    # TODO: handle failure to send,  such as bad room.
     timeout_and_retry do
       hipchat_client[room].send(sender, message, options_or_notify)
     end
