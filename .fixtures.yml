@@ -4,7 +4,9 @@ fixtures:
     sensu_handlers: "#{source_dir}"
   repositories:
     monitoring_check: "https://github.com/Yelp/puppet-monitoring_check"
-    sensu: 'git://github.com/sensu/sensu-puppet.git'
+    sensu:
+        repo: 'git://github.com/sensu/sensu-puppet.git'
+        ref: v2.2.0
     stdlib: "https://github.com/puppetlabs/puppetlabs-stdlib"
     apt:
         repo: 'git://github.com/puppetlabs/puppetlabs-apt.git'
