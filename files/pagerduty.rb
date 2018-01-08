@@ -16,16 +16,11 @@ class Pagerduty < BaseHandler
     return false unless api_key
     require 'redphone/pagerduty'
 
-    details = full_description_hash
-    # Add description and component field if they are present in the payload
-    details['description'] = @event['check']['description'] if @event['check'].has_key? 'description'
-    details['component'] = @event['check']['component'] if @event['check'].has_key? 'component'
-
     response = Redphone::Pagerduty.trigger_incident(
       :service_key  => api_key,
       :incident_key => incident_key,
       :description  => description(140),
-      :details      => details
+      :details      => full_description_hash
     )['status']
     if response == 'success'
       true

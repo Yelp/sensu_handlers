@@ -45,6 +45,14 @@ class BaseHandler < Sensu::Handler
     @event['check']['runbook'] || false
   end
 
+  def event_description
+    @event['check']['description'] || false
+  end
+
+  def component
+    @event['check']['component'] || false
+  end
+
   def team_name
     if @event['check']['team'] then
       @event['check']['team']
@@ -103,6 +111,9 @@ class BaseHandler < Sensu::Handler
   end
 
   def full_description
+    description = event_description ? event_description : 'NA'
+    component = component ? '[' + component.join(',') + ']' : 'NA'
+
     body = <<-BODY
 #{uncolorize(@event['check']['output'])}
 
@@ -121,12 +132,17 @@ Host: #{client_display_name(true)}
 Client Name: #{@event['client']['name']}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
+Description: #{description}
+Component: #{component}
 
 BODY
     body
   end
 
   def jira_description
+    description = event_description ? event_description : 'NA'
+    component = component ? '[' + component.join(',') + ']' : 'NA'
+
     body = <<-BODY
 {code}
 #{uncolorize(@event['check']['output'])}
@@ -147,6 +163,8 @@ Host: {{#{client_display_name(true)}}}
 Client Name: {{#{@event['client']['name']}}}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
+Description: #{description}
+Component: #{component}
 
 BODY
     body
@@ -154,7 +172,7 @@ BODY
 
 
   def full_description_hash
-    {
+    description_hash = {
       'Output' => uncolorize(@event['check']['output']),
       'Dashboard Link' => dashboard_link,
       'Host' => @event['client']['name'],
@@ -169,6 +187,18 @@ BODY
       'Tip' => tip,
       'Server' => Socket.gethostname,
     }
+
+    if event_description
+        description_hash['description'] = event_description
+    end
+
+    if component
+      if ! component.empty?
+        description_hash['component'] = '[' + component.join(',') + ']'
+      end
+    end
+
+    description_hash
   end
 
   def dashboard_link
