@@ -46,11 +46,16 @@ class BaseHandler < Sensu::Handler
   end
 
   def event_description
-    @event['check']['description'] || false
+    @event['check']['description'] ? @event['check']['description'] : 'N/A'
   end
 
   def component
-    @event['check']['component'] || false
+    component = @event['check']['component']
+    if component
+      !component.empty? ? '[' + component.join(',') + ']' : 'N/A'
+    else
+      'N/A'
+    end
   end
 
   def team_name
@@ -111,8 +116,6 @@ class BaseHandler < Sensu::Handler
   end
 
   def full_description
-    description = event_description ? event_description : 'NA'
-    component = component ? '[' + component.join(',') + ']' : 'NA'
 
     body = <<-BODY
 #{uncolorize(@event['check']['output'])}
@@ -132,7 +135,7 @@ Host: #{client_display_name(true)}
 Client Name: #{@event['client']['name']}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
-Description: #{description}
+Description: #{event_description}
 Component: #{component}
 
 BODY
@@ -140,8 +143,6 @@ BODY
   end
 
   def jira_description
-    description = event_description ? event_description : 'NA'
-    component = component ? '[' + component.join(',') + ']' : 'NA'
 
     body = <<-BODY
 {code}
@@ -163,7 +164,7 @@ Host: {{#{client_display_name(true)}}}
 Client Name: {{#{@event['client']['name']}}}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
-Description: #{description}
+Description: #{event_description}
 Component: #{component}
 
 BODY
@@ -188,11 +189,11 @@ BODY
       'Server' => Socket.gethostname,
     }
 
-    if event_description
+    if event_description != 'N/A'
         description_hash['description'] = event_description
     end
 
-    if component
+    if component != 'N/A'
       if ! component.empty?
         description_hash['component'] = '[' + component.join(',') + ']'
       end
