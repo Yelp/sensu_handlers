@@ -187,17 +187,9 @@ BODY
       'Runbook' => runbook,
       'Tip' => tip,
       'Server' => Socket.gethostname,
+      'description' => event_description,
+      'component' => component,
     }
-
-    if event_description != 'N/A'
-        description_hash['description'] = event_description
-    end
-
-    if component != 'N/A'
-      if ! component.empty?
-        description_hash['component'] = '[' + component.join(',') + ']'
-      end
-    end
 
     description_hash
   end
