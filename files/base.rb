@@ -45,6 +45,14 @@ class BaseHandler < Sensu::Handler
     @event['check']['runbook'] || false
   end
 
+  def event_description
+    @event['check']['description'] || 'N/A'
+  end
+
+  def component
+    "[" << Array(@event['check']['component'] || []).join(',') << "]"
+  end
+
   def team_name
     if @event['check']['team'] then
       @event['check']['team']
@@ -103,6 +111,7 @@ class BaseHandler < Sensu::Handler
   end
 
   def full_description
+
     body = <<-BODY
 #{uncolorize(@event['check']['output'])}
 
@@ -121,12 +130,15 @@ Host: #{client_display_name(true)}
 Client Name: #{@event['client']['name']}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
+Description: #{event_description}
+Component: #{component}
 
 BODY
     body
   end
 
   def jira_description
+
     body = <<-BODY
 {code}
 #{uncolorize(@event['check']['output'])}
@@ -147,6 +159,8 @@ Host: {{#{client_display_name(true)}}}
 Client Name: {{#{@event['client']['name']}}}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
+Description: #{event_description}
+Component: #{component}
 
 BODY
     body
@@ -168,7 +182,10 @@ BODY
       'Runbook' => runbook,
       'Tip' => tip,
       'Server' => Socket.gethostname,
+      'description' => event_description,
+      'component' => component,
     }
+
   end
 
   def dashboard_link

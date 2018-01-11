@@ -15,6 +15,7 @@ class Pagerduty < BaseHandler
   def trigger_incident
     return false unless api_key
     require 'redphone/pagerduty'
+
     response = Redphone::Pagerduty.trigger_incident(
       :service_key  => api_key,
       :incident_key => incident_key,
