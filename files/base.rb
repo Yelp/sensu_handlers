@@ -46,16 +46,11 @@ class BaseHandler < Sensu::Handler
   end
 
   def event_description
-    @event['check']['description'] ? @event['check']['description'] : 'N/A'
+    @event['check']['description'] || 'N/A'
   end
 
   def component
-    component = @event['check']['component']
-    if component
-      !component.empty? ? '[' + component.join(',') + ']' : 'N/A'
-    else
-      'N/A'
-    end
+    "[" << Array(@event['check']['component'] || []).join(',') << "]"
   end
 
   def team_name
@@ -173,7 +168,7 @@ BODY
 
 
   def full_description_hash
-    description_hash = {
+    {
       'Output' => uncolorize(@event['check']['output']),
       'Dashboard Link' => dashboard_link,
       'Host' => @event['client']['name'],
@@ -191,7 +186,6 @@ BODY
       'component' => component,
     }
 
-    description_hash
   end
 
   def dashboard_link
