@@ -3,6 +3,7 @@
 
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'sensu-handler'
+require 'timeout'
 
 # Taken from https://github.com/flori/term-ansicolor/blob/e6086b7fddf53c53f8022acc1920f435e65b5e51/lib/term/ansicolor.rb#L60
 COLOR_REGEX = /\e\[(?:(?:[349]|10)[0-7]|[0-9]|[34]8;5;\d{1,3})?m/
@@ -369,6 +370,10 @@ BODY
                                      port=redis_config['redis']['port'])
     rescue => e
       raise "Unable to load redis client or connect to sensu redis: #{e.message}"
+  end
+
+  def timeout(t)
+    Timeout.timeout(t) { yield }
   end
 
 end
