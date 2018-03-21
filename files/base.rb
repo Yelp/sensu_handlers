@@ -9,6 +9,14 @@ require 'timeout'
 COLOR_REGEX = /\e\[(?:(?:[349]|10)[0-7]|[0-9]|[34]8;5;\d{1,3})?m/
 
 class BaseHandler < Sensu::Handler
+  def deprecated_filtering_enabled?
+    true
+  end
+
+  def deprecated_occurrence_filtering_enabled?
+    true
+  end
+
   def event_is_ok?
     @event['check']['status'] == 0
   end
