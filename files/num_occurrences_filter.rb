@@ -53,6 +53,8 @@ module Sensu::Extension
       # nil.to_i == 0
       # 0 || 1   == 0
       realert_every = ( event[:check][:realert_every] || 1 ).to_i
+      # realert_every can't be 0 because of potential ZeroDivisionError below
+      realert_every = -1 if realert_every == 0
 
       initial_failing_occurrences = interval > 0 ? (alert_after / interval) : 0
       number_of_failed_attempts = event[:occurrences] - initial_failing_occurrences
