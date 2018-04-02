@@ -119,11 +119,11 @@ class Slack < BaseHandler
 
   def handle
     channels.each do |channel|
-      send(channel, message)
+      post_to_slack(channel, message)
     end
   end
 
-  def send(channel, msg)
+  def post_to_slack(channel, msg)
     msg['channel'] = channel
     webhook_url = slack_url
     uri = URI(webhook_url)
