@@ -99,12 +99,12 @@ class Mailer < BaseHandler
     begin
       timeout 10 do
         Mail.deliver do
-          to      mail_to
-          from    mail_from
-          subject subject
-          body    body
+          to       mail_to
+          from     mail_from
+          subject  subject
+          body     body
+          reply_to mail_to
         end
-
         log 'mail -- sent alert for ' + short_name + ' to ' + mail_to.to_s
       end
     rescue Timeout::Error
