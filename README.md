@@ -64,6 +64,7 @@ Modification of the sensu-community-plugins handler that can open events
 on different Pagerduty services depending on the inputs.
 
 * Only activates if the `page` boolean key in the event data is set to true
+* Only creates an incident on "Critical" levels (Does not page for warnings)
 * Uses the `pagerduty_api_key` config set to the `team` to determine which
 service to open or close an event in.
 * Tries to provide maximum context in the pagerduty event details
