@@ -9,28 +9,20 @@ class Slack < BaseHandler
     handler_settings['webhook_url']
   end
 
-  def pages_slack_channel
-    team_data('pages_slack_channel') || "##{team_name}-pages"
-  end
-
   def compact_messages
     team_data('slack_compact_message') || false
   end
 
-  def channels
-    channels = []
-    # All pages get to the pages_slack_channel
-    if should_page?
-      channels.push pages_slack_channel
-    end
-    # Allow slack_channels override if specified in the check itself
-    if @event['check']['slack_channels']
-      channels.push @event['check']['slack_channels']
-    else
-      team_data('notifications_slack_channel') { |channel| channels.push channel }
-    end
+  def pager_channel_keys
+    %w[ pages_slack_channel ]
+  end
 
-    channels
+  def channel_keys
+    %w[ slack_channels notifications_slack_channel ]
+  end
+
+  def default_pager_channel
+    "##{team_name}-pages"
   end
 
   def message
