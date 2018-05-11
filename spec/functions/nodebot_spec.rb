@@ -36,7 +36,6 @@ describe Nodebot do
       subject.event['check']['team'] = 'operations'
       subject.settings[settings_key]['teams']['operations']['pages_irc_channel'] = '#criticals'
     end
-    it { expect(subject.pages_irc_channel).to eql('#criticals') }
     it { expect(subject.channels).to eql(['criticals']) }
     timestamp_regex = / \(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\)$/
     it { expect(subject.message).to match(timestamp_regex) }
@@ -46,7 +45,6 @@ describe Nodebot do
       subject.event['check']['page'] = true 
       subject.event['check']['team'] = 'operations'
     end
-    it { expect(subject.pages_irc_channel).to eql('#operations-pages') }
     it { expect(subject.channels).to eql(['operations-pages']) }
   end
   context "Notifications channel" do

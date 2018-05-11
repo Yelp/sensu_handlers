@@ -452,7 +452,7 @@ describe BaseHandler do
       before { check_data['page'] = true }
 
       context "with no team or event level config"  do
-        it { expect(channels).to eq [] }
+        it { expect(channels).to eq ["#{team}-pages"] }
       end
 
       context "with both notification and pager channels configured at team leavel" do

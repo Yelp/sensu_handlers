@@ -4,24 +4,17 @@ require "strscan"
 require "#{File.dirname(__FILE__)}/base"
 
 class Nodebot < BaseHandler
-  def pages_irc_channel
-    team_data('pages_irc_channel') || "##{team_name}-pages"
+  def pager_channel_keys
+    %w[ pages_irc_channel ]
+  end
+
+  def channel_keys
+    %w[ irc_channels notifications_irc_channel ]
   end
 
   def channels
-    channels = []
-    # All pages get to the pages_irc_channel
-    if should_page?
-      channels.push pages_irc_channel
-    end
-    # Allow irc_channels override if specified in the check itself
-    if @event['check']['irc_channels']
-      channels.push @event['check']['irc_channels']
-    else
-      team_data('notifications_irc_channel') { |channel| channels.push channel }
-    end
-    # Return channels, but strip out any "#", nodebot doesn't need them
-    channels.flatten.uniq.collect { |x| x.gsub(/#/, '') }
+    # # Return channels, but strip out any "#", nodebot doesn't need them
+    super.flatten.uniq.collect { |x| x.gsub(/#/, '') }
   end
 
   def message
