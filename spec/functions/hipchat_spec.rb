@@ -26,6 +26,7 @@ describe Hipchat do
   let(:handler_settings) { subject.handler_settings }
   let(:check_data)       { subject.event['check'] }
   let(:client_data)      { subject.event['client'] }
+  let(:team_settings)    { settings['teams'][team] }
 
   before(:each) do
     setup_event!
@@ -257,6 +258,31 @@ describe Hipchat do
           expect(hipchat_message).to include('UNKNOWN')
         end
       end
+    end
+  end
+
+  describe "rooms" do
+    let(:rooms) { subject.rooms }
+    context "event has page true" do
+      before do
+        check_data['page'] = true
+        team_settings.delete('hipchat_room')
+      end
+
+      context "team data has hipchat_pager_room" do
+        before  { team_settings['hipchat_pager_room'] = 'pager-room' }
+        specify { expect(rooms).to eql ['pager-room'] }
+      end
+
+      context "team data does not have hipchat_pager_room" do
+        specify { expect(rooms).to eql [] }
+      end
+
+    end
+
+    context "check data has hipchat_room" do
+      before  { check_data['hipchat_room'] = 'check-room' }
+      specify { expect(rooms).to eql ["check-room"] }
     end
   end
 
