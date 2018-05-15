@@ -13,6 +13,10 @@ class Slack < BaseHandler
     team_data('slack_compact_message') || false
   end
 
+  def check_name
+    @event['check']['name']
+  end
+
   def pager_channel_keys
     %w[ pages_slack_channel ]
   end
@@ -52,7 +56,7 @@ class Slack < BaseHandler
       },
       {
         "title" => "Check",
-        "value" => @event['check']['name'],
+        "value" => "<#{dashboard_link}|#{check_name}>",
         "short" => true
       },
       {
@@ -98,8 +102,11 @@ class Slack < BaseHandler
     }
 
     compact_msg = {
-      "username" => "Sensu (#{Socket.gethostname.split('.')[0]})",
-      "text"     => description(maxlen=400)
+        "attachments" => [{
+            "color"    => color,
+            "username" => "Sensu (#{Socket.gethostname.split('.')[0]})",
+            "text"     => description(maxlen=400).sub(check_name, "<#{dashboard_link}|#{check_name}>")
+        }]
     }
 
     if compact_messages
