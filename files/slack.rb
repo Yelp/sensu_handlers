@@ -10,7 +10,9 @@ class Slack < BaseHandler
   end
 
   def compact_messages
-    team_data('slack_compact_message') || false
+    team_compact = team_data('slack_compact_message')
+    return team_compact unless team_compact.nil?
+    handler_settings['compact_message'] || false
   end
 
   def check_name

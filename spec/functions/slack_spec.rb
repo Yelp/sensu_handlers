@@ -63,4 +63,61 @@ describe Slack do
     end
   end
 
+  describe "compact_messages" do
+    let(:compact_messages) { subject.compact_messages }
+
+    context "handler settings compact_message is not set" do
+      context "when slack_compact_message is true in team data" do
+        before  { team_settings['slack_compact_message'] = true  }
+        specify { expect(compact_messages).to be_true }
+      end
+
+      context "when slack_compact_message is false in team data" do
+        before  { team_settings['slack_compact_message'] = false  }
+        specify { expect(compact_messages).to be_false }
+      end
+
+      context "when slack_compact_message is not set in  team data" do
+        specify { expect(compact_messages).to be_false }
+      end
+    end
+
+    context "handler settings compact_message is true" do
+      before { handler_settings['compact_message'] = true }
+
+      context "when slack_compact_message is true in team data" do
+        before  { team_settings['slack_compact_message'] = true  }
+        specify { expect(compact_messages).to be_true }
+      end
+
+      context "when slack_compact_message is false in team data" do
+        before  { team_settings['slack_compact_message'] = false  }
+        specify { expect(compact_messages).to be_false }
+      end
+
+      context "when slack_compact_message is not set in  team data" do
+        specify { expect(compact_messages).to be_true }
+      end
+    end
+
+    context "handler settings compact_message is false" do
+      before { handler_settings['compact_message'] = false }
+
+      context "when slack_compact_message is true in team data" do
+        before  { team_settings['slack_compact_message'] = true  }
+        specify { expect(compact_messages).to be_true }
+      end
+
+      context "when slack_compact_message is false in team data" do
+        before  { team_settings['slack_compact_message'] = false  }
+        specify { expect(compact_messages).to be_false }
+      end
+
+      context "when slack_compact_message is not set in  team data" do
+        specify { expect(compact_messages).to be_false }
+      end
+    end
+
+  end
+
 end
