@@ -10,10 +10,9 @@ class Slack < BaseHandler
   end
 
   def compact_messages
-    team_compact    = team_data('slack_compact_message')
-    handler_default = !! handler_settings['compact_message']
-
-    team_compact.nil? ? handler_default : team_compact
+    team_compact = team_data('slack_compact_message')
+    return team_compact unless team_compact.nil?
+    handler_settings['compact_message'] || false
   end
 
   def pager_channel_keys
