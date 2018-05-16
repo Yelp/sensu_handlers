@@ -72,10 +72,6 @@ class Hipchat < BaseHandler
     %w[ hipchat_pager_room pager_room pager_channel ]
   end
 
-  def default_pager_channel
-    []
-  end
-
   # hipchat message room api takes a notify option: 
   #
   # Whether this message should trigger a user notification (change the tab

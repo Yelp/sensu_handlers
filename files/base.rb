@@ -334,6 +334,11 @@ BODY
     "#{team_name}-pages"
   end
 
+  def default_pager
+    return [] if handler_settings['use_default_pager'] == false
+    default_pager_channel
+  end
+
   def find_channel(keys, &block)
     keys \
       .map(&block) \
@@ -353,7 +358,7 @@ BODY
   end
 
   def team_pager_channel
-    team_channel(pager_channel_keys) || default_pager_channel
+    team_channel(pager_channel_keys) || default_pager
   end
 
   def notifications_channel

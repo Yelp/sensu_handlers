@@ -9,6 +9,7 @@
 #  hipchat api key
 class sensu_handlers::hipchat (
   $api_key,
+  $use_default_pager = false, # backwards compatibility.
   $dependencies = {
     'hipchat' => {'provider' => $gem_provider }
   }

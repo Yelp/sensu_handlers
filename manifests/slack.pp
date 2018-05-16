@@ -3,7 +3,8 @@
 # Sensu handler for sending to slack
 #
 class sensu_handlers::slack (
-  $webhook_url
+  $webhook_url,
+  $use_default_pager = true,
 ) inherits sensu_handlers {
 
   sensu::handler { 'slack':
