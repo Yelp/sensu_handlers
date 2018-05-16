@@ -335,8 +335,8 @@ BODY
   end
 
   def default_pager
-    return [] if handler_settings['use_default_pager'] == false
-    default_pager_channel
+    return default_pager_channel if handler_settings.fetch('use_default_pager',true)
+    []
   end
 
   def find_channel(keys, &block)
