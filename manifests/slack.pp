@@ -5,6 +5,7 @@
 class sensu_handlers::slack (
   $webhook_url,
   $use_default_pager = true,
+  $compact_message   = false,
 ) inherits sensu_handlers {
 
   sensu::handler { 'slack':
@@ -17,6 +18,7 @@ class sensu_handlers::slack (
       teams             => $teams,
       webhook_url       => $webhook_url,
       use_default_pager => $use_default_pager,
+      compact_message   => $compact_message,
     }
   }
 
