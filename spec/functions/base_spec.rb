@@ -432,11 +432,12 @@ describe BaseHandler do
 
 
   describe "#channels" do
-    let(:team)       { 'someteam' }
-    let(:settings)   { subject.settings[settings_key] }
-    let(:team_data)  { settings['teams'][team] }
-    let(:check_data) { subject.event['check'] }
-    let(:channels)   { subject.channels }
+    let(:team)             { 'someteam' }
+    let(:settings)         { subject.settings[settings_key] }
+    let(:handler_settings) { subject.handler_settings }
+    let(:team_data)        { settings['teams'][team] }
+    let(:check_data)       { subject.event['check'] }
+    let(:channels)         { subject.channels }
 
     before do
       setup_event!({
@@ -452,7 +453,21 @@ describe BaseHandler do
       before { check_data['page'] = true }
 
       context "with no team or event level config"  do
-        it { expect(channels).to eq ["#{team}-pages"] }
+
+        context "when handler config has use_default_pager not set" do
+          it { expect(channels).to eq ["#{team}-pages"] }
+        end
+
+        context "when handler config has use_default_pager true" do
+          before { handler_settings['use_default_pager'] = true }
+          it { expect(channels).to eq ["#{team}-pages"] }
+        end
+
+        context "when handler config has use_default_pager false" do
+          before { handler_settings['use_default_pager'] = false }
+          it { expect(channels).to eq [] }
+        end
+
       end
 
       context "with both notification and pager channels configured at team leavel" do

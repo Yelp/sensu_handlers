@@ -263,6 +263,8 @@ describe Hipchat do
 
   describe "rooms" do
     let(:rooms) { subject.rooms }
+    before { handler_settings['use_default_pager'] = false }
+
     context "event has page true" do
       before do
         check_data['page'] = true
