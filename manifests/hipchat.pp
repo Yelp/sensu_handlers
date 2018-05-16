@@ -25,8 +25,9 @@ class sensu_handlers::hipchat (
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/hipchat.rb',
     config  => {
-      api_key      => $api_key,
-      teams        => $teams,
+      api_key           => $api_key,
+      teams             => $teams,
+      use_default_pager => $use_default_pager,
     }
   }
 

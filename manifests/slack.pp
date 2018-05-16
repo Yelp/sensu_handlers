@@ -14,8 +14,9 @@ class sensu_handlers::slack (
       $sensu_handlers::num_occurrences_filter,
     ]),
     config  => {
-      teams       => $teams,
-      webhook_url => $webhook_url,
+      teams             => $teams,
+      webhook_url       => $webhook_url,
+      use_default_pager => $use_default_pager,
     }
   }
 
