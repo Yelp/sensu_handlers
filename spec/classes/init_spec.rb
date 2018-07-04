@@ -101,7 +101,6 @@ describe 'sensu_handlers', :type => :class do
           .with_filters(['ticket_filter'])
         should contain_sensu__handler('pagerduty') \
           .with_filters(['page_filter'])
-        should contain_sensu__handler('nodebot').with_filters([])
         should contain_sensu__handler('mailer').with_filters([])
       }
     end
@@ -114,8 +113,6 @@ describe 'sensu_handlers', :type => :class do
           .with_filters(['ticket_filter', 'num_occurrences_filter'])
         should contain_sensu__handler('pagerduty') \
           .with_filters(['page_filter', 'num_occurrences_filter_for_pagerduty'])
-        should contain_sensu__handler('nodebot') \
-          .with_filters(['num_occurrences_filter'])
         should contain_sensu__handler('mailer') \
           .with_filters(['num_occurrences_filter'])
       }
