@@ -17,8 +17,8 @@
 #  This array ends up matching the class names that get included. For
 #  example:
 #
-#  default_handler_array =>  [ 'nodebot', 'pagerduty' ]
-#  Will include sensu_handlers::nodebot and sensu_handlers::pagerduty
+#  default_handler_array =>  [ 'slack', 'pagerduty' ]
+#  Will include sensu_handlers::slack and sensu_handlers::pagerduty
 #
 # [*jira_username*]
 # [*jira_password*]
@@ -43,7 +43,7 @@
 class sensu_handlers(
   $teams,
   $package_ensure             = 'latest',
-  $default_handler_array      = [ 'nodebot', 'pagerduty', 'mailer', 'jira' ],
+  $default_handler_array      = [ 'pagerduty', 'mailer', 'jira' ],
   $jira_username              = 'sensu',
   $jira_password              = 'sensu',
   $jira_site                  = "jira.${::domain}",
@@ -113,6 +113,6 @@ class sensu_handlers(
 
   # We compose an array of classes depending on the handlers requested
   $handler_classes = prefix($default_handler_array, 'sensu_handlers::')
-  # This ends up being something like [ 'sensu_handlers::nodebot', 'sensu_handlers::pagerduty' ]
+  # This ends up being something like [ 'sensu_handlers::slack', 'sensu_handlers::pagerduty' ]
   include $handler_classes
 }
