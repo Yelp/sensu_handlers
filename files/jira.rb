@@ -47,6 +47,11 @@ class Jira < BaseHandler
             "labels" => build_labels
           }
         }
+
+        if component
+          issue_json['fields'].merge!({'components' => component.map { |i| {'name' => i} }})
+        end
+
         issue.save(issue_json)
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"

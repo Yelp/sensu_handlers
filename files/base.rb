@@ -59,7 +59,13 @@ class BaseHandler < Sensu::Handler
   end
 
   def component
-    "[" << Array(@event['check']['component'] || []).join(',') << "]"
+    if !@event['check']['component']
+      nil
+    elsif @event['check']['component'].is_a?(Array)
+      @event['check']['component']
+    else
+      [@event['check']['component']]
+    end
   end
 
   def team_name
@@ -140,7 +146,7 @@ Client Name: #{@event['client']['name']}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
 Description: #{event_description}
-Component: #{component}
+Component: #{component || 'N/A'}
 
 BODY
     body
@@ -169,7 +175,7 @@ Client Name: {{#{@event['client']['name']}}}
 Address:  #{@event['client']['address']}
 Check Name:  #{@event['check']['name']}
 Description: #{event_description}
-Component: #{component}
+Component: #{component || 'N/A'}
 
 BODY
     body
