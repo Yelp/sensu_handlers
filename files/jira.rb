@@ -52,6 +52,10 @@ class Jira < BaseHandler
           issue_json['fields'].merge!({'components' => component.map { |i| {'name' => i} }})
         end
 
+        if handler_settings['priority_map'].include?(priority)
+          issue_json['fields']['priority'] = {"name" => handler_settings['priority_map'][priority]}
+        end
+
         issue.save(issue_json)
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"
@@ -109,6 +113,10 @@ class Jira < BaseHandler
 
   def project
     @event['check']['project'] || team_data('project')
+  end
+
+  def priority
+    @event['check']['priority'] || team_data('default_priority')
   end
 
   def handle

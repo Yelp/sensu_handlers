@@ -24,10 +24,11 @@ class sensu_handlers::jira (
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/jira.rb',
     config  => {
-      teams    => $teams,
-      username => $jira_username,
-      password => $jira_password,
-      site     => $jira_site,
+      teams        => $teams,
+      username     => $jira_username,
+      password     => $jira_password,
+      site         => $jira_site,
+      priority_map => $jira_priority_map,
     },
     filters => flatten([
       'ticket_filter',

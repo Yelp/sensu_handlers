@@ -26,6 +26,14 @@
 #  If you are using the JIRA handler, it needs basic auth to work.
 #  Fill in the credentials and url to your local JIRA instance.
 #
+# [*jira_priority_map*]
+#  If you are using the JIRA handler, this is an optional setting that maps
+#  from a priority value to the priority name so that a simpler value can be
+#  passed in, since priorities can only be set by either ID or name. For
+#  example, if there is a priority 1 with a priority name '1 Do now', then
+#  a hash of { 1 => '1 Do now' } could be passed in here so that the whole
+#  priority name does not need to be specified in every sensu alert configured.
+#
 # [*use_embeded_ruby*]
 #  use provider => sensu_gem for any gem packages
 #
@@ -47,6 +55,7 @@ class sensu_handlers(
   $jira_username              = 'sensu',
   $jira_password              = 'sensu',
   $jira_site                  = "jira.${::domain}",
+  $jira_priority_map          = {},
   $mailer_runbook             = 'http://y/unkown',
   $mailer_server              = 'localhost',
   $mailer_tip                 = '',
