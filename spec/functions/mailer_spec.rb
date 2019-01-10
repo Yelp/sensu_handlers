@@ -41,11 +41,12 @@ describe Mailer do
   end
 
   it "properly reads the email from the check" do
-    subject.event['check']['notification_email'] = "test@email"
+    subject.event['check']['notification_email'] = "test@example.com"
     subject.event['check']['status'] = 2
     subject.event['check']['name'] = 'fake_alert'
     subject.event['client']['name'] = 'fake_client'
-    Mail.stub(:deliver).and_return(true)
+    expect(Mail).to receive(:deliver)
+    expect(subject).not_to receive(:bail)
     subject.stub(:log).and_return(nil) # quiet specs
     subject.handle
   end
