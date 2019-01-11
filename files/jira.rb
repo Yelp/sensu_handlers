@@ -52,6 +52,10 @@ class Jira < BaseHandler
           issue_json['fields'].merge!({'components' => component.map { |i| {'name' => i} }})
         end
 
+        if handler_settings['priority_map'].include?(priority)
+          issue_json['fields']['priority'] = {"name" => handler_settings['priority_map'][priority]}
+        end
+
         issue.save(issue_json)
         url = get_options[:site] + '/browse/' + issue.key
         puts "Created issue #{issue.key} at #{url}"
@@ -109,6 +113,18 @@ class Jira < BaseHandler
 
   def project
     @event['check']['project'] || team_data('project')
+  end
+
+  def priority
+    # This uses a specific check's priority if given, but falls back to the
+    # default_priority of a team if specified in sensu_handlers::teams. This
+    # makes it easier if pseudo-teams are already specified like
+    # "ad_data_insights_p0" and "ad_data_insights_p1" to specify a default
+    # priority matching the team so that all their alert don't need to be
+    # updated to have the correct priority. If neither are found, this just
+    # returns nil, which will create a ticket with the default priority of
+    # whatever project it is created in.
+    @event['check']['priority'] || team_data('default_priority')
   end
 
   def handle

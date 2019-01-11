@@ -24,27 +24,15 @@ class sensu_handlers::jira (
     type    => 'pipe',
     source  => 'puppet:///modules/sensu_handlers/jira.rb',
     config  => {
-      teams    => $teams,
-      username => $jira_username,
-      password => $jira_password,
-      site     => $jira_site,
+      teams        => $teams,
+      username     => $jira_username,
+      password     => $jira_password,
+      site         => $jira_site,
+      priority_map => $jira_priority_map,
     },
     filters => flatten([
       'ticket_filter',
       $sensu_handlers::num_occurrences_filter,
     ]),
   }
-  if $::lsbdistcodename == 'Lucid' {
-    # So sorry for the httprb monkeypatch. It is Debian bug 564168 that took
-    # me forever to track down. Maybe someday we'll use a newer ruby.
-    # Afterall, who supports versions that are EOL?
-    # https://www.ruby-lang.org/en/news/2013/06/30/we-retire-1-8-7/
-    # What are they going to deprecate next? ifconfig?
-    file_line { 'fix_httprb_564168':
-      match => '      @socket.close unless.*',
-      line  => '      @socket.close unless @socket.nil? || @socket.closed?',
-      path  => '/usr/lib/ruby/1.8/net/http.rb',
-    }
-  }
-
 }
