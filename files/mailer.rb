@@ -59,7 +59,7 @@ class Mailer < BaseHandler
     # Only procede if we have an email address to work with
     return false unless mail_to
 
-    mail_from = handler_settings['mail_from']
+    mail_from = handler_settings['mail_from'] || 'sensu'
     return false unless mail_from
 
     delivery_method = handler_settings['delivery_method'] || 'smtp'
@@ -73,7 +73,7 @@ class Mailer < BaseHandler
     smtp_enable_starttls_auto = handler_settings['smtp_enable_starttls_auto'] == "false" ? false : true
 
     body = full_description
-    subject = "#{action_to_string} - #{short_name}: #{@event['check']['notification']}"
+    subject = "#{action_to_string} - #{short_name}: #{full_description.lines.first.strip}"
 
     Mail.defaults do
       delivery_options = {
