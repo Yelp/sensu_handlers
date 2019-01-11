@@ -116,6 +116,14 @@ class Jira < BaseHandler
   end
 
   def priority
+    # This uses a specific check's priority if given, but falls back to the
+    # default_priority of a team if specified in sensu_handlers::teams. This
+    # makes it easier if pseudo-teams are already specified like
+    # "ad_data_insights_p0" and "ad_data_insights_p1" to specify a default
+    # priority matching the team so that all their alert don't need to be
+    # updated to have the correct priority. If neither are found, this just
+    # returns nil, which will create a ticket with the default priority of
+    # whatever project it is created in.
     @event['check']['priority'] || team_data('default_priority')
   end
 
