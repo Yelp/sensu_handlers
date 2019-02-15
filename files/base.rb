@@ -59,13 +59,10 @@ class BaseHandler < Sensu::Handler
   end
 
   def component
-    if !@event['check']['component']
-      nil
-    elsif @event['check']['component'].is_a?(Array)
-      @event['check']['component']
-    else
-      [@event['check']['component']]
-    end
+    [
+      *@event['check']['component'],
+      *team_data('component'),
+    ].uniq.reject(&:nil?)
   end
 
   def team_name

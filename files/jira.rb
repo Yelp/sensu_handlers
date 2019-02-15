@@ -48,7 +48,7 @@ class Jira < BaseHandler
           }
         }
 
-        if component
+        unless component.empty?
           issue_json['fields'].merge!({'components' => component.map { |i| {'name' => i} }})
         end
 
