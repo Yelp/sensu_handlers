@@ -17,6 +17,11 @@ class sensu_handlers::jira (
     { before => Sensu::Handler['jira'] }
   )
 
+  case $jira_password_source {
+    'hiera': { $jira_password_real = $jira_password }
+    'vault': { $jira_password_real = vault_lookup('puppet/sensu_handlers/jira_password') }
+  }
+
   sensu::filter { 'ticket_filter':
     attributes => { 'check' => { 'ticket' => true } },
   } ->
@@ -26,7 +31,7 @@ class sensu_handlers::jira (
     config  => {
       teams        => $teams,
       username     => $jira_username,
-      password     => $jira_password,
+      password     => $jira_password_real,
       site         => $jira_site,
       priority_map => $jira_priority_map,
     },

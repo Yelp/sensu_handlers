@@ -54,6 +54,7 @@ class sensu_handlers(
   $default_handler_array      = [ 'nodebot', 'pagerduty', 'mailer', 'jira' ],
   $jira_username              = 'sensu',
   $jira_password              = 'sensu',
+  $jira_password_source       = 'hiera',
   $jira_site                  = "jira.${::domain}",
   $jira_priority_map          = {},
   $mailer_runbook             = 'http://y/unkown',
@@ -72,6 +73,7 @@ class sensu_handlers(
 ) {
 
   validate_hash($teams, $api_client_config)
+  validate_re($jira_password_source, '^(hiera|vault)$')
 
   $gem_provider = $use_embedded_ruby ? {
     true    => 'sensu_gem',
