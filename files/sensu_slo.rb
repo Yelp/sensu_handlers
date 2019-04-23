@@ -23,7 +23,7 @@ class SensuSLOHandler < Sensu::Handler
 
   def handle
 
-    metric_name = settings['sensu_slo']['metric_name'] || 'sensu.check_age"'
+    metric_name = settings['sensu_slo']['metric_name'] || 'sensu.check_age'
 
     statsite_host = settings['sensu_slo']['statsite_host'] || '127.0.0.1'
     statsite_port = settings['sensu_slo']['statsite_port'] || 8125
@@ -32,17 +32,17 @@ class SensuSLOHandler < Sensu::Handler
     if @event["check"] != nil
       check_name = @event["check"]["name"]
       if check_name == nil
-        STDERR.puts "Check result did not have a 'name'\n"
+        STDERR.print "Check result did not have a 'name'"
         return
       end
       
       client_name = @event["client"]["name"]
       if client_name == nil
-        STDERR.puts "Check result did not have a 'client name'\n"
+        STDERR.print "Check result did not have a 'client name'"
         return
       end
     else
-      STDERR.puts "Check result does not appear to contain check data\n"
+      STDERR.print "Check result does not appear to contain check data"
       return
     end
 
@@ -50,7 +50,7 @@ class SensuSLOHandler < Sensu::Handler
     now = Time.now.to_i
     executed = @event["check"]["executed"].to_i
     if executed == nil
-      STDERR.puts "Check result does not have an 'executed' field\n"
+      STDERR.puts "Check result does not have an 'executed' field"
       return
     end
     age = now - executed
@@ -62,11 +62,11 @@ class SensuSLOHandler < Sensu::Handler
     # Add default environment Dimensions
     $default_dims_files.each do |f|
       begin
-        dims << [f, File.read($env_dir + "/" + f)]
+        dims << [f, File.read($env_dir + "/" + f).strip]
       rescue Errno::ENOENT
-        STDERR.puts "Could not read #{f}\n"
+        STDERR.puts "Could not read #{f}"
       rescue => e
-        STDERR.puts "An unknown error occured: #{e}\n"
+        STDERR.puts "An unknown error occured: #{e}"
       end
     end
 
@@ -78,10 +78,10 @@ class SensuSLOHandler < Sensu::Handler
     statsite_msg = "#{dims.to_json}:#{age}|g"
 
     statsite = UDPSocket.new
-    n = statsite.send statsite_msg, 0, $statsite_host, $statsite_port
+    n = statsite.send statsite_msg, 0, statsite_host, statsite_port
 
-    STDERR.puts "Zero bytes sent to #{statsite_host}:#{statsite_port}. Msg: #{statsite_msg}\n" if n < 1
-    STDOUT.puts "#{n} bytes sent to statsite\n"
+    STDERR.print "Zero bytes sent to #{statsite_host}:#{statsite_port}. Msg: #{statsite_msg}" if n < 1
+    STDOUT.print "#{n} bytes sent to #{statsite_host}:#{statsite_port}: #{statsite_msg}"
 
   end
 
