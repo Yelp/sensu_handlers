@@ -10,6 +10,7 @@
 
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'sensu-handler'
+require 'socket'
 
 $env_dir = "/nail/etc/"
 $default_dims_files = [
@@ -27,6 +28,14 @@ class SensuSLOHandler < Sensu::Handler
 
     statsite_host = settings['sensu_slo']['statsite_host'] || '127.0.0.1'
     statsite_port = settings['sensu_slo']['statsite_port'] || 8125
+
+    # Get hostname of this Sensu server
+    begin
+        hostname = Socket.gethostname
+    rescue => _e
+        STDERR.print "Could not determine hostname: #{e}"
+        return
+    end
 
     # Extract the name of the check and the client which ran it
     if @event["check"] != nil
@@ -73,6 +82,7 @@ class SensuSLOHandler < Sensu::Handler
     # Add the check specific dimensions
     dims << ["check_name", check_name]
     dims << ["client_name", client_name]
+    dims << ["hostname", hostname]
 
     # Sort dimensions alphabetically by dimension name to ensure consitent keying
     dims.sort! {|a,b| a[0] <=> b[0]}
