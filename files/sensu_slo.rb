@@ -74,6 +74,9 @@ class SensuSLOHandler < Sensu::Handler
     dims << ["check_name", check_name]
     dims << ["client_name", client_name]
 
+    # Sort dimensions alphabetically by dimension name to ensure consitent keying
+    dims.sort! {|a,b| a[0] <=> b[0]}
+
     # Format the output string and send to statsite
     statsite_msg = "#{dims.to_json}:#{age}|g"
 
