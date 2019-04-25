@@ -13,9 +13,7 @@ require 'sensu-handler'
 require 'socket'
 
 $env_dir = "/nail/etc/"
-$default_dims_files = [
-  "habitat"
-]
+$default_dims_files = %w[ habitat ]
 
 class SensuSLOHandler < Sensu::Handler
 
@@ -34,23 +32,25 @@ class SensuSLOHandler < Sensu::Handler
         return
     end
 
-    # Extract the name of the check and the client which ran it
-    if @event["check"] != nil
-      check_name = @event["check"]["name"]
-      if check_name == nil
-        STDERR.print "Check result did not have a 'name'"
-        return
-      end
-      
-      client_name = @event["client"]["name"]
-      if client_name == nil
-        STDERR.print "Check result did not have a 'client name'"
-        return
-      end
-    else
+    # Check required check fields are available
+    if @event["check"].nil?
       STDERR.print "Check result does not appear to contain check data"
       return
     end
+
+    if @event["check"]["name"].nil?
+      STDERR.print "Check result did not have a 'name'"
+      return
+    end
+
+    if @event["client"]["name"].nil?
+      STDERR.print "Check result did not have a 'client name'"
+      return
+    end
+
+    # Extract the name of the check and the client which ran it
+    check_name = @event["check"]["name"]
+    client_name = @event["client"]["name"]
 
     # Calculate how long ago the check was executed
     now = Time.now.to_i
