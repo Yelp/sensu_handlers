@@ -13,7 +13,6 @@ require 'sensu-handler'
 require 'socket'
 
 $env_dir = "/nail/etc/"
-$default_dims_files = %w[ habitat ]
 
 class SensuSLOHandler < Sensu::Handler
 
@@ -29,23 +28,23 @@ class SensuSLOHandler < Sensu::Handler
         hostname = Socket.gethostname
     rescue => _e
         STDERR.print "Could not determine hostname: #{e}"
-        return
+        exit 1
     end
 
     # Check required check fields are available
     if @event["check"].nil?
       STDERR.print "Check result does not appear to contain check data"
-      return
+      exit 1
     end
 
     if @event["check"]["name"].nil?
       STDERR.print "Check result did not have a 'name'"
-      return
+      exit 1
     end
 
     if @event["client"]["name"].nil?
       STDERR.print "Check result did not have a 'client name'"
-      return
+      exit 1
     end
 
     # Extract the name of the check and the client which ran it
@@ -57,7 +56,7 @@ class SensuSLOHandler < Sensu::Handler
     executed = @event["check"]["executed"].to_i
     if executed == nil
       STDERR.puts "Check result does not have an 'executed' field"
-      return
+      exit 1
     end
     age = now - executed
 
@@ -66,14 +65,14 @@ class SensuSLOHandler < Sensu::Handler
     dims << ["metric_name", metric_name]
 
     # Add default environment Dimensions
-    $default_dims_files.each do |f|
-      begin
-        dims << [f, File.read($env_dir + "/" + f).strip]
-      rescue Errno::ENOENT
-        STDERR.puts "Could not read #{f}"
-      rescue => e
-        STDERR.puts "An unknown error occured: #{e}"
-      end
+    begin
+      dims << ["habitat", File.read($env_dir + "/habitat").strip]
+    rescue Errno::ENOENT
+      STDERR.puts "Could not read #{f}"
+      exit 1
+    rescue => e
+      STDERR.puts "An unknown error occured: #{e}"
+      exit 1
     end
 
     # Add the check specific dimensions
@@ -93,6 +92,7 @@ class SensuSLOHandler < Sensu::Handler
     STDERR.print "Zero bytes sent to #{statsite_host}:#{statsite_port}. Msg: #{statsite_msg}" if n < 1
     STDOUT.print "#{n} bytes sent to #{statsite_host}:#{statsite_port}: #{statsite_msg}"
 
+    exit 0
   end
 
 end
