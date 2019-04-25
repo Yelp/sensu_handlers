@@ -14,9 +14,6 @@ require 'socket'
 
 $env_dir = "/nail/etc/"
 $default_dims_files = [
-  "runtimeenv",
-  "ecosystem",
-  "region",
   "habitat"
 ]
 
