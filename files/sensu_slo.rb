@@ -93,6 +93,7 @@ class SensuSLOHandler < Sensu::Handler
     STDOUT.print "#{n} bytes sent to #{statsite_host}:#{statsite_port}: #{statsite_msg}"
 
     exit 0
+
   end
 
 end
