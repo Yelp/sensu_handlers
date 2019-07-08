@@ -39,7 +39,13 @@ class Mailer < BaseHandler
   end
 
   def mail_destination
-    if @event['check']['notification_email'] == 'false'
+    if @event['check']['notification_email'] == false
+      false
+    elsif @event['check']['notification_email'] == []
+      false
+    elsif @event['check']['notification_email'] == 'false'
+      false
+    elsif @event['check']['notification_email'] == 'noreply'
       false
     elsif @event['check']['notification_email'] == ''
       false
