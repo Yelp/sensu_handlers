@@ -87,6 +87,10 @@ class BaseHandler < Sensu::Handler
     @event['check']['tip']
   end
 
+  def sensu_cli_resolve_cmd
+    "sensu-cli resolve #{@event['client']['name']} #{@event['check']['name']}" 
+  end
+
   def client_display_name(with_instance_id=false)
     client_display_name = @event['client']['tags']['Display Name'] rescue nil
     client_display_name = @event['client']['name'] if
@@ -131,6 +135,9 @@ Dashboard Link: #{dashboard_link}
 Runbook: #{runbook}
 Tip: #{tip}
 
+If you need to resolve this alert manually, you can try running: #{sensu_cli_resolve_cmd}
+For full details please see: http://y/using-sensu
+
 Command:  #{@event['check']['command']}
 Status: #{human_check_status()} (#{@event['check']['status']})
 
@@ -159,6 +166,13 @@ BODY
 Dashboard Link: #{dashboard_link}
 Runbook: #{runbook}
 Tip: #{tip}
+
+If you need to resolve this alert manually, you can try running:
+{code}
+$ #{sensu_cli_resolve_cmd}
+{code}
+For full details please see: http://y/using-sensu
+
 
 Command: {{#{@event['check']['command']}}}
 Status: #{human_check_status()} (#{@event['check']['status']})
@@ -193,6 +207,7 @@ BODY
       'Team' => team_name,
       'Runbook' => runbook,
       'Tip' => tip,
+      'Manual Resolve Command' => sensu_cli_resolve_cmd,
       'Server' => Socket.gethostname,
       'description' => event_description,
       'component' => component,
