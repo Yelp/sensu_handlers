@@ -192,10 +192,6 @@ describe Hipchat do
       expect(hipchat_message).to include('test.vagrant.local')
     end
 
-    it 'includes link to dashboard' do
-      expect(hipchat_message).to include(subject.dashboard_link)
-    end
-
     context 'when address is known' do
       it 'includes address' do
         expect(hipchat_message).to include('127.0.0.1')

@@ -65,7 +65,6 @@ class sensu_handlers(
   $pagerduty_tip              = 'is PD up? https://events.pagerduty.com?',
   $team                       = 'operations',
   $datacenter                 = $::datacenter,
-  $dashboard_link             = nil,
   $use_embedded_ruby          = false,
   $api_client_config          = {},
   $use_num_occurrences_filter = false,
@@ -115,7 +114,6 @@ class sensu_handlers(
     command   => true,
     handlers  => $default_handler_array,
     config    => {
-      dashboard_link => $dashboard_link,
       datacenter     => $datacenter,
     }
   }
