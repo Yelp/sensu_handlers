@@ -58,7 +58,7 @@ class Slack < BaseHandler
       },
       {
         "title" => "Check",
-        "value" => "<#{dashboard_link}|#{check_name}>",
+        "value" => check_name,
         "short" => true
       },
       {
@@ -107,7 +107,7 @@ class Slack < BaseHandler
         "attachments" => [{
             "color"    => color,
             "username" => "Sensu (#{Socket.gethostname.split('.')[0]})",
-            "text"     => description(maxlen=400).sub(check_name, "<#{dashboard_link}|#{check_name}>")
+            "text"     => description(maxlen=400).sub(check_name)
         }]
     }
 

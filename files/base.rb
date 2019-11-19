@@ -131,7 +131,6 @@ class BaseHandler < Sensu::Handler
     body = <<-BODY
 #{uncolorize(@event['check']['output'])}
 
-Dashboard Link: #{dashboard_link}
 Runbook: #{runbook}
 Tip: #{tip}
 
@@ -163,7 +162,6 @@ BODY
 #{uncolorize(@event['check']['output'])}
 {code}
 
-Dashboard Link: #{dashboard_link}
 Runbook: #{runbook}
 Tip: #{tip}
 
@@ -196,7 +194,6 @@ BODY
   def full_description_hash
     {
       'Output' => uncolorize(@event['check']['output']),
-      'Dashboard Link' => dashboard_link,
       'Host' => @event['client']['name'],
       'Timestamp' => Time.at(@event['check']['issued']),
       'Address' => @event['client']['address'],
@@ -213,11 +210,6 @@ BODY
       'component' => component,
     }
 
-  end
-
-  def dashboard_link
-    settings['default']['dashboard_link'].gsub(/\/$/, '')
-    "#{settings['default']['dashboard_link']}/#/client/#{datacenter}/#{@event['client']['name']}?check=#{@event['check']['name']}" || 'Unknown dashboard link. Please set for the base handler config'
   end
 
   def datacenter

@@ -29,10 +29,6 @@ describe BaseHandler do
     it('has no runbook') { expect(subject.runbook).to eql(false) }
   end
 
-  context "dashboard link is correctly compiled" do
-    it('has correct link') { expect(subject.dashboard_link).to eql('test_dashboard_link/#/client/data_center/some.client?check=mycoolcheck') }
-  end
-
   context "Settings can be overridden from check metadata" do
     before(:each) do
       setup_event! do |e|

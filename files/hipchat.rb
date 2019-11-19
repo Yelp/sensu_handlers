@@ -41,7 +41,6 @@ class Hipchat < BaseHandler
   def hipchat_message
     <<-EOM.gsub(/^\s{6}/, '')
       <b>#{human_check_status}</b>
-      <a href="#{dashboard_link}"><b>#{@event['check']['name']}</b></a>
       on #{@event['client']['name']}#{address_string}
       <span style="color: gray">@#{event_time}</span>
       <br />
